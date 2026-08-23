@@ -30,8 +30,28 @@
                     </div>
     -->
 
-    <table style="width:100%;margin:20px;"><tr>
-    <td style="width:40%;height:100%;vertical-align:top"><iframe src="/NicerAppWebOS/businessLogos/models/angel-book-1.1.0.html" style="transform: scale(2.0);transition: transform 0.5s ease-in-out; transform-origin: top left;border:0px;height:100%;"></iframe></td>
+    <table style="height: 100%;
+    width: auto;
+    border-collapse: collapse;;margin:30px;"><tr>
+    <td style="width:40%;height:100%;vertical-align:top">
+    <!--
+    <script type="module" src="https://googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+    <model-viewer
+    title="3D Angel Statue"
+    src="https://githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Angel/glTF-Binary/Angel.glb"
+    alt="A transparent 3D model of a classical angel figure"
+    auto-rotate
+    camera-controls
+    touch-action="pan-y"
+    style="width: 100%; height: 500px; --poster-color: transparent; background-color: transparent;">
+    </model-viewer>
+    -->
+    <iframe src="/NicerAppWebOS/businessLogos/models/angel-book-1.1.0.html" style="transform: scale(1);transition: transform 0.5s ease-in-out; transform-origin: top left;border:0px;height:100%;display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;"></iframe>
+
+    </td>
         <td>
 
             <h2 class="contentSectionTitle2" style="margin-left:40px;"><a href="/me" class="nomod noPushState contentSectionTitle2_a">Cloudhost new rich text documents and photo albums (with zoom capabilities!).</a></h2>

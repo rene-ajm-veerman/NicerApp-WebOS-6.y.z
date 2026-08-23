@@ -100,7 +100,9 @@ they'll be announced here and on <a href="https://zoned.at/d3" class="nomod noPu
 
     <div class="naFrontpage_headerText naFrontpage_headerText_recentAchievement" style="float:left">
     <p class="backdropped" style="color:lime">
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/gvnsP1byW7U?si=wSt6jQ1dQQwjyjJu" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <!--<iframe width="560" height="315" src="https://www.youtube.com/embed/gvnsP1byW7U?si=wSt6jQ1dQQwjyjJu" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>-->
+    <!--<iframe width="560" height="315" src="https://www.youtube.com/embed/NoVX3GRqmAc?si=BjrL-PgVan-3OXIa" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>-->
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/sVBin4Tz5n8?si=H15sDKPCbmKPVqqM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     </p>
     </div>
 
@@ -115,7 +117,7 @@ they'll be announced here and on <a href="https://zoned.at/d3" class="nomod noPu
     Services may go down temporarily on any of my servers for seemingly unexplainable reasons over the next few weeks.
     </p>
     <p class="backdropped">
-    In addition, the PHP database backup-to-filesystem scripts are scheduled to get coded within the next week, and put on 6-hour intervals of execution into folders which automatically get backed up whenever i update my sourcecode backups.
+    In addition, the <a href="https://github.com/rene-ajm-veerman/NicerApp-WebOS-6.y.z/blob/main/code/NicerAppWebOS/scripts.maintenance/dump_by_prefix.php" class="nomod noPushState" target="ghDumpScript">PHP database backup-to-filesystem scripts</a> have been written now (yes, there is a <a href="https://github.com/rene-ajm-veerman/NicerApp-WebOS-6.y.z/blob/main/code/NicerAppWebOS/scripts.maintenance/restore_by_prefix.php" class="nomod noPushState" target="ghRestoreScript">restore script</a> too), and put on 10-minute intervals of execution into folders which automatically get backed up whenever i update my sourcecode backups. The backups are retained in their original location for 2 days.
     </p>
     </div>
 

@@ -14,14 +14,12 @@ The yearly release stage of a new <a href="https://github.com/rene-ajm-veerman/N
 </p>
 
 <ol class="todoList" style="width:50%; width:content-width;">
-    <li class="todoList"><div>Yields calculated in real time now for <a href="https://nicer.app/fusion/Grok-by-xai-and-Elon-Musk/tokamak-yields-v2.1.1.html" class="nomod noPushState" target="groksTokamak">nuclear fusion power plant designs</a>! With <a href="https://grok.com/share/c2hhcmQtMw_f2621998-1b7b-4d6f-81e0-993a6de5524e" class="nomod noPushState" target="grokFusionPowerPlantsDiscussion">assistance</a> by <a href="https://grok.com" class="nomod noPushState" target="grokHomepage">Grok.com</a> from <a href="https://x.ai" class="nomod noPushState" target="xaiHomepage">x.ai</a> (see also <a href="https://x.com/xai" class="nomod noPushState" target="xaiHomepageOnXdotCom">x.com/xai</a>).<br/>(C) + (R) 2026 by Rene AJM Veerman, building upon general progress in the science and engineering fields. I do not want to cheat anyone out of their legitimate own paychecks though! :-)</div></li>
-
-    <li class="todoList"><div>(2026) Implemented automated screenshot fetching for all comments on any page of any NicerApp domain.</div></li>
-
     <li class="todoList"><div>(2026-2028/2029) Start on .../logic.databases/uDB-2.0.0, to be based on .../logic.databases/generalizedDatabasesAPI-1.0.0<br/>
         <a href="/NicerAppWebOS/documentation/__README__documentation/v5.10.z/v5.10.z-uDB.png" class="nomod noPushState" target="tl-udb-1"><img src="/NicerAppWebOS/documentation/__README__documentation/v5.10.z/v5.10.z-uDB.png" style="width:320px"/></a>
         <a href="/NicerAppWebOS/documentation/__README__documentation/v5.10.z/v5.10.z-taskManager.png" class="nomod noPushState" target="tl-udb-1"><img src="/NicerAppWebOS/documentation/__README__documentation/v5.10.z/v5.10.z-taskManager.png" style="width:320px"/></a>
         <ol class="todoList_l1">
+            <li class="todoList_l1"><div>Code for uDB-2.5.0 has been largely written now (.../businessLogic/databases/uDB-2.y.z), but needs to be tied together as calls to use, <br/>
+            into it's CRUD methods that auto-talk to either couchdb or SQL, as created by grok.com (overseen for this task by yours truly).</div></li>
             <li class="todoList_l1"><div>Add FilesystemDB (by Rene AJM Veerman), MySQL, and PostgreSQL to the list of supported database architectures (via .../NicerAppWebOS/3rd-party/adodb5), currently only couchdb is supported.</div></li>
             <li class="todoList_l1"><div>Add query routines in uDB to translate couchdb index names to index ids.</div></li>
             <li class="todoList_l1"><div>Add and test MySQL, PostgreSQL and 'filesystemDB' (fsDB) sub-modules to uDB <b>(also on Window 11)</b>, as well as their interactions with the CouchDB part of uDB.</div></li>
@@ -37,8 +35,9 @@ The yearly release stage of a new <a href="https://github.com/rene-ajm-veerman/N
             </ol>
     </div></li>
 
+    <li class="todoList"><div>(2026) Permanently and completely fix the web-based theme editor for NA.</div></li>
+
     <li class="todoList"><div>(2026) Add database based caching of wikipedia.org output for /wiki on nicer.app (fairly easy to implement these days actually).</div></li>
-    <li class="todoList"><div>(2026) Complete a <a href="/3D">3D folder structure viewer</a>, which will be linked to all sorts of 2D user interface components/widgets.</div></li>
 
     <li class="todoList"><div>(2026) Allow log entries (of console.log in the browser, and all database traffic and error messages on the server) to be logged to a different machine on the LAN than the main server.</div></li>
 

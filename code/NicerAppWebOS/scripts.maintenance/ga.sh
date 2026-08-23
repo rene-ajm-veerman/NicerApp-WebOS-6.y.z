@@ -1,9 +1,9 @@
 #!/bin/bash
-cd ..
+cd ../..
 git add .
 git commit -m "$1"
 git push -u origin main
-cd scripts.maintenance
+cd NicerAppWebOS/scripts.maintenance
 
 #for f in $(ls ./do_upgrade_repositoriesFor_*.sh)
 #do

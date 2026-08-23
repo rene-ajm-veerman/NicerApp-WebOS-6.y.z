@@ -211,6 +211,7 @@ class class_naComments {
             //echo $json; exit;
             if (is_null($rootItemJSON)) $rootItemJSON = $json;//str_replace('\/','/',substr($json,1  ,strlen($json)-2));
         };
+        $rootItemJSON = preg_replacE('/#.*"/','"',$rootItemJSON);
         $rootItemJSON = str_replace('\\/', '/', $rootItemJSON);
 
 
