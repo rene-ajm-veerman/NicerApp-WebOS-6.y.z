@@ -70,9 +70,21 @@ class naThemeEditor {
                         new naVividMenu ($('#siteToolbarThemeEditor__selector')[0], true);
         //}, 1000);
         */
-        if (!na.site.c.menus['#textFontFamily'])
-            na.site.c.menus['#textFontFamily'] =
-                new CascadingMenu ($('#textFontFamily')[0]);
+        if (!na.site.c.menus['#textFontFamily']) {
+            na.site.c.menus['#textFontFamily'] = new naVividMenu('textFontFamily', 'textFontFamily', function(menu) {
+                // optional: any post-init callback you need
+                debugger;
+            });
+        };
+        var m = na.site.c.menus['#textFontFamily'];
+        $('.vividMenu_mainUL',m.menu).css({
+            display:'block'//,
+            //position:'absolute',
+            //top : $(m.menu).offset().top + 40,
+            //left : $(m.menu).offset().left + 40
+        });
+        $('.submenu',m.menu).css({opacity:1});
+        debugger;
 
 
         $('#textFontFamily')[0].addEventListener('mouseover', function() {
@@ -652,7 +664,7 @@ class naThemeEditor {
                         ]);
                     } else if (data.node.text.match(/:before/)) {
                         na.te.s.c.forDialogID = null;
-                        na.te.s.c.forElements = data.node.text;
+                        na.te.s.c.forElements = data.node.text.replace(/&gt;/g, '>');
                         na.te.enableButtons([
                             '#btnDeleteElement',
                             '#btnSelectBackgroundFolder' , '#btnSelectBackgroundImage',
@@ -667,7 +679,7 @@ class naThemeEditor {
                             ]);
                         }
                     } else if (data.node.text.match(regExApps)) {
-                        na.te.s.c.forDialogID = data.node.text.replace('#','');
+                        na.te.s.c.forDialogID = data.node.text.replace('#','').replace(/&gt;/g, '>');;
                         //debugger;
                         na.te.s.c.forElements = null;
                         na.te.enableButtons([
@@ -677,7 +689,7 @@ class naThemeEditor {
                         ]);
                     } else {
                         na.te.s.c.forDialogID = null;
-                        na.te.s.c.forElements = data.node.text;
+                        na.te.s.c.forElements = data.node.text.replace(/&gt;/g, '>');;
                         na.te.enableButtons([
                             '#btnDeleteElement',
                             '#btnSelectBackgroundFolder' , '#btnSelectBackgroundImage',
@@ -2524,75 +2536,87 @@ debugger;
             +'#'+evt.currentTarget.id+'.'+evt.currentTarget.className.replace(' ', '.')+'\n',
                            false
         );
+        debugger;
         if (
             evt.target.tagName!==evt.currentTarget.tagName
             || evt.target.id!==evt.currentTarget.id
             || evt.target.className!==evt.currentTarget.className
         ) {
-            if (
-                !na.te.s.c.pickedElement
-                || (
-                    na.te.s.c.pickedElement.length>0
-                    && na.te.s.c.lastPickedElement!==evt.target
-                )
-            ) {
-                na.te.s.c.pickedElement = [ { evt : $.extend({},evt) } ];
-                na.te.s.c.lastPickedElement = evt.target;
-            } else na.te.s.c.pickedElement.push ({ evt : $.extend({},evt) });
-            evt.preventDefault();
-            debugger;
+            if (!na.te.s.c.addingElements) {
+                //na.te.s.c.addingElements = true;
+            } else {
+                if (
+                    !na.te.s.c.pickedElement
+                    || (
+                        /*na.te.s.c.pickedElement.length>0
+                        &&*/ na.te.s.c.lastPickedElement!==evt.target
+                    )
+                ) {
+                    na.te.s.c.pickedElement = [ { evt : $.extend({},evt) } ];
+                    na.te.s.c.lastPickedElement = evt.target;
+                } else na.te.s.c.pickedElement.push ({ evt : $.extend({},evt) });
+                evt.preventDefault();
+            }
         } else {
-            na.te.s.c.pickedElement.push ({ evt : $.extend({},evt) });
-            na.te.s.c.lastPickedElement = evt.target;
-            var msg = '';
-            $('#siteToolbarThemeEditor__elementPicker').html('<div class="vividListSelector vividScrollpane"></div>').delay(50);
-            for (var i=0; i<na.te.s.c.pickedElement.length; i++) {
-                var ev = na.te.s.c.pickedElement[i].evt;
-                msg +=
-                //'\n#'+ev.target.id+'.'+ev.target.className.replace(' ', '.')+'\n'
-                '\n'+ev.currentTarget.tagName+'#'+ev.currentTarget.id+'.'+ev.currentTarget.className.replace(' ', '.')+'\n';
-                var itemHTML = '<div class="vividButton" style="display:inline-block;width:fit-content;position:relative;z-index:900000">'+ev.currentTarget.tagName+'</div><div class="vividButton" style="display:inline-block;width:fit-content;position:relative;"><div class="vdBackground"></div><span style="opacity:1">#'+ev.currentTarget.id+'</span></div><div class="vividButton" style="display:inline-block;width:fit-content;position:relative;"><div class="vdBackground"></div><span style="opacity:1">.'+ev.currentTarget.className.replace(' ', '</span></div><div class="vividButton" style="display:inline-block;width:fit-content;position:relative;"><div class="vdBackground"></div><span style="opacity:1">.')+'</div>';
+                //na.te.s.c.addingElements = true;
+                if (na.te.s.c.pickedElement) {
+                    na.te.s.c.pickedElement.push ({ evt : $.extend({},evt) });
+                } else {
+                    return false;
+                    na.te.s.c.pickedElement = [ { evt : $.extend({},evt) } ];
+                }
+
+                na.te.s.c.lastPickedElement = evt.target;
+                var msg = '';
+                $('#siteToolbarThemeEditor__elementPicker').html('<div class="vividListSelector vividScrollpane"></div>').delay(50);
+                for (var i=0; i<na.te.s.c.pickedElement.length; i++) {
+                    var ev = na.te.s.c.pickedElement[i].evt;
+                    msg +=
+                    //'\n#'+ev.target.id+'.'+ev.target.className.replace(' ', '.')+'\n'
+                    '\n'+ev.currentTarget.tagName+'#'+ev.currentTarget.id+'.'+ev.currentTarget.className.replace(' ', '.')+'\n';
+                    var itemHTML = '<div class="vividButton" style="display:inline-block;width:fit-content;position:relative;z-index:900000">'+ev.currentTarget.tagName+'</div><div class="vividButton" style="display:inline-block;width:fit-content;position:relative;"><div class="vdBackground"></div><span style="opacity:1">#'+ev.currentTarget.id+'</span></div><div class="vividButton" style="display:inline-block;width:fit-content;position:relative;"><div class="vdBackground"></div><span style="opacity:1">.'+ev.currentTarget.className.replace(' ', '</span></div><div class="vividButton" style="display:inline-block;width:fit-content;position:relative;"><div class="vdBackground"></div><span style="opacity:1">.')+'</div>';
+                    var divEl = document.createElement('div');
+                    $(divEl).html(itemHTML);
+                    $('.vividButton4, .vividButton, .vividButton_icon_50x50_siteTop, .vividButton_icon_50x50', divEl).each(function(idx,el){
+                        if (na.site.c.buttons['#'+el.id]) delete na.site.c.buttons['#'+el.id];
+                        if (!na.site.c.buttons['#'+el.id]) {
+                            na.site.c.buttons['#'+el.id] = new vividUserInterface_2D_button(el);
+                            el.addEventListener ('click', na.te.btnAddElement_clickSelector, {capture:true});
+                        };
+                    });
+                    $('#siteToolbarThemeEditor__elementPicker > .vividListSelector').append(divEl);
+                }
+
+                var itemHTML = '<div class="vividButton btnSave" style="display:inline-block;width:fit-content;position:relative;z-index:900000">Save</div>';
                 var divEl = document.createElement('div');
                 $(divEl).html(itemHTML);
-                $('.vividButton4, .vividButton, .vividButton_icon_50x50_siteTop, .vividButton_icon_50x50', divEl).each(function(idx,el){
-                    if (na.site.c.buttons['#'+el.id]) delete na.site.c.buttons['#'+el.id];
-                    if (!na.site.c.buttons['#'+el.id]) {
-                        na.site.c.buttons['#'+el.id] = new vividUserInterface_2D_button(el);
-                        el.addEventListener ('click', na.te.btnAddElement_clickSelector, {capture:true});
-                    };
+                $('.vividButton', divEl).each(function(idx,btnEl){
+                    btnEl.addEventListener ('click', function() {
+                        na.te.s.c.addingElements = false;
+                        $('#siteToolbarThemeEditor__elementPicker').fadeOut('normal');
+                        $('div, p, span, li, ol, ul, h1, h2, h3, h4').css({cursor:'inherit'}).each (function(){this.removeEventListener('click',na.te.btnAddElement_clickElement)});
+                    } )
                 });
                 $('#siteToolbarThemeEditor__elementPicker > .vividListSelector').append(divEl);
-            }
 
-            var itemHTML = '<div class="vividButton btnSave" style="display:inline-block;width:fit-content;position:relative;z-index:900000">Save</div>';
-            var divEl = document.createElement('div');
-            $(divEl).html(itemHTML);
-            $('.vividButton', divEl).each(function(idx,btnEl){
-                btnEl.addEventListener ('click', function() {
-                    na.te.s.c.addingElements = false;
-                    $('#siteToolbarThemeEditor__elementPicker').fadeOut('normal');
-                    $('div, p, span, li, ol, ul, h1, h2, h3, h4').css({cursor:'inherit'}).each (function(){this.removeEventListener('click',na.te.btnAddElement_clickElement)});
-                } )
-            });
-            $('#siteToolbarThemeEditor__elementPicker > .vividListSelector').append(divEl);
+                na.m.log (110, msg);
+                var br = evt.target.getBoundingClientRect();
+                $('#siteToolbarThemeEditor__elementPicker').css({position:'absolute',left:br.left,top:br.top+br.height,zIndex:900000}).fadeIn('slow');
+                evt.preventDefault();
 
-            na.m.log (110, msg);
-            var br = evt.target.getBoundingClientRect();
-            $('#siteToolbarThemeEditor__elementPicker').css({position:'absolute',left:br.left,top:br.top+br.height,zIndex:900000}).fadeIn('slow');
-            evt.preventDefault();
+                na.te.s.c.newElementID = na.m.randomString();
+                $('#themeEditor_jsTree_selectors').jstree().create_node(na.te.s.c.selectedSelector.node, {
+                    id : na.te.s.c.newElementID,
+                    text : 'New Element',
+                    type : 'naElement',
+                }, 'last');
+                na.te.s.c.elementsCSS[na.te.s.c.newElementID] = {
+                    background : $(ev.currentTarget).css('background')
+                };
+                na.te.s.c.addingElements = false;
+                delete na.te.s.c.pickedElement;
 
-            na.te.s.c.newElementID = na.m.randomString();
-            $('#themeEditor_jsTree_selectors').jstree().create_node(na.te.s.c.selectedSelector.node, {
-                id : na.te.s.c.newElementID,
-                text : 'New Element',
-                type : 'naElement',
-            }, 'last');
-            na.te.s.c.elementsCSS[na.te.s.c.newElementID] = {
-                background : $(ev.currentTarget).css('background')
-            };
-
-            //$('#themeEditor_jsTree_selectors').jstree('deselect_all').jstree('select_node', na.te.s.c.newElementID);
-
+                //$('#themeEditor_jsTree_selectors').jstree('deselect_all').jstree('select_node', na.te.s.c.newElementID);
         }
     }
 
@@ -2601,7 +2625,12 @@ debugger;
             $('div, p, span, li, ol, ul, h1, h2, h3, h4').css({cursor:'inherit'}).each (function(){this.removeEventListener('click',na.te.btnAddElement_clickElement)});
         } else {
             na.te.s.c.addingElements = true;
-            $('div, p, span, li, ol, ul, h1, h2, h3, h4').css({cursor:'url(/siteMedia/btnSettings2.32x32.png) 16 16, grab'}).each (function(idx,el) { this.addEventListener('click',na.te.btnAddElement_clickElement,{capture:true})});
+            $('div, p, span, li, ol, ul, h1, h2, h3, h4').css({cursor:'url(/siteMedia/btnSettings2.32x32.png) 16 16, grab'}).each (function(idx,el) {
+                if (!$(el)[0].hasClickHandler) {
+                    this.addEventListener('click',na.te.btnAddElement_clickElement,{capture:true})
+                    $(el)[0].hasClickHandler = true;
+                }
+            });
         }
     }
 
