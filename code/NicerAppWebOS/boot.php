@@ -72,9 +72,21 @@ NicerApp WebOS from Nicer Enterprises
 		if (!file_exists($settingsFilePath)) {
 			$settingsFilePath = dirname($scriptDir, 2) . '/' . $bn . '/domainConfig/settings.json';
 		}
+		
+		// Optional: also accept an environment override for cron
+		if ($envDomain = getenv('NA_DOMAIN')) {
+		    $bn = $envDomain;
+		    $settingsFilePath = dirname($scriptDir, 2) . '/domains/' . $bn . '/domainConfig/settings.json';
+		    // or hard-code the known root if you prefer:
+			if (!file_exists($settingsFilePath)) {
+				$settingsFilePath = dirname($scriptDir, 2) . '/' . $bn . '/domainConfig/settings.json';
+			}
+		    // $settingsFilePath = '/var/www/NicerAppWebOS-v6.0.z/domains/' . $bn . '/domainConfig/settings.json';
+		}
+	}
+
 //var_dump ($scriptDir); var_dump ($settingsFilePath); exit;
 // adjust the number of dirname() levels according to your real layout
-        }
         //echo '<pre>';var_dump ($_SERVER);echo '</pre>';
         //echo $dcFolderName; die();
 
@@ -94,7 +106,6 @@ NicerApp WebOS from Nicer Enterprises
             ob_clean();
             ob_start();
         }
-
 
         $naSettings = json_decode(file_get_contents($settingsFilePath), true);
         //$rootPath_na = realpath(dirname(__FILE__).'/..');

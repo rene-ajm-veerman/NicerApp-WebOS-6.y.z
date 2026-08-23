@@ -1,7 +1,7 @@
 {
     "phpServers" : [
         {
-            "rootPath" : "/var/www/NicerAppWebOS-v6.0.z/domains/said.by/",
+            "rootPath" : "/var/www/NicerAppWebOS-v6.y.z/domains/said.by/",
             "relativePathUnderRootPath" : "/",
             "debug" : {
                 "ajax_backgrounds.php" : false,

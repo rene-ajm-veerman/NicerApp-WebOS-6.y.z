@@ -757,6 +757,7 @@ $url = trim($url);
         }
     }
 
+    
     public function processJob(array $job): array
     {
         $url = trim($job['url'] ?? '');
@@ -782,87 +783,55 @@ $url = trim($url);
 
         $s = $this->nodeScript;   // currently forced to screenshot_other2.js
 
-        $paths = $this->buildFilePath($url);
-        try {
-            $this->ensureDirectory($paths['dir']);
-        } catch (Exception $e) {
-            echo '<div class="phpError">Could not ensureDirectory() : '.$e->getMessage().'</div>';
-        }
+	$paths = $this->buildFilePath($url);
+$this->ensureDirectory($paths['dir']);
 
+$cmd = "node " . escapeshellarg($this->nodeScript) . " "
+     . escapeshellarg($url) . " "
+     . escapeshellarg($paths['absolute']) . " 2>&1";
 
-        $cmd = sprintf(
-            'node %s %s %s 2>&1',
-            escapeshellarg($s),
-                       escapeshellarg($url),
-                       escapeshellarg($paths['absolute'])
-        );
-        $cmd = "node " . escapeshellarg($this->nodeScript) . " " . escapeshellarg($job['url']) . " " . escapeshellarg($job['filePath']) . " 2>&1";
-        echo "<div class=\"phpError\">Starting unix process : $cmd</div>";
+echo "<div class=\"phpError\">Starting unix process : $cmd</div>";
 
-        $output     = [];
-        $returnCode = 0;
-        exec($cmd, $output, $returnCode);
+$output = [];
+$returnCode = 0;
+exec($cmd, $output, $returnCode);
 
-        $errorText = implode("\n", $output);
-        $success   = ($returnCode === 0 && file_exists($paths['absolute']));
-        	$attempts    = (int)($job['attempts'] ?? 1);
-	        $maxAttempts = (int)($job['maxAttempts'] ?? 3);
-        	$now         = date('Y-m-d H:i:s');
-	//if ($success) {
+$errorText = implode("\n", $output);
+echo "<pre class=\"phpError\">Node output:\n" . htmlspecialchars($errorText) . "</pre>";
 
-	        $exec = 'convert "'.$job['filePath'].'" -resize 1400 "'.$job['filePath'].'_thumb.png"';
-        	$output = array(); $result = -1;
-	        exec ($exec, $output, $result);
-        	$dbg = [ '$exec' => $exec, '$output' => $output, '$result' => $result ];
-	        //if ($debug) { echo 'convert : $dbg='; var_dump ($dbg); echo PHP_EOL.PHP_EOL; }
-	//};
+$success = ($returnCode === 0 && file_exists($paths['absolute']));
 
-	if ($success) {
-    		$this->markReady(array_merge($job, $update));   // ← add this
-	} else {
-    		$this->markInvalid($url);                       // ← optional
-	}
+$attempts    = (int)($job['attempts'] ?? 1);
+$maxAttempts = (int)($job['maxAttempts'] ?? 3);
+$now         = date('Y-m-d H:i:s');
 
-        if ($success) {
-            $update = [
-                'status'       => 'ready',
-                'filePath'     => $paths['absolute'],
-                'relativePath' => $paths['relative'],
-                'lockedAt'     => null,
-                'lockedBy'     => null,
-                'error'        => null,
-                'updated'      => $now,
-            ];
-        } else {
-            // Decide whether this is a permanent failure
-            $permanent = (
-                str_contains($errorText, 'ERR_NAME_NOT_RESOLVED') ||
-                str_contains($errorText, 'ERR_CONNECTION_REFUSED') ||
-                str_contains($errorText, 'net::ERR_') ||
-                str_contains($errorText, 'Invalid URL') ||
-                str_contains($errorText, 'Navigation timeout') ||
-                str_contains($errorText, 'net::ERR_ABORTED')
-            );
+if ($success) {
+    // thumbnail
+    $thumbCmd = 'convert ' . escapeshellarg($paths['absolute'])
+              . ' -resize 1400 '
+              . escapeshellarg($paths['absolute'] . '_thumb.png') . ' 2>&1';
+    exec($thumbCmd, $thumbOut, $thumbRc);
 
-            // Chrome missing is infrastructure – keep retrying a few times
-            if (str_contains($errorText, 'Could not find Chrome')) {
-                $permanent = false;
-            }
+    $update = [
+        'status'       => 'ready',
+        'filePath'     => $paths['absolute'],
+        'relativePath' => $paths['relative'],
+        'lockedAt'     => null,
+        'lockedBy'     => null,
+        'error'        => null,
+        'updated'      => $now,
+    ];
+    $this->markReady(array_merge($job, $update));
+} else {
+    // ... your permanent-failure logic ...
+    $update = [ /* failed / pending */ ];
+    $this->markInvalid($url);
+}
 
-            $update = [
-                'status'   => ($attempts >= $maxAttempts || $permanent) ? 'failed' : 'pending',
-                'lockedAt' => null,
-                'lockedBy' => null,
-                'error'    => $errorText,
-                'updated'  => $now,
-            ];
-        }
+$filter = !empty($job['_id']) ? ['_id' => $job['_id']] : ['url' => $url];
+$this->db->updateMany($filter, ['$set' => $update]);
+return array_merge($job, $update);
 
-        // Prefer updating by _id when we have it
-        $filter = !empty($job['_id']) ? ['_id' => $job['_id']] : ['url' => $url];
-        $this->db->updateMany($filter, ['$set' => $update]);
-
-        return array_merge($job, $update);
     }
 
 
