@@ -83,6 +83,12 @@ class naThemeEditor {
             //top : $(m.menu).offset().top + 40,
             //left : $(m.menu).offset().left + 40
         });
+        const rect = m.menu.getBoundingClientRect();
+        $('.submenu', m.menu).css({
+            position: 'fixed',
+            top:  rect.top  + 20,
+            left: rect.left + 20
+        });
         $('.submenu',m.menu).css({opacity:1});
         debugger;
 
