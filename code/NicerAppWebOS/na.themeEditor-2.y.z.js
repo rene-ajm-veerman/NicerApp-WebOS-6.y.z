@@ -942,18 +942,18 @@ class naThemeEditor {
          */
 
         switch (it.type) {
-            /*
             case 'naSelectorSet' :
                 var data = {};
-                data[it.text] = {};
+                data[it.text.replace(/&gt;/g, '>')] = {};
+                debugger;
                 themeSettings = $.extend (themeSettings, data);
                 break;
             case 'naCSS' :
                 var data = {};
-                data[it.text] = {};
+                data[it.text.replace(/&gt;/g, '>')] = {};
+                debugger;
                 themeSettings = $.extend (themeSettings, data);
                 break;
-            */
             case 'naElement' :
                 var
                 parent = $('#themeEditor_jsTree_selectors').jstree(true).get_node(it.parent),
@@ -968,9 +968,11 @@ class naThemeEditor {
                 ) {
                     if (!themeSettings[parent.text]) themeSettings[parent.text] = { css : {} };
                     if (!themeSettings[parent.text].css) themeSettings[parent.text].css = {};
+                    debugger;
                     themeSettings[parent.text].css = $.extend (
-                        themeSettings[parent.text].css, na.site.fetchTheme(it.text)
+                        themeSettings[parent.text].css, na.site.fetchTheme(it.text.replace(/&gt;/g, '>'))
                     );
+                    debugger;
                 }
                 break;
         }
@@ -2542,7 +2544,7 @@ debugger;
             +'#'+evt.currentTarget.id+'.'+evt.currentTarget.className.replace(' ', '.')+'\n',
                            false
         );
-        debugger;
+
         if (
             evt.target.tagName!==evt.currentTarget.tagName
             || evt.target.id!==evt.currentTarget.id

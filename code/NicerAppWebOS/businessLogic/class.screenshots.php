@@ -877,10 +877,14 @@ return array_merge($job, $update);
 
         // Auto-create directories safely if they are missing
         if (!is_dir($absoluteDir)) {
-            mkdir($absoluteDir, 0775, true);
+            try {
+                mkdir($absoluteDir, 0775, true);
             // Force the new folder to belong to the www-data group natively
-            chgrp($absoluteDir, 'www-data');
-            chmod($absoluteDir, 02775); // 2 enables the SetGID bit programmatically
+                chgrp($absoluteDir, 'www-data');
+                chmod($absoluteDir, 02775); // 2 enables the SetGID bit programmatically
+            } catch (Exception $e) {
+                // ignore for now
+            }
         }
 
         return [

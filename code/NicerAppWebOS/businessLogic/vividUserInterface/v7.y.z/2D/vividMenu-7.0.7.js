@@ -148,28 +148,22 @@ class naVividMenu {
 
           const taskbarH = document.getElementById('siteTaskbar')?.offsetHeight || 60;
           const d = submenu._depth || 0;
+          const menuEl = this.menu;   // the root menu element (naVividMenu instance)
+          const menuRect = menuEl.getBoundingClientRect();
 
           Object.assign(submenu.style, {
             position: 'fixed',
             display: 'flex',
             opacity: '1',
-            top: 'auto',
-            left: (12+submenu._depth*72)+'px',
-                        width: '25vw',
+            top: (menuRect.top + 20) + 'px',
+            left: (menuRect.left + 20 + d * 20) + 'px',  // slight indent per depth
+            bottom: 'auto',          // critical: stop anchoring to bottom of screen
+            width: '25vw',
             maxWidth: '25vw',
             height: 'auto',
             maxHeight: '65vh',
-            bottom: taskbarH + 12 + d * 72 + 'px',
             zIndex: String(1000000001 + d)
           });
-          const menuRect =
-            (item && item.menu
-              ? item.menu
-              : item.closest('.vividMenu_vertical, [id*="'+m.menu.id+'"]')
-            ).getBoundingClientRect();
-
-          submenu.style.top  = (menuRect.top  + 20) + 'px';
-          submenu.style.left = (menuRect.left + 20) + 'px';
 
           openPanels.add(submenu);
 
