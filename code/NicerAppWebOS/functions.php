@@ -5,7 +5,23 @@ require_once(dirname(__FILE__).'/boot.php');
 //use Birke\Rememberme\Storage\FileStorage;
 //use Defuse\Crypto\Key;
 //use Defuse\Crypto\Crypto;
+/**
+ * Safe DateTimeZone constructor – never throws on empty/invalid values.
+ */
+function na_safe_timezone(?string $tz = null): DateTimeZone {
+    $tz = trim((string)$tz);
 
+    if ($tz === '') {
+        $tz = date_default_timezone_get() ?: 'UTC';
+    }
+
+    try {
+        return new DateTimeZone($tz);
+    } catch (Exception $e) {
+        error_log('na_safe_timezone: bad value [' . var_export($tz, true) . '] – falling back to UTC');
+        return new DateTimeZone('UTC');
+    }
+}
 
 /**
  * Generate a generic "View History" button.

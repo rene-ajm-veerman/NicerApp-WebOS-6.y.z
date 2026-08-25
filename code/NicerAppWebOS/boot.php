@@ -303,7 +303,7 @@ NicerApp WebOS from Nicer Enterprises
     $_SESSION['started'] = time();//microtime(true);
     global $date;
     $now = DateTime::createFromFormat('U', $_SESSION['started']);
-    $now->setTimezone(new DateTimeZone(exec('date +%z')));
+    $now->setTimezone(na_safe_timezone(exec('date +%z')));    //$now->setTimezone(new DateTimeZone(exec('date +%z')));
     //$date = $now->format("Y-m-d_H:i:s.u");
     $dateLog =
         $now->format("Y/m/d-l/H/i-s_")
@@ -320,6 +320,15 @@ NicerApp WebOS from Nicer Enterprises
             preg_replace('/.*\s/','',date(DATE_RFC2822))
         );*/
 
+            $naBot = stripos($_SERVER['HTTP_USER_AGENT'], 'bot')!==false;
+            $detect = new CrawlerDetect();
+
+            // Or pass a specific User-Agent
+            $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+            $naIsBot = $detect->isCrawler($userAgent);
+            // Get the name of the bot (very useful)
+            $name = $detect->getMatches(); // Returns the matching bot name/pattern
+            $naIsDesktop = false;
 
     if (
         $_SERVER['SCRIPT_NAME']=='/NicerAppWebOS/index.php'
@@ -327,14 +336,6 @@ NicerApp WebOS from Nicer Enterprises
     ) {
         $_SESSION['startedID'] = cdb_randomString(50);
 
-        $naBot = stripos($_SERVER['HTTP_USER_AGENT'], 'bot')!==false;
-        $detect = new CrawlerDetect();
-
-        // Or pass a specific User-Agent
-        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-        $naIsBot = $detect->isCrawler($userAgent);
-        // Get the name of the bot (very useful)
-        $name = $detect->getMatches(); // Returns the matching bot name/pattern
 
         //echo '<pre>t584'; var_dump($naBot); die();
 
@@ -417,6 +418,7 @@ NicerApp WebOS from Nicer Enterprises
     //echo '<pre style="color:skyblue;background:navy;">'; var_dump ($dbg); echo '</pre>';
     //$msg = 'NEW REQUEST :<br/>'.hmJSON($dbg,'$dbg');
 
+    /*
     global $naIsBot; global $naIsDesktop; global $naIsMobile; global $naBrowserMarketSharePercentage;
     $naIsDesktop = false;
     $naIsMobile = false;
@@ -435,7 +437,7 @@ NicerApp WebOS from Nicer Enterprises
             $naIsBot = preg_match('/spider/i', $_SERVER['HTTP_USER_AGENT']) === 1;
         if (!$naIsBot)
             $naIsBot = preg_match('/scaninfo\@paloanetworks\.com/i', $_SERVER['HTTP_USER_AGENT']) === 1;
-        */
+        * /
 
         $fn1 = dirname(__FILE__).'/apps/NicerAppWebOS/applications/2D/logs/userAgents.desktop.2023-12-02.json';
         $json1 = json_decode(file_get_contents($fn1), true);
@@ -459,6 +461,7 @@ NicerApp WebOS from Nicer Enterprises
         }
     }
     //  echo '<p style="color:purple">'; var_dump($naIsBot); echo '</p>';
+    */
 
     global $naURL;
     $naURL = 'https://'.$_SERVER['HTTP_HOST'].(array_key_exists('REDIRECT_URL',$_SERVER)?$_SERVER['REDIRECT_URL']:'/');
@@ -476,7 +479,7 @@ NicerApp WebOS from Nicer Enterprises
         'GATEWAY_INTERFACE' => $_SERVER['GATEWAY_INTERFACE'],
         'naIsBot' => $naIsBot,
         'naIsDesktop' => $naIsDesktop,
-        'naBrowserMarketSharePercentage-2023-12' => $naBrowserMarketSharePercentage,
+        //'naBrowserMarketSharePercentage-2023-12' => $naBrowserMarketSharePercentage,
         '_COOKIE' => $_COOKIE
     ];
     if (array_key_exists('HTTP_SEC_CH_UA_PLATFORM', $_SERVER)) $naBrowserInfo['HTTP_SEC_CH_UA_PLATFORM'] = $_SERVER['HTTP_SEC_CH_UA_PLATFORM'];
@@ -526,8 +529,8 @@ NicerApp WebOS from Nicer Enterprises
     $time = microtime(true) - $phpScript_startupTime;
     //var_dump (dirname(__FILE__).'/errors.css');
     //date_default_timezone_set('UTC');
-    $dtz = new DateTime('now');//new DateTimeZone(date_default_timezone_get());
-    $dtz_offset = $dtz->getOffset();
+$dtz = new DateTime('now', na_safe_timezone());
+$dtz_offset = $dtz->getOffset();
     //$unixTimeStamp = time();//date(DATE_ATOM);//date(DATE_RFC2822);//date('Y-m-d H:i:sa');
     $timestamp = date(DATE_RFC2822);
 

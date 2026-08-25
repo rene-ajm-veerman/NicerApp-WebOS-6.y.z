@@ -13,6 +13,7 @@
         }
     ],
     "subdomains" : [
+        "// probably will go unused because one can only request so many domain certificates using free tools",
 	    "absolutely",
 	    "beautifully",
 	    "definitely",

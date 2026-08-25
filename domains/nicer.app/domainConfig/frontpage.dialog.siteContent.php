@@ -74,32 +74,6 @@ NL30INGB0007689155
 
     <div class="naFrontpage_headerText naFrontpage_headerText_recentAchievement" style="float:left">
     <p class="backdropped" style="color:lime">
-    2026-Aug-10th, 19:25CEST<br/>
-    </p>
-    <p class="backdropped">I'm allowed to inquire about laser eye surgery, which gets rid of the need for contact lenses and glasses entirely, which is something that I badly need for medical and practical reasons.</p>
-    </div>
-
-
-    <div class="naFrontpage_headerText naFrontpage_headerText_recentAchievement" style="float:left">
-<pre class="backdropped">
-I aim for symbiotic relationships with both governments and other (big-)tech companies.
-My longterm net-worth goal for this lifetime can stay under one-billion Euros.
-
-coz the way *i* see it, anything more than around 200-million Euros, is excess in my bank accounts and/or holdings accounts that ought to get spent on the needs of the poor.
-
-and those around-200-million Euros are there to fund any new businesses i might want to start. i do have some ideas, all of which i choose to keep secret. they're all peaceful civilian biz ideas, but still. don't want to ruin my own chances.
-
-and to the rest of the civilian and military industrial markets out there i say : i'll get you plenty of free business ideas that i just don't have the time and/or money and/or expertise to implement myself.
-they'll be announced here and on <a href="https://zoned.at/d3" class="nomod noPushState" target="na-rv-diary-part3">http://zoned.at/d3</a>
-
-<a href="https://nicer.app/fusion" class="nomod noPushState" target="na-fusion">https://nicer.app/fusion</a>
-<a href="https://nicer.app/powerPlants" class="nomod noPushState" target="na-power-plants">https://nicer.app/powerPlants</a>
-<a href="https://nicer.app/warViewers" class="nomod noPushState" target="na-war-viewers">https://nicer.app/warViewers</a>
-</pre>
-    </div>
-
-    <div class="naFrontpage_headerText naFrontpage_headerText_recentAchievement" style="float:left">
-    <p class="backdropped" style="color:lime">
     <!--<iframe width="560" height="315" src="https://www.youtube.com/embed/gvnsP1byW7U?si=wSt6jQ1dQQwjyjJu" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>-->
     <!--<iframe width="560" height="315" src="https://www.youtube.com/embed/NoVX3GRqmAc?si=BjrL-PgVan-3OXIa" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>-->
     <iframe width="560" height="315" src="https://www.youtube.com/embed/sVBin4Tz5n8?si=H15sDKPCbmKPVqqM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>

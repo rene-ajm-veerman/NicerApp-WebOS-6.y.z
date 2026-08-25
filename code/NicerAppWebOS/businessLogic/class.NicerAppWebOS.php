@@ -889,6 +889,8 @@ class NicerAppWebOS {
                 $call = $cdb->find ($findCommand);
             } catch (Exception $e) {
                 $msg = $fncn.' FAILED while trying to find in \''.$dataSetName.'\' : '.$e->getMessage();
+                global $naLAN;
+                if ($naLAN) $msg .= ' : <pre>'.json_encode(debug_backtrace(),JSON_PRETTY_PRINT).'</pre>';
                 trigger_error ($msg, E_USER_WARNING);
                 echo $msg;
                 return false;

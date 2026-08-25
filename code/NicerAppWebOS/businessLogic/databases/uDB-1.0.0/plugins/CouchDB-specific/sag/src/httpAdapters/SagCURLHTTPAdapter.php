@@ -236,7 +236,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
           ? $_SESSION['started']
           : time()//microtime(true)
       ));
-      $now->setTimezone(new DateTimeZone(exec('date +%z')));
+      $now->setTimezone(na_safe_timezone(exec('date +%z')));    //$now->setTimezone(new DateTimeZone(exec('date +%z')));
       $date = $now->format("Y-m-d H:i:s.u ").preg_replace('/.*\s/','',date(DATE_RFC2822));
       //$date = $now->format("Y-m-d_H:i:s");
 
