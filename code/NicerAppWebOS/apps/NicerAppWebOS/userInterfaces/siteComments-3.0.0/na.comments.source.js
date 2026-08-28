@@ -118,7 +118,7 @@ na.apps.loaded['/NicerAppWebOS/apps/NicerAppWebOS/userInterfaces/siteComments'] 
             const id  = $('.naComment_id', el).text().trim();   // or data-id or whatever you use
             $('.naComment_msgHTML > a > img',el).remove();
             $('.naComment_msgHTML > p > iframe, .naComment_msgHTML > p', el).each(function(idx,el2){
-		    $(el2).add($(el2).parents('.naComment_msgHTML')).css({justifyItems:'flex-end',display:'grid',justifyContent:'right',textAlight:'right'});
+		    $(el2).add($(el2).parents('.naComment_msgHTML')).css({display:'block'});
 	    });
 
 
@@ -238,6 +238,163 @@ na.apps.loaded['/NicerAppWebOS/apps/NicerAppWebOS/userInterfaces/siteComments'] 
                 // optional: anything you want after the scroll finishes
             }
         });
+    },
+
+    onclick_btnViewHistory: function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const entry = $(event.target).closest('.naComment_entry');
+        const id    = entry.find('.naComment_id').text().trim();
+
+        na.c.loadHistory(id);
+    },
+
+
+    loadHistory: function(commentId) {
+        const url = '/NicerAppWebOS/apps/NicerAppWebOS/userInterfaces/siteComments-3.0.0/ajax_getHistory.php';
+
+        $.ajax({
+            type: 'POST',
+            url: url,
+            data: { id: commentId },
+            success: function(data) {
+                try {
+                    const res = (typeof data === 'string') ? JSON.parse(data) : data;
+
+                    if (!res.ok) {
+                        alert(res.error || 'Kon history niet laden');
+                        return;
+                    }
+
+                    na.c.showHistoryModal(commentId, res.history || []);
+                } catch (e) {
+                    console.error(e);
+                    alert('Onverwacht antwoord van de server');
+                }
+            },
+            error: function() {
+                alert('Netwerkfout bij ophalen van history');
+            }
+        });
+    },
+
+
+    showHistoryModal: function(commentId, history) {
+        // Eenvoudige modal (pas aan naar jouw UI-stijl)
+        let html = `
+        <div id="naHistoryModal" style="
+        position:fixed; inset:0; background:rgba(0,0,0,0.75);
+        z-index:99999; display:flex; align-items:center; justify-content:center;
+        padding:20px; box-sizing:border-box;
+        ">
+        `;
+        // Binnen showHistoryModal(), bij de header-buttons:
+        html += `
+        <button onclick="na.c.exportHistory('${commentId}')" style="
+        background:#27ae60; color:white; border:none; padding:8px 16px;
+        border-radius:8px; cursor:pointer; font-weight:600; margin-right:10px;
+        ">Export JSON</button>
+        <button onclick="na.c.exportHistory('${commentId}', 'csv')" style="
+        background:#2980b9; color:white; border:none; padding:8px 16px;
+        border-radius:8px; cursor:pointer; font-weight:600; margin-right:10px;
+        ">Export CSV</button>
+        `;
+        html += `
+        <div style="
+        background:#1a1a2e; color:#eee; width:100%; max-width:900px;
+        max-height:90vh; overflow:auto; border-radius:16px;
+        box-shadow:0 20px 60px rgba(0,0,0,0.6); padding:24px;
+        ">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="margin:0; color:#fff;">Audit History</h2>
+        <button onclick="$('#naHistoryModal').remove()" style="
+        background:#c0392b; color:white; border:none; padding:8px 16px;
+        border-radius:8px; cursor:pointer; font-weight:600;
+        ">Sluiten</button>
+        </div>
+        <div style="font-size:0.9em; opacity:0.7; margin-bottom:16px;">
+        Comment ID: <code>${commentId}</code>
+        </div>
+        <div id="naHistoryTimeline">
+        `;
+
+        if (history.length === 0) {
+            html += '<p style="opacity:0.6;">Nog geen history-records gevonden.</p>';
+        } else {
+            history.forEach(function(item) {
+                const isMeta   = item.type === 'meta-edit-point';
+                const bg       = isMeta ? 'rgba(80,40,120,0.4)' : 'rgba(30,60,90,0.45)';
+                const border   = isMeta ? '1px solid #9b59b6' : '1px solid #3498db';
+                const label    = isMeta ? 'META' : 'CONTENT';
+                const action   = item.action || '—';
+                const by       = item.historyBy || 'onbekend';
+                const when     = item.historyDatetimeStr || '—';
+                const ip       = item.historyIP || '—';
+
+                html += `
+                <div style="
+                margin-bottom:14px; padding:14px 16px; background:${bg};
+                border:${border}; border-radius:10px;
+                ">
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                <span style="
+                font-size:0.75em; font-weight:700; letter-spacing:0.5px;
+                background:rgba(0,0,0,0.3); padding:2px 8px; border-radius:4px;
+                ">${label}</span>
+                <span style="font-size:0.85em; opacity:0.8;">${when}</span>
+                </div>
+                <div style="font-weight:600; margin-bottom:4px;">
+                Actie: <span style="color:#7bed9f;">${action}</span>
+                </div>
+                <div style="font-size:0.9em; opacity:0.85;">
+                Door: <strong>${by}</strong> &nbsp;|&nbsp; IP: ${ip}
+                </div>
+                `;
+
+                // Extra meta-info tonen als die er is
+                if (item.meta && Object.keys(item.meta).length > 0) {
+                    html += `<div style="margin-top:8px; font-size:0.85em; opacity:0.8;">
+                    <pre style="margin:0; white-space:pre-wrap; font-family:monospace;">${JSON.stringify(item.meta, null, 2)}</pre>
+                    </div>`;
+                }
+
+                // Bij content-edit-points de msgHTML tonen (ingeklapt)
+                if (!isMeta && item.snapshot && item.snapshot.msgHTML) {
+                    html += `
+                    <details style="margin-top:10px;">
+                    <summary style="cursor:pointer; color:#74b9ff;">Snapshot inhoud tonen</summary>
+                    <div style="
+                    margin-top:8px; padding:10px; background:rgba(0,0,0,0.25);
+                    border-radius:6px; max-height:200px; overflow:auto;
+                    font-size:0.9em;
+                    ">${item.snapshot.msgHTML}</div>
+                    </details>
+                    `;
+                }
+
+                html += `</div>`;
+            });
+        }
+
+        html += `
+        </div>
+        </div>
+        </div>
+        `;
+
+        // Oude modal verwijderen als die nog open stond
+        $('#naHistoryModal').remove();
+        $('body').append(html);
+    },
+
+    exportHistory: function(commentId, format = 'json') {
+        const url = '/NicerAppWebOS/apps/NicerAppWebOS/userInterfaces/siteComments-3.0.0/ajax_exportHistory.php'
+        + '?id=' + encodeURIComponent(commentId)
+        + '&format=' + encodeURIComponent(format);
+
+        // Simpele download via verborgen iframe of window.open
+        window.open(url, '_blank');
     },
 
     onclick_datetime : function (event) {

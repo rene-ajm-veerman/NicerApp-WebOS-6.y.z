@@ -12,10 +12,10 @@ $codeLocation = realpath(__FILE__);
 
 $serverSettings = array (
     'http' => 'http://',
-    'domain' => '192.168.178.29',
+    'domain' => '127.0.0.1',
     'port' => 5984,
-    'adminUsername' => 'nicer_app___Rene_AJM_Veerman',
-    'adminPassword' => 'dontGoBitingMee,Pups'
+    'adminUsername' => 'admin',
+    'adminPassword' => 'texass.t33'
 );
 $server = new couchdb_server ($serverSettings, $codeLocation);
 if (!cdb_processResults ($server, $codeLocation, is_object($server) && !is_null($server->address))) {

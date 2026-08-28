@@ -1641,14 +1641,8 @@ na.site = {
                             return r;
                         }, function () {
                             if (!na.site.globals.themes[na.site.globals.themeName].themeSettings)
-                                na.site.globals.themes[na.site.globals.themeName].themeSettings = { // gets initialized through na.onload_phase2() calling na.loadTheme()
-                                    Dialogs : {}, // filled in below here.
-                                    Apps : {}, // ditto
-                                    Extras :  na.te.transform_jsTree_to_siteGlobalsThemes() // pulls data modified by end-users from the Theme Editor back into this na.saveTheme() AJAX call
-                                };
-                            na.site.globals.themes[na.site.globals.themeName].themeSettings.Apps = {};
-                            //na.te.onload(); // results in excess /view/logs data
-                            na.site.globals.themes.default = na.site.loadTheme_fetchDialogs();
+                                na.site.globals.themes[na.site.globals.themeName].themeSettings = na.te.transform_jsTree_to_siteGlobalsThemes();
+                            //na.site.globals.themes.default = na.site.loadTheme_fetchDialogs();
                         }, null);
                     })] },
 
@@ -3635,6 +3629,7 @@ na.site = {
         }*/
 
         // Fetch dialogs properly
+        debugger;
         themeData = na.site.loadTheme_fetchDialogs(themeData) || themeData;
 
         //IS THIS NECESSARY?? na.site.loadTheme_applySettings (themeData, null, false); // apply theme changes, all except .background in this case.
@@ -3710,51 +3705,9 @@ na.site = {
 
     loadTheme_fetchDialogs : function (themeData) {
         var themeData2 = $.extend ({}, na.site.globals.themes[na.site.globals.themeName], themeData);
-        for (var divSel in na.site.c.dialogs) {
-            if (!themeData2.themeSettings) {
-                themeData2.themeSettings = { // gets initialized through na.onload_phase2() calling na.loadTheme()
-                    Dialogs : {}, // filled in below here.
-                    Apps : {}, // ditto
-                    Extras :  na.te.transform_jsTree_to_siteGlobalsThemes() // pulls data modified by end-users from the Theme Editor back into this na.saveTheme() AJAX call
-                };
-            }
-            if (!themeData2.themeSettings.Apps) themeData2.themeSettings.Apps = {};
-
-            var
-            regExDialogs = /#site(.*)[\s\w\.\#\d\>]*/,
-            regExApps = /#app__(.*)__(.*)$/;
-            if (divSel.match(regExDialogs)) {
-                var divName = divSel.match(regExDialogs)[1];
-                if (!themeData2.themeSettings.Dialogs || themeData2.themeSettings.Dialogs.length===0)
-                    themeData2.themeSettings.Dialogs = { };
-                if (!themeData2.themeSettings.Dialogs[divName])
-                    themeData2.themeSettings.Dialogs[divName] = { css : {} };
-                themeData2.themeSettings.Dialogs[divName]['css'] =
-                    $.extend (
-                        {},
-                        themeData2.themeSettings.Dialogs[divName]['css'],
-                        na.site.fetchTheme (divSel)
-                    );
-            } else if (divSel.match(regExApps)) {
-                var
-                m = divSel.match(regExApps),
-                appName = m[1],
-                appDialogName = m[2];
-                if (!themeData2.themeSettings['Apps'][appName])
-                    themeData2.themeSettings['Apps'][appName] = { css : {} };
-                //if (!themeData.themeSettings['Apps'][appName]['css'][divSel])
-                themeData2.themeSettings['Apps'][appName]['css'] =
-                    $.extend({},
-                        themeData2.themeSettings['Apps'][appName]['css'],
-                        na.site.fetchTheme(divSel)
-                    );
-            }
-        };
-
-        //if (!themeData.themeSettings.Extras)
         try {
             if (!themeData2.themeSettings) themeData2.themeSettings = {};
-            themeData2.themeSettings.Extras = na.te.transform_jsTree_to_siteGlobalsThemes();
+            themeData2.themeSettings = na.te.transform_jsTree_to_siteGlobalsThemes();
         } catch (err) {
             var dbg = {
                 msg : err.message,
@@ -3775,6 +3728,41 @@ na.site = {
     },
 
     fetchTheme : function (selector) {
+        var ret = {};
+        ret[selector] = {
+            border : $(selector).css('border'),
+            borderRadius : $(selector).css('borderRadius'),
+            boxShadow : $(selector).css('boxShadow'),
+            color : $(selector).css('color'),
+            fontSize : $(selector).css('fontSize'),
+            fontWeight : $(selector).css('fontWeight'),
+            fontFamily : $(selector).css('fontFamily'),
+            textShadow : $(selector+' > .vividDialogContent').css('textShadow')//,
+            //opacity : $(selector).css('opacity')
+        };
+        ret[selector].border = // firefox work-around
+            $(selector).css('borderTopWidth')+' '
+            //+$(selector).css('borderRightWidth')+' '
+            //+$(selector).css('borderBottomWidth')+' '
+            //+$(selector).css('borderLeftWidth')+' '
+            +$(selector).css('borderTopStyle')+' '
+            //+$(selector).css('borderRightStyle')+' '
+            //+$(selector).css('borderBottomStyle')+' '
+            //+$(selector).css('borderLeftStyle')+' '
+            +$(selector).css('borderTopColor')+' '
+            //+$(selector).css('borderRightColor')+' '
+            //+$(selector).css('borderBottomColor')+' '
+            //+$(selector).css('borderLeftColor')+' ';
+        ret[selector].borderRadius = // firefox work-around
+            $(selector).css("borderTopLeftRadius")+' '
+            +$(selector).css("borderTopRightRadius")+' '
+            +$(selector).css("borderBottomRightRadius")+' '
+            +$(selector).css("borderBottomLeftRadius")+' ';
+        return ret;
+    },
+
+
+    fetchTheme_old : function (selector) {
         var ret = {};
         ret[selector] = {
             border : $(selector).css('border'),

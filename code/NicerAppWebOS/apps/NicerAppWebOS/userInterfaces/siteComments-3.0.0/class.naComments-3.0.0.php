@@ -24,7 +24,385 @@ class class_naComments {
     public $theme = 'simple';//'DutchCulture';
     public $mode = 'PHP-Apache-nginx';
 
+    /**
+     * Check whether the current user belongs to the "Government Authorities" group
+     * (or is a system admin).
+     */
+    private function userIsGovernmentAuthority(): bool
+    {
+        global $naUsername, $naWebOS;
 
+        if (empty($naUsername)) {
+            return false;
+        }
+
+        try {
+            $db  = $naWebOS->dbs->findConnection('couchdb');
+            $cdb = $db->cdb;
+            $cdb->setDatabase($db->dataSetName('users'), true); // pas aan als jouw users-db anders heet
+
+            $call = $cdb->get($naUsername);
+            $user = $call->body ?? null;
+
+            if (!$user) {
+                return false;
+            }
+
+            $groups = $user->groups ?? $user->roles ?? [];
+            if (is_string($groups)) {
+                $groups = [$groups];
+            }
+
+            $allowed = [
+                'Government Authorities',
+                'Justitie',
+                'OM',
+                'Politie',
+                'admin',
+                'system'
+            ];
+
+            foreach ($groups as $g) {
+                if (in_array($g, $allowed, true)) {
+                    return true;
+                }
+            }
+
+            return false;
+
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+
+    /**
+     * Hide a comment by Government Authorities / Justitie
+     * with a reason visible to the author + control whether the author may unhide it.
+     */
+    public function authorityHide($in = null)
+    {
+        $fncn = $this->cn . '::authorityHide($in)';
+        global $naWebOS, $naUsername, $naIP;
+
+        if (!is_array($in)) {
+            trigger_error($fncn . ' : !is_array($in)', E_USER_ERROR);
+        }
+
+        $id              = $in['id']              ?? null;
+        $reason          = trim($in['reason']      ?? '');
+        $authorCanUnhide = !empty($in['authorCanUnhide']);
+        $internalNote    = trim($in['internalNote'] ?? '');
+
+        if (!$id) {
+            echo json_encode(['error' => 'Missing comment id']);
+            return;
+        }
+
+        if (empty($reason)) {
+            echo json_encode(['error' => 'A reason is required']);
+            return;
+        }
+
+        // Security
+        if (!$this->userIsGovernmentAuthority()) {
+            echo json_encode(['error' => 'Not allowed']);
+            return;
+        }
+
+        $db     = $naWebOS->dbs->findConnection('couchdb');
+        $cdb    = $db->cdb;
+        $dbName = $db->dataSetName('cms_comments');
+        $cdb->setDatabase($dbName, true);
+
+        try {
+            $call = $cdb->get($id);
+            $doc  = $call->body;
+
+            // Snapshot vóór de wijziging
+            $this->writeHistorySnapshot($doc, 'authority-hide', [
+                'tz'              => $doc->clientTZoffset ?? 0,
+                'reason'          => $reason,
+                'authorCanUnhide' => $authorCanUnhide,
+                'internalNote'    => $internalNote
+            ]);
+
+            $now = time();
+
+            $doc->hidden               = true;
+            $doc->hiddenBy             = $naUsername;
+            $doc->hiddenAt             = $now;
+            $doc->hiddenAtStr          = naDateTimeStr($now, 0);
+            $doc->hiddenReason         = $reason;                 // zichtbaar voor de auteur
+            $doc->hiddenByAuthority    = true;
+            $doc->authorCanUnhide      = $authorCanUnhide;
+            $doc->hiddenAuthorityNote  = $internalNote;           // alleen voor Government Authorities
+
+            $cdb->put($doc->_id, $doc);
+
+            // Meta-edit-point
+            $this->writeMetaHistoryPoint($id, 'authority-hide', null, [
+                'reason'          => $reason,
+                'authorCanUnhide' => $authorCanUnhide,
+                'internalNote'    => $internalNote
+            ]);
+
+            echo json_encode([
+                'ok'              => true,
+                'id'              => $doc->_id,
+                'hidden'          => true,
+                'authorCanUnhide' => $authorCanUnhide
+            ]);
+
+        } catch (Exception $e) {
+            echo json_encode([
+                'errorHTML'       => 'Could not hide comment',
+                'couchdbErrorMsg' => $e->getMessage()
+            ]);
+        }
+    }
+
+
+    /**
+     * Toggle hidden state – respects authority freeze rules
+     */
+    public function toggleHidden($in = null)
+    {
+        $fncn = $this->cn . '::toggleHidden($in)';
+        global $naWebOS, $naUsername;
+
+        if (!is_array($in)) {
+            trigger_error($fncn . ' : !is_array($in)', E_USER_ERROR);
+        }
+        if (empty($in['id'])) {
+            trigger_error($fncn . ' : missing id', E_USER_ERROR);
+        }
+
+        $db     = $naWebOS->dbs->findConnection('couchdb');
+        $cdb    = $db->cdb;
+        $dbName = $db->dataSetName('cms_comments');
+        $cdb->setDatabase($dbName, true);
+
+        try {
+            $call = $cdb->get($in['id']);
+            $doc  = $call->body;
+
+            $isOwner     = (isset($doc->clientUsername) && $doc->clientUsername === $naUsername);
+            $isAuthority = $this->userIsGovernmentAuthority();
+
+            if (!$isOwner && !$isAuthority) {
+                echo json_encode(['error' => 'Not allowed']);
+                return;
+            }
+
+            $currentlyHidden = !empty($doc->hidden);
+
+            // Als justitie de post heeft bevroren én authorCanUnhide === false,
+            // dan mag de auteur hem niet meer unhiden.
+            if (
+                $currentlyHidden
+                && $isOwner
+                && !empty($doc->hiddenByAuthority)
+                && empty($doc->authorCanUnhide)
+            ) {
+                echo json_encode([
+                    'error' => 'Deze post is bevroren door justitie en kan niet door jou worden vrijgegeven.'
+                ]);
+                return;
+            }
+
+            $action = $currentlyHidden ? 'unhide' : 'hide';
+
+            // Snapshot vóór de wijziging
+            $this->writeHistorySnapshot($doc, $action, [
+                'tz' => $doc->clientTZoffset ?? 0
+            ]);
+
+            // Toggle
+            $doc->hidden = !$currentlyHidden;
+
+            // Als de auteur de post weer zichtbaar maakt → authority-velden opschonen
+            if (!$doc->hidden && $isOwner) {
+                $doc->hiddenBy             = null;
+                $doc->hiddenAt             = null;
+                $doc->hiddenAtStr          = null;
+                $doc->hiddenReason         = null;
+                $doc->hiddenByAuthority    = false;
+                $doc->authorCanUnhide      = true;
+                $doc->hiddenAuthorityNote  = null;
+            }
+
+            $cdb->put($doc->_id, $doc);
+
+            echo json_encode([
+                'ok'     => true,
+                'id'     => $doc->_id,
+                'hidden' => $doc->hidden
+            ]);
+
+        } catch (Exception $e) {
+            echo json_encode([
+                'errorHTML'       => 'Could not toggle hidden state',
+                'couchdbErrorMsg' => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Write a content-edit-point (create / edit / hide / unhide / delete / authority-hide)
+     *
+     * @param object|array $doc
+     * @param string       $action   create|edit|hide|unhide|delete|authority-hide
+     * @param array        $extraMeta
+     * @return string|null
+     */
+    private function writeHistorySnapshot($doc, string $action = 'edit', array $extraMeta = []): ?string
+    {
+        global $naWebOS, $naUsername, $naIP;
+
+        if (is_object($doc)) {
+            $doc = json_decode(json_encode($doc), true);
+        }
+
+        if (empty($doc['_id'])) {
+            trigger_error($this->cn . '::writeHistorySnapshot() : missing _id', E_USER_WARNING);
+            return null;
+        }
+
+        $db     = $naWebOS->dbsAdmin->findConnection('couchdb');
+        $cdb    = $db->cdb;
+        $histDb = $db->dataSetName('cms_comments_history');
+        $cdb->setDatabase($histDb, true);
+
+        $now = time();
+        $tz  = $extraMeta['tz'] ?? ($doc['clientTZoffset'] ?? 0);
+
+        $historyDoc = [
+            '_id'                => bin2hex(random_bytes(12)),
+            'type'               => 'content-edit-point',
+            'action'             => $action,
+            'documentID'         => $doc['_id'],
+            'originalRev'        => $doc['_rev'] ?? null,
+            'snapshot'           => $doc,                       // volledige snapshot
+            'historyDatetime'    => $now,
+            'historyDatetimeStr' => naDateTimeStr($now, $tz),
+            'historyBy'          => $naUsername ?? null,
+            'historyIP'          => $naIP ?? null,
+            'historyUserAgent'   => $_SERVER['HTTP_USER_AGENT'] ?? null,
+            'meta'               => $extraMeta
+        ];
+
+        try {
+            $resp = $cdb->post($historyDoc);
+            return $resp->body->id ?? $historyDoc['_id'];
+        } catch (Exception $e) {
+            trigger_error($this->cn . '::writeHistorySnapshot() failed: ' . $e->getMessage(), E_USER_WARNING);
+            return null;
+        } finally {
+            $cdb->setDatabase($db->dataSetName('cms_comments'));
+        }
+    }
+
+
+    /**
+     * Write a meta-edit-point (acties op de history zelf)
+     * Alleen bedoeld voor Government Authorities.
+     */
+    private function writeMetaHistoryPoint(
+        string $commentId,
+        string $action,
+        ?string $relatedHistoryId = null,
+        array $extra = []
+    ): ?string
+    {
+        global $naWebOS, $naUsername, $naIP;
+
+        $db     = $naWebOS->dbsAdmin->findConnection('couchdb');
+        $cdb    = $db->cdb;
+        $histDb = $db->dataSetName('cms_comments_history');
+        $cdb->setDatabase($histDb, true);
+
+        $now = time();
+        $tz  = $extra['tz'] ?? 0;
+
+        $historyDoc = [
+            '_id'                => bin2hex(random_bytes(12)),
+            'type'               => 'meta-edit-point',
+            'action'             => $action,                    // view | annotate | redact | export | ...
+            'documentID'         => $commentId,
+            'relatedHistoryID'   => $relatedHistoryId,
+            'snapshot'           => null,
+            'historyDatetime'    => $now,
+            'historyDatetimeStr' => naDateTimeStr($now, $tz),
+            'historyBy'          => $naUsername ?? null,
+            'historyIP'          => $naIP ?? null,
+            'historyUserAgent'   => $_SERVER['HTTP_USER_AGENT'] ?? null,
+            'meta'               => $extra
+        ];
+
+        try {
+            $resp = $cdb->post($historyDoc);
+            return $resp->body->id ?? $historyDoc['_id'];
+        } catch (Exception $e) {
+            trigger_error($this->cn . '::writeMetaHistoryPoint() failed: ' . $e->getMessage(), E_USER_WARNING);
+            return null;
+        } finally {
+            $cdb->setDatabase($db->dataSetName('cms_comments'));
+        }
+    }
+
+    /**
+     * Haal de volledige history van een comment op (alleen voor Government Authorities)
+     */
+    public function getHistory($in = null)
+    {
+        global $naWebOS;
+
+        if (!$this->userIsGovernmentAuthority()) {
+            echo json_encode(['error' => 'Not allowed']);
+            return;
+        }
+
+        $commentId = $in['id'] ?? null;
+        if (!$commentId) {
+            echo json_encode(['error' => 'Missing comment id']);
+            return;
+        }
+
+        $db     = $naWebOS->dbsAdmin->findConnection('couchdb');
+        $cdb    = $db->cdb;
+        $histDb = $db->dataSetName('cms_comments_history');
+        $cdb->setDatabase($histDb, true);
+
+        try {
+            $result = $cdb->find([
+                'selector' => [
+                    'documentID' => $commentId
+                ],
+                'sort' => [
+                    ['historyDatetime' => 'desc']
+                ],
+                'limit' => 200
+            ]);
+
+            $docs = $result->body->docs ?? [];
+
+            // Optioneel: log dat iemand de history heeft bekeken
+            $this->writeMetaHistoryPoint($commentId, 'view');
+
+            echo json_encode([
+                'ok'      => true,
+                'id'      => $commentId,
+                'history' => $docs
+            ]);
+
+        } catch (Exception $e) {
+            echo json_encode([
+                'error' => 'Could not load history',
+                'msg'   => $e->getMessage()
+            ]);
+        }
+    }
     /**
      * Scan the entire comments database and enqueue screenshots
      * for every unique URL found in rootItemJSON + inside msgHTML.
@@ -583,6 +961,24 @@ class class_naComments {
                     'btnPlus_shaded.png',
                     '', '', '', ''
                 ).PHP_EOL;
+                // History-knop alleen voor Government Authorities
+                if ($this->userIsGovernmentAuthority()) {
+                    $html .= $naWebOS->html_vividButton(
+                        1001, 'float:right',
+                        'btnViewHistory',
+                        'vividButton_icon_50x50 grouped', '_50x50', 'grouped',
+                        '',
+                        'na.c.onclick_btnViewHistory(event);',
+                                                        '',
+                                                        '',
+                                                        1001, 'Audit History',
+                                                        'btnCssVividButton_outerBorder.png',
+                                                        'btnCssVividButton.png',
+                                                        $this->themes[$this->theme]['btnHistory'] ?? 'btnCssVividButton.redStone.png',
+                                                        'btnDocument.png',
+                                                        '', '', '', ''
+                    );
+                };
                 if (array_key_exists('clientUsername',$it) && $it['clientUsername']==$naUsername) {
                     /*$html .= $naWebOS->html_vividButton(
                         1001, 'float:right',
@@ -641,12 +1037,12 @@ class class_naComments {
                                                         '1660_blk_19329_zoom.upperBodyOnly.256x256.png',          // or any icon you already have
                                                         '', '', '', ''
                     ).PHP_EOL;
-		    $html .= html_viewHistoryButton($it['_id'], [
-    'title'        => 'Comment Revision History',
-    'contentField' => 'snapshot.msgHTML',   // or just 'msgHTML' if you kept the old format
-    'database' => 'cms_comments',
-    'limit'        => 55
-]);
+                    $html .= html_viewHistoryButton($it['_id'], [
+                        'title'        => 'Comment Revision History',
+                        'contentField' => 'snapshot.msgHTML',   // or just 'msgHTML' if you kept the old format
+                        'database' => 'cms_comments',
+                        'limit'        => 55500
+                    ]);
                 }
                 $html .= "\t".'<div style="display:none">'.PHP_EOL;
                 $html .= "\t\t".'<span class="naComment_id">'.$it['_id'].'</span>'.PHP_EOL;
@@ -660,7 +1056,7 @@ class class_naComments {
 
             $html .= "\t".'<div class="naComment_header">';
 
-	$loginResult = $_SESSION['loginResult'];
+            $loginResult = $_SESSION['loginResult'];
             if (array_key_exists('clientUsername', $it)) {
                 $html .= "\t".'<span class="naComment_username">'
                 . (array_key_exists('displayName',$loginResult)?$loginResult['displayName']:$it['clientUsername'])
@@ -711,10 +1107,64 @@ class class_naComments {
                 strpos($t->mode,'ajax')!==false
                 && $h!==true
             ) {
-		$mh = $it['msgHTML'];
-		$mh = str_replace('<iframe', '<iframe loading="lazy" defer=""', $mh);
-		$mh = str_replace('allowfullscreen>', 'allowfullscreen="">', $mh);
-                $html .= "\t".'<div class="naComment_msgHTML" style="opacity:'.($h?0.4:1).'">'.$mh.'</div>'.PHP_EOL;
+
+
+                // ────────────────────────────────────────────────
+                // Authority freeze notice (alleen zichtbaar voor de auteur)
+                // ────────────────────────────────────────────────
+                if (
+                    !empty($it['hidden'])
+                    && !empty($it['hiddenByAuthority'])
+                    && isset($it['clientUsername'])
+                    && $it['clientUsername'] === $naUsername
+                ) {
+                    $canUnhide = !empty($it['authorCanUnhide']);
+
+                    $html .= '<div class="naComment_authorityNotice" style="
+                    margin: 12px 0 16px 0;
+                    padding: 14px 18px;
+                    background: linear-gradient(135deg, rgba(180,30,30,0.85), rgba(120,10,10,0.9));
+                    border: 1px solid rgba(255,180,180,0.4);
+                    border-radius: 12px;
+                    color: #fff;
+                    font-size: 0.95em;
+                    line-height: 1.45;
+                    box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+                    ">';
+
+                    $html .= '<div style="font-weight:700; font-size:1.05em; margin-bottom:6px;">
+                    ⚠ Deze post is verborgen door justitie
+                    </div>';
+
+                    if (!empty($it['hiddenReason'])) {
+                        $html .= '<div style="margin-bottom:8px;">
+                        <strong>Reden:</strong> ' . htmlspecialchars($it['hiddenReason']) . '
+                        </div>';
+                    }
+
+                    if (!empty($it['hiddenAtStr'])) {
+                        $html .= '<div style="opacity:0.85; font-size:0.9em; margin-bottom:8px;">
+                        Bevroren op: ' . htmlspecialchars($it['hiddenAtStr']) . '
+                        </div>';
+                    }
+
+                    if ($canUnhide) {
+                        $html .= '<div style="margin-top:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.2);">
+                        Je mag deze post zelf weer zichtbaar maken via de "Hide/Show" knop.
+                        </div>';
+                    } else {
+                        $html .= '<div style="margin-top:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.2); color:#ffb0b0;">
+                        <em>Je kunt deze post niet zelf weer zichtbaar maken. Alleen justitie kan de freeze opheffen.</em>
+                        </div>';
+                    }
+
+                    $html .= '</div>';
+                } else {
+                    $mh = $it['msgHTML'];
+                    $mh = str_replace('<iframe', '<iframe loading="lazy" defer=""', $mh);
+                    $mh = str_replace('allowfullscreen>', 'allowfullscreen="">', $mh);
+                    $html .= "\t".'<div class="naComment_msgHTML" style="opacity:'.($h?0.4:1).'">'.$mh.'</div>'.PHP_EOL;
+                }
 
                 // Show small screenshots for any URLs mentioned in this comment
                 $mentionedUrls = $t->extractUrlsFromHtml($it['msgHTML'] ?? '');
@@ -762,6 +1212,229 @@ class class_naComments {
         return $html;
     }
 
+    /**
+     * Bulk / advanced export of audit history.
+     *
+     * Parameters (via $_REQUEST):
+     *  - id            string     single comment
+     *  - ids[]         array      multiple comments
+     *  - from          int/unix   historyDatetime >= from
+     *  - to            int/unix   historyDatetime <= to
+     *  - type          string     content-edit-point | meta-edit-point | all (default)
+     *  - action        string     filter on action (create, edit, authority-hide, ...)
+     *  - format        string     json | csv (default: json)
+     *  - limit         int        max records per comment (default 1000)
+     */
+    public function exportHistory($in = null)
+    {
+        global $naWebOS, $naUsername;
+
+        if (!$this->userIsGovernmentAuthority()) {
+            header('Content-Type: application/json');
+            echo json_encode(['error' => 'Not allowed']);
+            return;
+        }
+
+        $ids     = [];
+        $format  = strtolower($in['format']  ?? 'json');
+        $type    = $in['type']               ?? 'all';
+        $action  = $in['action']             ?? null;
+        $from    = isset($in['from']) ? (int)$in['from'] : null;
+        $to      = isset($in['to'])   ? (int)$in['to']   : null;
+        $limit   = max(1, min(5000, (int)($in['limit'] ?? 1000)));
+
+        // Collect IDs
+        if (!empty($in['id'])) {
+            $ids[] = $in['id'];
+        }
+        if (!empty($in['ids']) && is_array($in['ids'])) {
+            $ids = array_merge($ids, $in['ids']);
+        }
+        $ids = array_values(array_filter(array_unique($ids)));
+
+        // Als er geen IDs zijn opgegeven → bulk over alle comments in de periode
+        $bulkMode = empty($ids);
+
+        $db     = $naWebOS->dbsAdmin->findConnection('couchdb');
+        $cdb    = $db->cdb;
+        $histDb = $db->dataSetName('cms_comments_history');
+        $cdb->setDatabase($histDb, true);
+
+        $allHistory = [];
+        $totalRecords = 0;
+
+        try {
+            if ($bulkMode) {
+                // ── Bulk mode: alle history records in de periode ──────────────
+                $selector = new stdClass();
+
+                if ($from || $to) {
+                    $selector->historyDatetime = new stdClass();
+                    if ($from) $selector->historyDatetime->{'$gte'} = $from;
+                    if ($to)   $selector->historyDatetime->{'$lte'} = $to;
+                }
+
+                if ($type !== 'all') {
+                    $selector->type = $type;
+                }
+                if ($action) {
+                    $selector->action = $action;
+                }
+
+                $query = [
+                    'selector' => $selector,
+                    'sort'     => [['historyDatetime' => 'asc']],
+                    'limit'    => $limit
+                ];
+
+                $result = $cdb->find($query);
+                $docs   = $result->body->docs ?? [];
+
+                // Groepeer per documentID
+                foreach ($docs as $doc) {
+                    $cid = $doc->documentID ?? 'unknown';
+                    if (!isset($allHistory[$cid])) {
+                        $allHistory[$cid] = [];
+                    }
+                    $allHistory[$cid][] = $doc;
+                    $totalRecords++;
+                }
+
+                // Log de bulk-export
+                $this->writeMetaHistoryPoint('BULK_EXPORT', 'export', null, [
+                    'mode'        => 'bulk',
+                    'format'      => $format,
+                    'from'        => $from,
+                    'to'          => $to,
+                    'type'        => $type,
+                    'action'      => $action,
+                    'recordCount' => $totalRecords,
+                    'exportedBy'  => $naUsername
+                ]);
+
+            } else {
+                // ── Per-comment mode ──────────────────────────────────────────
+                foreach ($ids as $commentId) {
+                    $selector = [
+                        'documentID' => $commentId
+                    ];
+
+                    if ($from || $to) {
+                        $selector['historyDatetime'] = [];
+                        if ($from) $selector['historyDatetime']['$gte'] = $from;
+                        if ($to)   $selector['historyDatetime']['$lte'] = $to;
+                    }
+                    if ($type !== 'all') {
+                        $selector['type'] = $type;
+                    }
+                    if ($action) {
+                        $selector['action'] = $action;
+                    }
+
+                    $result = $cdb->find([
+                        'selector' => $selector,
+                        'sort'     => [['historyDatetime' => 'asc']],
+                        'limit'    => $limit
+                    ]);
+
+                    $docs = $result->body->docs ?? [];
+                    $allHistory[$commentId] = $docs;
+                    $totalRecords += count($docs);
+
+                    // Log per comment
+                    $this->writeMetaHistoryPoint($commentId, 'export', null, [
+                        'mode'        => 'single',
+                        'format'      => $format,
+                        'recordCount' => count($docs),
+                                                 'exportedBy'  => $naUsername
+                    ]);
+                }
+            }
+
+            // ─────────────────────────────────────────────
+            // Output
+            // ─────────────────────────────────────────────
+            if ($format === 'csv') {
+                $this->outputHistoryAsCsv($allHistory);
+            } else {
+                header('Content-Type: application/json; charset=utf-8');
+                header('Content-Disposition: attachment; filename="comments_audit_bulk_' . date('Y-m-d_His') . '.json"');
+
+                echo json_encode([
+                    'exportedAt'    => date('c'),
+                                 'exportedBy'    => $naUsername,
+                                 'mode'          => $bulkMode ? 'bulk' : 'per-comment',
+                                 'filters'       => [
+                                     'from'   => $from,
+                                 'to'     => $to,
+                                 'type'   => $type,
+                                 'action' => $action,
+                                 'limit'  => $limit
+                                 ],
+                                 'commentCount'  => count($allHistory),
+                                 'recordCount'   => $totalRecords,
+                                 'history'       => $allHistory
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            }
+
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'error' => 'Export failed',
+                'msg'   => $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Helper: output history as CSV
+     */
+    private function outputHistoryAsCsv(array $allHistory)
+    {
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="comments_audit_' . date('Y-m-d_His') . '.csv"');
+
+        $out = fopen('php://output', 'w');
+
+        // Header
+        fputcsv($out, [
+            'commentID',
+            'historyID',
+            'type',
+            'action',
+            'datetime',
+            'datetimeStr',
+            'by',
+            'ip',
+            'userAgent',
+            'relatedHistoryID',
+            'meta_json',
+            'has_snapshot'
+        ]);
+
+        foreach ($allHistory as $commentId => $records) {
+            foreach ($records as $r) {
+                fputcsv($out, [
+                    $commentId,
+                    $r['_id'] ?? '',
+                    $r['type'] ?? '',
+                    $r['action'] ?? '',
+                    $r['historyDatetime'] ?? '',
+                    $r['historyDatetimeStr'] ?? '',
+                    $r['historyBy'] ?? '',
+                    $r['historyIP'] ?? '',
+                    $r['historyUserAgent'] ?? '',
+                    $r['relatedHistoryID'] ?? '',
+                    json_encode($r['meta'] ?? [], JSON_UNESCAPED_UNICODE),
+                        !empty($r['snapshot']) ? 'yes' : 'no'
+                ]);
+            }
+        }
+
+        fclose($out);
+        exit;
+    }
+
     public function getEditor() {
         $fn = __DIR__.'/htmlSnippet_commentsEditor.php';
         $html = require_return ($fn);
@@ -792,12 +1465,17 @@ class class_naComments {
         echo json_encode($rec);
     }
 
-/*    public function edit($in = null) {
-        $fncn = $this->cn.'::edit($in)';
+    public function edit($in = null)
+    {
+        $fncn = $this->cn . '::edit($in)';
         global $naWebOS, $naIP, $naUsername;
 
-        if (!is_array($in)) trigger_error($fncn.' : !is_array($in)', E_USER_ERROR);
-        if (!array_key_exists('rec', $in)) trigger_error($fncn.' : missing rec', E_USER_ERROR);
+        if (!is_array($in)) {
+            trigger_error($fncn . ' : !is_array($in)', E_USER_ERROR);
+        }
+        if (!array_key_exists('rec', $in)) {
+            trigger_error($fncn . ' : missing rec', E_USER_ERROR);
+        }
 
         $rec = json_decode($in['rec'], true);
         if (empty($rec['id'])) {
@@ -814,30 +1492,35 @@ class class_naComments {
             $call = $cdb->get($rec['id']);
             $doc  = $call->body;
 
-            // security: only the original author may edit
+            // Alleen de originele auteur mag bewerken
             if (!isset($doc->clientUsername) || $doc->clientUsername !== $naUsername) {
                 echo json_encode(['error' => 'Not allowed']);
                 return;
             }
 
-            // update message
+            // ─── Audit trail: snapshot VÓÓR de wijziging ───────────────
+            $this->writeHistorySnapshot($doc, 'edit', [
+                'tz' => $rec['clientTZoffset'] ?? ($doc->clientTZoffset ?? 0)
+            ]);
+
+            // Content bijwerken
             $doc->msgHTML = str_replace('<p><span class="backdropped"', '<p class="backdropped"', $rec['msgHTML']);
             $doc->msgHTML = str_replace('</span>', '', $doc->msgHTML);
             $doc->msgHTML = str_replace('<p>', '<p class="backdropped">', $doc->msgHTML);
 
-            // ─── last-edited timestamp ───
+            // Laatste bewerkingstijd bijwerken
             $now = time();
-            $doc->editedDatetime   = $now;
-            $doc->editedTZoffset   = $rec['clientTZoffset'] ?? ($doc->clientTZoffset ?? 0);
+            $doc->editedDatetime    = $now;
+            $doc->editedTZoffset    = $rec['clientTZoffset'] ?? ($doc->clientTZoffset ?? 0);
             $doc->editedDatetimeStr = naDateTimeStr($now, $doc->editedTZoffset);
-
-            // keep original creation time intact
-            // (optional) also refresh clientIP if you want
-            // $doc->clientIP = $naIP;
 
             $cdb->put($doc->_id, $doc);
 
-            echo json_encode(['ok' => true, 'id' => $doc->_id]);
+            echo json_encode([
+                'ok' => true,
+                'id' => $doc->_id
+            ]);
+
         } catch (Exception $e) {
             echo json_encode([
                 'errorHTML'       => 'Could not edit comment',
@@ -845,323 +1528,40 @@ class class_naComments {
             ]);
         }
     }
-    public function edit($in = null) {
-    $fncn = $this->cn.'::edit($in)';
-    global $naWebOS, $naIP, $naUsername;
+    private function onedit(array $doc, array $options = []): ?string
+    {
+        global $naWebOS, $naUsername, $naIP;
 
-    if (!is_array($in)) trigger_error($fncn.' : !is_array($in)', E_USER_ERROR);
-    if (!array_key_exists('rec', $in)) trigger_error($fncn.' : missing rec', E_USER_ERROR);
-
-    $rec = json_decode($in['rec'], true);
-    if (empty($rec['id'])) {
-        echo json_encode(['error' => 'Missing comment id']);
-        return;
-    }
-
-    $db     = $naWebOS->dbs->findConnection('couchdb');
-    $cdb    = $db->cdb;
-    $dbName = $db->dataSetName('cms_comments');
-    $cdb->setDatabase($dbName);
-
-    try {
-        $call = $cdb->get($rec['id']);
-        $doc  = $call->body;
-
-        // security: only the original author may edit
-        if (!isset($doc->clientUsername) || $doc->clientUsername !== $naUsername) {
-            echo json_encode(['error' => 'Not allowed']);
-            return;
-        }
-
-        // ───────────────────────────────────────────────
-        // 1. Build revision history entry (the "onedit")
-        // ───────────────────────────────────────────────
-        $this->onedit($doc, $rec);   // ← the new helper
-
-        // ───────────────────────────────────────────────
-        // 2. Apply the actual content change
-        // ───────────────────────────────────────────────
-        $doc->msgHTML = str_replace('<p><span class="backdropped"', '<p class="backdropped"', $rec['msgHTML']);
-        $doc->msgHTML = str_replace('</span>', '', $doc->msgHTML);
-        $doc->msgHTML = str_replace('<p>', '<p class="backdropped">', $doc->msgHTML);
-
-        // last-edited timestamp
-        $now = time();
-        $doc->editedDatetime    = $now;
-        $doc->editedTZoffset    = $rec['clientTZoffset'] ?? ($doc->clientTZoffset ?? 0);
-        $doc->editedDatetimeStr = naDateTimeStr($now, $doc->editedTZoffset);
-
-        // keep original creation time intact
-        // (optional) $doc->clientIP = $naIP;
-
-        $cdb->put($doc->_id, $doc);
-
-        echo json_encode([
-            'ok'      => true,
-            'id'      => $doc->_id,
-            'history' => $doc->history ?? []   // optional: return the history to the client
-        ]);
-    } catch (Exception $e) {
-        echo json_encode([
-            'errorHTML'       => 'Could not edit comment',
-            'couchdbErrorMsg' => $e->getMessage()
-        ]);
-    }
-}
-    public function edit($in = null) {
-    // ... validation & security checks stay the same ...
-        $fncn = $this->cn.'::edit($in)';
-        global $naWebOS, $naIP, $naUsername;
-
-        if (!is_array($in)) trigger_error($fncn.' : !is_array($in)', E_USER_ERROR);
-        if (!array_key_exists('rec', $in)) trigger_error($fncn.' : missing rec', E_USER_ERROR);
-
-
-    $db = $naWebOS->dbs; // or the uDB2 instance
-    $uDB = $db;
-
-    $result = $uDB->updateOne(
-        ['_id' => $rec['id']],
-        ['$set' => [
-            'msgHTML'            => $cleanedMsgHTML,
-            'editedDatetime'     => time(),
-            'editedTZoffset'     => $rec['clientTZoffset'] ?? 0,
-            'editedDatetimeStr'  => naDateTimeStr(...),
-        ]],
-        [
-            'history'     => true,                    // or 'cms_comments_history'
-            'historyMeta' => [
-                'tz' => $rec['clientTZoffset'] ?? 0,
-                // any extra fields you want in the history doc
-            ]
-        ]
-    );
-
-    if ($result['ok']) {
-        echo json_encode(['ok' => true, 'id' => $result['_id']]);
-    } else {
-        echo json_encode(['errorHTML' => 'Could not edit comment', 'couchdbErrorMsg' => $result['error'] ?? '']);
-    }
-}
- */
-    public function edit($in = null) {
-    $fncn = $this->cn.'::edit($in)';
-    global $naWebOS, $naIP, $naUsername;
-
-    if (!is_array($in)) {
-        trigger_error($fncn.' : !is_array($in)', E_USER_ERROR);
-    }
-    if (!array_key_exists('rec', $in)) {
-        trigger_error($fncn.' : missing rec', E_USER_ERROR);
-    }
-
-    $rec = json_decode($in['rec'], true);
-    if (empty($rec['id'])) {
-        echo json_encode(['error' => 'Missing comment id']);
-        return;
-    }
-
-    // -------------------------------------------------
-    // 1. Load the current document (old style for now)
-    // -------------------------------------------------
-    $db     = $naWebOS->dbsAdmin->findConnection('couchdb');
-    $cdb    = $db->cdb;
-    $dbName = $db->dataSetName('cms_comments');
-    $cdb->setDatabase($dbName);
-
-    try {
-        $call = $cdb->get($rec['id']);
-        $doc  = $call->body;
-
-        // security: only the original author may edit
-        if (!isset($doc->clientUsername) || $doc->clientUsername !== $naUsername) {
-            echo json_encode(['error' => 'Not allowed']);
-            return;
-        }
-
-        // -------------------------------------------------
-        // 2. Clean the new message
-        // -------------------------------------------------
-        $msgHTML = $rec['msgHTML'] ?? '';
-        $msgHTML = str_replace('<p><span class="backdropped"', '<p class="backdropped"', $msgHTML);
-        $msgHTML = str_replace('</span>', '', $msgHTML);
-        $msgHTML = str_replace('<p>', '<p class="backdropped">', $msgHTML);
-
-        // -------------------------------------------------
-        // 3. Write history snapshot (old onedit for now)
-        // -------------------------------------------------
-        // You can later switch this to uDB2->updateOne(..., ['history'=>true])
-        $this->onedit((array)$doc, [
-            'history'     => 'cms_comments_history',
-            'historyMeta' => [
-                'tz' => $rec['clientTZoffset'] ?? ($doc->clientTZoffset ?? 0)
-            ]
-        ]);
-
-        // -------------------------------------------------
-        // 4. Apply the changes
-        // -------------------------------------------------
-        $now = time();
-        $doc->msgHTML            = $msgHTML;
-        $doc->editedDatetime     = $now;
-        $doc->editedTZoffset     = $rec['clientTZoffset'] ?? ($doc->clientTZoffset ?? 0);
-        $doc->editedDatetimeStr  = naDateTimeStr($now, $doc->editedTZoffset);
-
-        $cdb->put($doc->_id, $doc);
-
-        echo json_encode([
-            'ok' => true,
-            'id' => $doc->_id
-        ]);
-
-    } catch (Exception $e) {
-        echo json_encode([
-            'errorHTML'       => 'Could not edit comment',
-            'couchdbErrorMsg' => $e->getMessage()
-        ]);
-    }
-}
-
-/**
- * Write a full snapshot of $doc into the matching ___history database.
- * Returns the new history document _id, or null on failure.
- *
- * $options['history'] can be:
- *   - true                  → auto-derive "currentTable_history"
- *   - 'cms_comments_history'→ explicit history database name/suffix
- */
-/*private function onedit(array $doc, array $options = []): ?string
-{
-    global $naWebOS, $naUsername, $naIP;
-
-    $historySuffix = $options['history'];
-    if ($historySuffix === true) {
-        // Auto-derive from current table/database name
-        $current = $this->table ?: $this->getCurrentDatabase();
-        $historySuffix = $current . '_history';
-        // If the current name already ends with a domain prefix, keep the same style
-        if (strpos($current, '___') !== false) {
-            $historySuffix = preg_replace('/___.*$/', '___' . basename(str_replace('___', '/', $current)) . '_history', $current);
-        }
-    }
-
-    // Resolve the real CouchDB database name the same way the rest of the system does
-    $histDbName = $this->couchConnector->dataSetName
-        ? $this->couchConnector->dataSetName($historySuffix)
-        : $historySuffix;
-
-    // Switch to history database
-    $this->couchConnector->cdb->setDatabase($histDbName);
-
-    $now = time();
-    $meta = $options['historyMeta'] ?? [];
-
-    $historyDoc = array_merge([
-        '_id'               => bin2hex(random_bytes(12)),
-        'type'              => 'revision',
-        'documentID'        => $doc['_id'],
-        'originalRev'       => $doc['_rev'] ?? null,
-
-        // full snapshot of the document that is about to be overwritten
-        'snapshot'          => $doc,
-
-        // metadata about this history write
-        'historyDatetime'   => $now,
-        'historyDatetimeStr'=> function_exists('naDateTimeStr')
-                                ? naDateTimeStr($now, $meta['tz'] ?? 0)
-                                : date('c', $now),
-        'historyBy'         => $naUsername ?? ($meta['by'] ?? null),
-        'historyIP'         => $naIP ?? ($meta['ip'] ?? null),
-    ], $meta);
-
-    // Remove CouchDB system fields from the nested snapshot if you prefer a cleaner history
-    // unset($historyDoc['snapshot']['_id'], $historyDoc['snapshot']['_rev']);
-
-    try {
-        $resp = $this->couchConnector->cdb->post($historyDoc);
-        $id = $resp->body->id ?? $historyDoc['_id'];
-    } catch (Exception $e) {
-        trigger_error($this->cn.'::onedit() history write failed: '.$e->getMessage(), E_USER_WARNING);
-        $id = null;
-    }
-
-    // Always switch back to the original database
-    $this->couchConnector->cdb->setDatabase($this->getCurrentDatabase());
-
-    return $id;
-}
- */
-private function onedit(array $doc, array $options = []): ?string
-{
-    global $naWebOS, $naUsername, $naIP;
-
-    $db     = $naWebOS->dbsAdmin->findConnection('couchdb');
-    $cdb    = $db->cdb;
-    $histDb = $db->dataSetName('cms_comments_history');
-    $cdb->setDatabase($histDb, true);
-
-    $now  = time();
-    $meta = $options['historyMeta'] ?? [];
-    $tz   = $meta['tz'] ?? 0;
-
-    $historyDoc = [
-        '_id'               => bin2hex(random_bytes(12)),
-        'type'              => 'revision',
-        'documentID'        => $doc['_id'] ?? $doc['_id'] ?? null,
-        'originalRev'       => $doc['_rev'] ?? null,
-        'snapshot'          => $doc,
-        'historyDatetime'   => $now,
-        'historyDatetimeStr'=> naDateTimeStr($now, $tz),
-        'historyBy'         => $naUsername ?? null,
-        'historyIP'         => $naIP ?? null,
-    ];
-
-    try {
-        $resp = $cdb->post($historyDoc);
-        return $resp->body->id ?? $historyDoc['_id'];
-    } catch (Exception $e) {
-        trigger_error($this->cn.'::onedit() failed: '.$e->getMessage(), E_USER_WARNING);
-        return null;
-    } finally {
-        // switch back
-        $cdb->setDatabase($db->dataSetName('cms_comments'));
-    }
-}
-
-    public function toggleHidden($in = null) {
-        $fncn = $this->cn.'::toggleHidden($in)';
-        global $naWebOS, $naUsername;
-
-        if (!is_array($in)) trigger_error($fncn.' : !is_array($in)', E_USER_ERROR);
-        if (!array_key_exists('id', $in)) trigger_error($fncn.' : missing id', E_USER_ERROR);
-
-        $db     = $naWebOS->dbs->findConnection('couchdb');
+        $db     = $naWebOS->dbsAdmin->findConnection('couchdb');
         $cdb    = $db->cdb;
-        $dbName = $db->dataSetName('cms_comments');
-        $cdb->setDatabase($dbName, true);
+        $histDb = $db->dataSetName('cms_comments_history');
+        $cdb->setDatabase($histDb, true);
+
+        $now  = time();
+        $meta = $options['historyMeta'] ?? [];
+        $tz   = $meta['tz'] ?? 0;
+
+        $historyDoc = [
+            '_id'               => bin2hex(random_bytes(12)),
+            'type'              => 'revision',
+            'documentID'        => $doc['_id'] ?? $doc['_id'] ?? null,
+            'originalRev'       => $doc['_rev'] ?? null,
+            'snapshot'          => $doc,
+            'historyDatetime'   => $now,
+            'historyDatetimeStr'=> naDateTimeStr($now, $tz),
+            'historyBy'         => $naUsername ?? null,
+            'historyIP'         => $naIP ?? null,
+        ];
 
         try {
-            $call = $cdb->get($in['id']);
-            $doc  = $call->body;
-
-            // Only allow owner or admin (adjust as you like)
-            $isOwner = (isset($doc->clientUsername) && $doc->clientUsername === $naUsername);
-            // You can add more permission checks here
-
-            $doc->hidden = !(isset($doc->hidden) && $doc->hidden === true);
-
-            $cdb->put($doc->_id, $doc);
-
-            echo json_encode([
-                'ok'     => true,
-                'id'     => $doc->_id,
-                'hidden' => $doc->hidden
-            ]);
+            $resp = $cdb->post($historyDoc);
+            return $resp->body->id ?? $historyDoc['_id'];
         } catch (Exception $e) {
-            echo json_encode([
-                'errorHTML'       => 'Could not toggle hidden state',
-                'couchdbErrorMsg' => $e->getMessage()
-            ]);
+            trigger_error($this->cn.'::onedit() failed: '.$e->getMessage(), E_USER_WARNING);
+            return null;
+        } finally {
+            // switch back
+            $cdb->setDatabase($db->dataSetName('cms_comments'));
         }
     }
 

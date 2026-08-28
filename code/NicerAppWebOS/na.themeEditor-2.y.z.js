@@ -197,6 +197,7 @@ class naThemeEditor {
                 if ($.jstree) $.jstree.defaults.core.error = function (a,b,c,d) {
                     //debugger;
                 };
+                debugger;
                 na.te.initSelectorsTree (dat);
 
                 if (did) setTimeout (function() {
@@ -245,6 +246,7 @@ class naThemeEditor {
                 if ($.jstree) $.jstree.defaults.core.error = function (a,b,c,d) {
                     //debugger;
                 };
+                debugger;
                 $('#themeEditor_jsTree_backgrounds').css({
                     height : $('#siteToolbarLeft .vividDialogContent').height() - $('#jsTree_navBar').height()
                 }).jstree('destroy').jstree({
@@ -809,6 +811,7 @@ class naThemeEditor {
         na.site.globals.themes[na.site.globals.themeName] = $.extend({}, themeData);
         var
         inputData = na.site.globals.themes[themeName];
+        debugger;
 
         if (!inputData) inputData = na.site.globals.themes.default;
         inputData = inputData.themeSettings;
@@ -928,6 +931,7 @@ class naThemeEditor {
             var it = jsonNodes[i];
             na.te.transform_jsTree_to_siteGlobalsThemes__do (it, themeSettings);
         }
+        debugger;
         return themeSettings;
     }
 
@@ -941,41 +945,27 @@ class naThemeEditor {
          * to be used in na.site.saveTheme() and na.site.loadTheme()
          */
 
-        switch (it.type) {
-            case 'naSelectorSet' :
-                var data = {};
-                data[it.text.replace(/&gt;/g, '>')] = {};
-                debugger;
-                themeSettings = $.extend (themeSettings, data);
-                break;
-            case 'naCSS' :
-                var data = {};
-                data[it.text.replace(/&gt;/g, '>')] = {};
-                debugger;
-                themeSettings = $.extend (themeSettings, data);
-                break;
-            case 'naElement' :
-                var
-                parent = $('#themeEditor_jsTree_selectors').jstree(true).get_node(it.parent),
-                regExDialogs = /#site(.*)[\s\w\.\#\d\>]*/,
-                regExApps = /#app__(.*)__(.*)$/;
+        var
+        cssSelector = it.text.replace(/&gt;/g, '>'),
+        data = na.site.fetchTheme(cssSelector);
 
-                if (
-                    !it.text.match(regExDialogs)
-                    && !it.text.match(regExApps)
-                    && !it.text.match(/Dialog/)
-                    //&& !it.text.match(/Extras/)
-                ) {
-                    if (!themeSettings[parent.text]) themeSettings[parent.text] = { css : {} };
-                    if (!themeSettings[parent.text].css) themeSettings[parent.text].css = {};
-                    debugger;
-                    themeSettings[parent.text].css = $.extend (
-                        themeSettings[parent.text].css, na.site.fetchTheme(it.text.replace(/&gt;/g, '>'))
-                    );
-                    debugger;
-                }
+        switch (it.type) {
+            case 'naSelectorSet':
+                if (!themeSettings[cssSelector]) themeSettings[cssSelector] = {};
+                break;
+            case 'naCSS':
+                break;
+            case 'naElement':
+                var
+                jsonNodes = $('#themeEditor_jsTree_selectors').jstree(true).get_json('#', { flat: true });
+
+                debugger;
+
                 break;
         }
+
+
+        //themeSettings = $.extend (themeSettings, data);
         return themeSettings;
     }
     

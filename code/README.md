@@ -38,7 +38,7 @@ On Windows(tm)(r), the https://wampserver.com/en WAMP stack (windows, apache, my
 and it can also be done on **linux systems[3]** from the **terminal** OS-level app, as such :
 
 **if you have not installed NicerApp before:**
-(a +-55GB total download, followed by unzipping, so feel free to do something else while it installs - it's a pretty complete script)
+(a +-2GB total download, followed by unzipping, so feel free to do something else while it installs - it's a pretty complete script)
 
 > apt update
 >

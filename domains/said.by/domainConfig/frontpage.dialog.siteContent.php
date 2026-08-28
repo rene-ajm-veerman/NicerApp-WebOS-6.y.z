@@ -80,7 +80,7 @@
             I kindly refer you to my <a href="https://nicer.app/business-news" class="nomod noPushState" target="naNewsBusiness">business news segment</a> for that.
            </p>
 
-<p class="backdropped">The 'delete comment' button will get disabled soon, now that the view/edit history button is just about finished.</p>
+<p class="backdropped">The delete-comment button is disabled now, now that the edit-comment &amp; view-history buttons are finished.</p>
 
 <p class="backdropped">Dutch Freedom of Expression – Key Legal Limits (concise reference)  </p>
 
