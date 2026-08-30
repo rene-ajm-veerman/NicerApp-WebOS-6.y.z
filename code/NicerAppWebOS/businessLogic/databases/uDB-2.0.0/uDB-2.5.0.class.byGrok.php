@@ -622,7 +622,7 @@ private function couchReplaceOne(array $filter, array $replacement, array $optio
         ];
 
         try {
-            $this->couchConnector->cdb->putSecurity($security);
+            $this->couchConnector->cdb->setSecurity($security);
             return true;
         } catch (Exception $e) {
             return false;
@@ -638,7 +638,7 @@ private function couchReplaceOne(array $filter, array $replacement, array $optio
         if ($name) $index['name'] = $name;
 
         try {
-            $this->couchConnector->cdb->createIndex($index);
+            $this->couchConnector->cdb->setIndex($index);
             return true;
         } catch (Exception $e) {
             return false;

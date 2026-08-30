@@ -28,7 +28,7 @@ class class_naComments {
      * Check whether the current user belongs to the "Government Authorities" group
      * (or is a system admin).
      */
-    private function userIsGovernmentAuthority(): bool
+    public function userIsGovernmentAuthority(): bool
     {
         global $naUsername, $naWebOS;
 
@@ -962,7 +962,7 @@ class class_naComments {
                     '', '', '', ''
                 ).PHP_EOL;
                 // History-knop alleen voor Government Authorities
-                if ($this->userIsGovernmentAuthority()) {
+                if ($t->userIsGovernmentAuthority()) {
                     $html .= $naWebOS->html_vividButton(
                         1001, 'float:right',
                         'btnViewHistory',

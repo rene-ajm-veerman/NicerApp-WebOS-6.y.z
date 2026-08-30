@@ -13,36 +13,16 @@ Options +FollowSymLinks
 
 
     # pre-compiled gzip:
-# Pre-compiled gzip configuration
-# Ensure the browser accepts gzip, and verify the physical .gz asset exists on the server
-RewriteCond %{HTTP:Accept-Encoding} gzip
-RewriteCond %{REQUEST_FILENAME}.gz -s
-RewriteRule ^(.*)\.(json|js|css|html)$ $1.$2.gz [QSA,L]
+        RewriteCond %{HTTP:Accept-Encoding} gzip
+        RewriteCond %{REQUEST_FILENAME}.gz -s
+        RewriteRule ^(.*)\.(json|js|css|html)$ $1.$2.gz [QSA]
 
-# Apply proper headers and MIME types to mapped .gz assets
-<FilesMatch "\.json\.gz$">
-    ForceType application/json
-    Header set Content-Encoding gzip
-    Header append Vary Accept-Encoding
-</FilesMatch>
+        RewriteRule \.json\.gz$  - [T=text/json,E=no-gzip:1]
+        RewriteRule \.js\.gz$  - [T=text/javascript,E=no-gzip:1]
+        RewriteRule \.css\.gz$ - [T=text/css,E=no-gzip:1]
 
-<FilesMatch "\.js\.gz$">
-    ForceType text/javascript
-    Header set Content-Encoding gzip
-    Header append Vary Accept-Encoding
-</FilesMatch>
-
-<FilesMatch "\.css\.gz$">
-    ForceType text/css
-    Header set Content-Encoding gzip
-    Header append Vary Accept-Encoding
-</FilesMatch>
-
-<FilesMatch "\.html\.gz$">
-    ForceType text/html
-    Header set Content-Encoding gzip
-    Header append Vary Accept-Encoding
-</FilesMatch>
+        Header set Content-Encoding gzip env=no-gzip
+        Header append Vary Accept-Encoding
 
     # uses /view-content/logs due to na.site.loadContent() URL mangling in na.site.transformLinks()!
     #RewriteCond %{REQUEST_METHOD} ^(GET)$

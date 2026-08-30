@@ -12,5 +12,15 @@ while true; do
     # optional: automatically fix it
      chmod 700 /tmp/runtime-gavan
   fi
-  sleep 2
+  mode=$(stat -c %a /tmp/snap-private-tmp)
+  if [ "$mode" != "700" ]; then
+    echo "$(date): /tmp/snap-private/tmp is now $mode !"
+    # optional: automatically fix it
+  	chmod -R 700 /tmp/snap-private-tmp/
+  	chown -R root:root /tmp/snap-private-tmp/
+  fi
+ 
+  chmod 755 /usr /usr/bin /usr/bin/readlink /usr/bin/dirname /usr/bin/cat /bin/bash
+  chown root:root /usr/bin/readlink /usr/bin/dirname /usr/bin/cat
+  sleep 5
 done

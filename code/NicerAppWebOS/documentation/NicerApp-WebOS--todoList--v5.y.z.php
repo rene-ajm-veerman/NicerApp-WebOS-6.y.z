@@ -14,10 +14,13 @@ The yearly release stage of a new <a href="https://github.com/rene-ajm-veerman/N
 </p>
 
 <ol class="todoList" style="width:50%; width:content-width;">
-    <li class="todoList"><div>(2026-2028/2029) Start on .../logic.databases/uDB-2.0.0, to be based on .../logic.databases/generalizedDatabasesAPI-1.0.0<br/>
+    <li class="todoList"><div>(2026-2028/2029) Start on .../logic.databases/uDB-2.y.z, to be based on .../logic.databases/generalizedDatabasesAPI-1.0.0<br/>
         <a href="/NicerAppWebOS/documentation/__README__documentation/v5.10.z/v5.10.z-uDB.png" class="nomod noPushState" target="tl-udb-1"><img src="/NicerAppWebOS/documentation/__README__documentation/v5.10.z/v5.10.z-uDB.png" style="width:320px"/></a>
         <a href="/NicerAppWebOS/documentation/__README__documentation/v5.10.z/v5.10.z-taskManager.png" class="nomod noPushState" target="tl-udb-1"><img src="/NicerAppWebOS/documentation/__README__documentation/v5.10.z/v5.10.z-taskManager.png" style="width:320px"/></a>
         <ol class="todoList_l1">
+            <li class="todoList_l1"><div>Auto-logout and auto-login as user 'Guest' if the account that is logged into is no longer accessible.</div></li>
+            <li class="todoList_l1"><div>Fix MYDOMAIN.TLD/install - .htaccess routing to .../NicerAppWebOS/init.uDB2.php, access permissions, web-form to indicate to what level the restoration / re-install should happen, etc, the works.</div></li>
+
             <li class="todoList_l1"><div>Code for uDB-2.5.0 has been largely written now (.../businessLogic/databases/uDB-2.y.z), but needs to be tied together as calls to use, <br/>
             into it's CRUD methods that auto-talk to either couchdb or SQL, as created by grok.com (overseen for this task by yours truly).</div></li>
             <li class="todoList_l1"><div>Add FilesystemDB (by Rene AJM Veerman), MySQL, and PostgreSQL to the list of supported database architectures (via .../NicerAppWebOS/3rd-party/adodb5), currently only couchdb is supported.</div></li>

@@ -4,8 +4,9 @@
  * Much cleaner than the old couchdb plugin setup
  */
 
-require_once dirname(__DIR__) . '/NicerAppWebOS/businessLogic/databases/uDB-2.0.0/uDB-2.1.0.byGrok.class.php';
-require_once dirname(__DIR__) . '/NicerAppWebOS/businessLogic/databases/uDB-2.0.0/uDB2.InitHelper.class.php';
+require_once dirname(__DIR__) . '/NicerAppWebOS/boot.php';
+require_once dirname(__DIR__) . '/NicerAppWebOS/businessLogic/databases/uDB-2.0.0/uDB-2.5.0.class.byGrok.php';
+require_once dirname(__DIR__) . '/NicerAppWebOS/businessLogic/databases/uDB-2.0.0/uDB-2.2.0.initHelper.class.byGrok.php';
 
 echo "=== Starting uDB2 Database Initialization ===\n\n";
 
@@ -14,9 +15,11 @@ try {
     global $naWebOS;
 
     $cRec = [
+        'httpAdapter'     => 'HTTP_CURL',
+        'useSSL'          => false,
         'driver'          => 'couchdb',
         'database'        => '',           // will be set per dataset
-        'host'            => 'localhost',
+        'host'            => '127.0.0.1',
         'port'            => 5984,
         'username'        => 'admin',
         'password'        => $naWebOS->cfg['couchdb']['password'] ?? '',

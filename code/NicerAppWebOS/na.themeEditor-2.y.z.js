@@ -160,15 +160,13 @@ class naThemeEditor {
             * /
         });*/
 
-        /*
         var
-        url = '/NicerAppWebOS/apps/NicerAppWebOS/content-management-systems/NicerAppWebOS/blogEditor/ajax_getTreeNodes.php',
+        url = '/NicerAppWebOS/apps/NicerAppWebOS/content-management-systems/NicerAppWebOS/cmsManager/ajax_getTreeNodes.php',
         ac = {
             type : 'GET',
             url : url,
             success  (data, ts, xhr) {
-        */
-                let dat2 = na.te.transform_siteGlobalsThemes_to_jsTree();
+                let dat2 = typeof data=='string'?JSON.parse(data):data;//na.te.transform_siteGlobalsThemes_to_jsTree();
                 na.te.s.c.dbSelectors = dat2;
                 let dat = dat2.dat;
                 let did = dat2.did;
@@ -198,7 +196,7 @@ class naThemeEditor {
                     //debugger;
                 };
                 debugger;
-                na.te.initSelectorsTree (dat);
+                na.te.initSelectorsTree (dat2);
 
                 if (did) setTimeout (function() {
                     $('#themeEditor_jsTree_selectors').jstree('deselect_all').jstree('select_node', did);
@@ -206,13 +204,13 @@ class naThemeEditor {
 
 
                 $('#siteToolbarLeft .lds-facebook').fadeOut('slow');
-          /*  },
+            },
             error  (xhr, textStatus, errorThrown) {
                 na.site.ajaxFail(fncn, url, xhr, textStatus, errorThrown);
             }
         };
         $.ajax(ac);
-        */
+
 
         var 
         url = '/NicerAppWebOS/apps/NicerAppWebOS/content-management-systems/NicerAppWebOS/cmsManager/ajax_getTreeNodes.php',

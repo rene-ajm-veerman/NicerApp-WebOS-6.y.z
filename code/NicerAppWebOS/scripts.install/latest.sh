@@ -22,8 +22,8 @@ if [ ! -d "/var/www/NicerAppWebOS-v6.y.z" ]; then
 
   mkdir downloads
   cd downloads
-  wget https://nicer.app/downloads/NicerAppWebOS-v6.y.z/code.zip
-  wget https://nicer.app/downloads/NicerAppWebOS-v6.y.z/3rd-party.zip
-  unzip 3rd-party.zip -d ..
-  unzip code.zip -d ..
+  wget https://nicer.app/downloads/NicerAppWebOS-v6.y.z/NicerAppWebOS-v6.0.0-alpha-2.0.0.zip
+  unzip NicerAppWebOS-v6.0.0-alpha-2.0.0.zip -d ..
+
+  cd ..
 fi
