@@ -64,11 +64,40 @@ na.m = {
         return cssText;
     },
 
+    showVividDialog : function (containerEl, dialogHTML, dialogWidth, dialogHeight) {
+        if (!dialogWidth) dialogWidth = 200;
+        if (!dialogHeight) dialogHeight = 150;
+
+        var dialogEl = $.html(htmlDialog);
+        $(dialogEl).css({
+            display : 'none',
+            position : 'fixed',
+            top : o.top + 20,
+            left : o.left,
+            width : dialogWidth,
+            height : dialogHeight
+        });
+        $(containerEl).append(dialogEl);
+        $(dialogEl).fadeIn('slow');
+    },
+
     html : function (relativeIndentLevel, html) {
         //var indent = '';
         //for (var i=0; i < na.m.settings.baseLevel + relativeIndentLevel; i++) indent += "\t";
         //return indent+html+'\n';
         return html;
+    },
+    html_vividDialog : function (
+        relativeIndentLevel, style,
+
+        id, className,
+        contentHTML
+    ) {
+      var il = relativeIndentLevel;
+      var r = na.m.html (il, '<div id="'+id+'" class="'+className+'">');
+      r += contentHTML;
+      r += '</div>';
+      return r;
     },
     html_vividButton : function  (
         relativeIndentLevel, containerStyle,

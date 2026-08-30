@@ -5,6 +5,7 @@ global $naWebOS;
 <!DOCTYPE html>
 <html>
 <head>
+    <?php global $naLogLocation; global $naLAN; if (isset($naLogLocation) && isset($naLAN) && $naLAN) echo $naLogLocation; ?>
     <link rel="apple-touch-icon" sizes="180x180" href="/NicerAppWebOS/favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/NicerAppWebOS/favicon/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/NicerAppWebOS/favicon/favicon-16x16.png">
@@ -34,32 +35,13 @@ global $naWebOS;
     -->
 
 {$javascriptLinks}
-<script type="text/javascript" src="/NicerAppWebOS/3rd-party/tinymce-4.9.11/js/tinymce/tinymce.js"></script>
-<script type="text/javascript" src="/NicerAppWebOS/3rd-party/tinymce-4.9.11/js/tinymce/jquery.tinymce.min.js"></script>
-<!--<script type="module" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.js" integrity="sha512-y5GdcvG8/LoqZllcaDnZKY4hKSDowG4vWAytStZ1AZ8sxgWke7KtkMx3G9KQU0Ih3kIDfY/3EO1sSyKGRxqwJQ==" crossorigin="anonymous" referrerpolicy="no-referrer">            import { Colors } from 'chart.js';
+    <script type="text/javascript" src="/NicerAppWebOS/3rd-party/tinymce-4.9.11/js/tinymce/tinymce.js"></script>
+    <script type="text/javascript" src="/NicerAppWebOS/3rd-party/tinymce-4.9.11/js/tinymce/jquery.tinymce.min.js"></script>
 
-            Chart.register(Colors);
-</script>-->
-<script type="module" src="https://unpkg.com/chart.js@4.2.1/dist/chart.umd.js" integrity="sha512-vCUbejtS+HcWYtDHRF2T5B0BKwVG/CLeuew5uT2AiX4SJ2Wff52+kfgONvtdATqkqQMC9Ye5K+Td0OTaz+P7cw==" crossorigin="anonymous" referrerpolicy="no-referrer">import {
-  Chart,
-  ChartColors,
-  Colors,
-  BubbleController,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  Legend
-} from 'chart.js'
-Chart.register(ChartColors);
-Chart.register(
-  Colors,
-  BubbleController,
-  PointElement,
-  CategoryScale,
-  LinearScale,
-  Legend
-);
- </script>
+    <script type="module" src="https://unpkg.com/chart.js@4.2.1/dist/chart.umd.js" integrity="sha512-vCUbejtS+HcWYtDHRF2T5B0BKwVG/CLeuew5uT2AiX4SJ2Wff52+kfgONvtdATqkqQMC9Ye5K+Td0OTaz+P7cw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    import { BubbleController, CategoryScale, Chart, ChartColors, Colors, Legend, LinearScale, PointElement } from 'chart.js';
+    Chart.register(BubbleController, CategoryScale, Colors, ChartColors, Legend, LinearScale, PointElement);
+    </script>
 
 {$cssLinks}
 

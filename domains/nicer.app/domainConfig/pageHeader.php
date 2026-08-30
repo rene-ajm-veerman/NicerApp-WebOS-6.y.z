@@ -57,13 +57,14 @@
         <table style="width:100%;margin:30px;">
         <tr>
         <td rowspan="2" align="right">
-        <div>
-        <div><p class="backdropped" alt="(C) and (R) 2026 Rene AJM Veerman [rene.veerman.netherlands@gmail.com]">(C) and (R) 2026 <a href="https://zoned.at/d3">Rene</a> AJM Veerman [<a href="mailto:rene.veerman.netherlands@gmail.com">rene.veerman.netherlands@gmail.com</a>].</p></div>
-        <div><p class="backdropped" alt="Founded in 2002 by Rene AJM Veerman [rene.veerman.netherlands@gmail.com]">Founded in 2002 by Rene AJM Veerman.</p></div>
-        <div><p class="backdropped" alt="Founded in 2002 by Rene AJM Veerman [rene.veerman.netherlands@gmail.com]">Original idea by unknown and/or anonymous human(s) ;-)<br/>For which I plan to donate to charities when I finally can again.</p></div>
+        <div style="font-size:x-large;font-weight:bold;text-shadow:0px 0px 4px black, 2px 2px 8px black">
+        <div><p class="backdropped" alt="(C) and (R) 2026 Rene AJM Veerman [rene.veerman.netherlands@gmail.com]">(C) and (R) 2026 <a href="https://zoned.at/d3">René</a> AJM Veerman [<a href="mailto:rene.veerman.netherlands@gmail.com">rene.veerman.netherlands@gmail.com</a>],<br/>also known as <a href="https://www.usmessageboard.com/search/1852780/?c[users]=GavanPeacefan&o=date" class="nomod noPushState" target="usmessageboardDotComSlashGavanPeacefan">Gavan Peacefan Veers</a>.</p></div>
+        <div><p class="backdropped" alt="Founded in 2002 by Rene AJM Veerman [rene.veerman.netherlands@gmail.com]">Founded in <a class="nomod noPushState" target="rvFB" href="https://facebook.com/rene.veerman.90">2002</a> by <a class="nomod noPushState" target="rvX" href="https://x.com/GavanVeers">René AJM Veerman</a>,<br/>official Prophet of the Christian God since around 2010,<br/>and Prophet of the Council of the Gods since 2026.</p></div>
+        <div><p class="backdropped">Student of <a class="nomod noPushState" target="ytCheetahKungFu" href="https://youtube.com/@CheetahKungFu">numerous kung-fu styles</a>, as well as just about every art of war.</p></div>
+        <div><p class="backdropped" alt="Original idea by unknown and/or anonymous humans">Original idea by unknown and/or anonymous human(s) ;-)<br/>For whom (well, for my own conscience too of course) I plan to donate to charities when I finally can again.</p></div>
         </div>
         </td>
-        <td align="right" style="box-shadow:3px 3px 5px 3px rgba(0,0,0,0.7);padding:10px;border-radius:5px;background:rgba(0,0,50,0.4);border:1px solid grey;width:220px;padding-right:10px;font-size:small;"><img src="/NicerAppWebOS/documentation/selfies/rene-ajm-veerman/Rene_at_Airlie_Beach_Australia_2004.jpg" style="box-shadow:3px 3px 5px 3px rgba(0,0,0,0.7);width:300px;padding:10px;border-radius:5px;background:rgba(0,0,50,0.4);border:1px solid grey;"><br/>Pictured in 2004 in Airlie Beach, Australia.<br/>And folks, i'm <em>straight</em>.</td>
+        <td align="center" class="naFrontpage_headerText naFrontpage_headerText_intro" style="width:220px;background:rgba(255,255,255,0.33);"><a class="nomod noPushState" href="/NicerAppWebOS/documentation/selfies/rene-ajm-veerman/IMG_20260826_082746_1.jpg"><img src="/NicerAppWebOS/documentation/selfies/rene-ajm-veerman/IMG_20260826_082746_1.jpg" style="width:200px;margin:5px;border:3px solid rgba(255,255,255,0.33);border-radius:10px;box-shadow:3px 3px 7px 5px rgba(0,0,0,0.8);"></a><br/><div lang="ar" dir="rtl" style="font-size:large;font-weight:bold;text-shadow:0px 0px 5px rgba(0,0,0,0.88),2px 2px 7px rgba(0,0,0,0.89)">الله عظيم حقاً، لكن مجلس الآلهة أعظم بكثير ;-)</div><br/><div style="font-size:large;font-weight:bold;text-shadow:0px 0px 5px rgba(0,0,0,0.88),2px 2px 7px rgba(0,0,0,89)">Allah is very great indeed, but the council of the Gods is still way larger ;-)</div></td>
         </tr>
         </table>
 

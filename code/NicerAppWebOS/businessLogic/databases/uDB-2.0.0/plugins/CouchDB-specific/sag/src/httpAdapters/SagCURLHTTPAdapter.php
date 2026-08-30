@@ -290,20 +290,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
         //echo '<pre>t33321:';var_dump (debug_backtrace());
         //echo '<pre>t120A:'.json_encode($_SESSION,JSON_PRETTY_PRINT).'</pre>';
 
-        $folderName = dirname($na_error_log_filepath_txt);
-        //echo '<pre>t120B:'.json_encode($folderName,JSON_PRETTY_PRINT).'</pre>'; exit();
-        if ($debugMe && !file_exists($folderName) || !is_dir($folderName)) {
-          global $filePerms_ownerUser;
-          global $filePerms_ownerGroup;
-          global $filePerms_perms;
-          try {
-            createDirectoryStructure ($folderName.'/');
-          } catch (Exception $e) {
-            echo '<H1>NicerAppWebOS Error(3)</H1><p><b>Could not create folder structure '.json_encode($na_error_log_filepath_txt).'</b></p>';
-            //exit();
-          }
-        }
-        if (
+      if (
           array_key_exists('na_error_log_filepath_txt', $_SESSION)
           && is_string($na_error_log_filepath_txt)
           && $na_error_log_filepath_txt !== ''

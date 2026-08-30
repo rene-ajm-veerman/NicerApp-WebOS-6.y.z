@@ -306,29 +306,21 @@ NicerApp WebOS from Nicer Enterprises
     $now->setTimezone(na_safe_timezone(exec('date +%z')));    //$now->setTimezone(new DateTimeZone(exec('date +%z')));
     //$date = $now->format("Y-m-d_H:i:s.u");
     $dateLog =
-        $now->format("Y/m/d-l/H/i-s_")
-        .str_replace(
-            '+','plus',
-            preg_replace('/.*\s/','',date(DATE_RFC2822))
-        );
+        $now->format("Y/m/d-l/H/i-s ")
+        .date_default_timezone_get();
     $date =
-        $now->format("Y/m/d-l H:i:s-")
-        .' (Amsterdam.NL timezone; CEST)';
-            /*
-        .str_replace(
-            '+','plus',
-            preg_replace('/.*\s/','',date(DATE_RFC2822))
-        );*/
+        $now->format("Y/m/d-l/H/i-s ")
+        .date_default_timezone_get();
 
-            $naBot = stripos($_SERVER['HTTP_USER_AGENT'], 'bot')!==false;
-            $detect = new CrawlerDetect();
+    $naBot = stripos($_SERVER['HTTP_USER_AGENT'], 'bot')!==false;
+    $detect = new CrawlerDetect();
 
-            // Or pass a specific User-Agent
-            $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-            $naIsBot = $detect->isCrawler($userAgent);
-            // Get the name of the bot (very useful)
-            $name = $detect->getMatches(); // Returns the matching bot name/pattern
-            $naIsDesktop = false;
+    // Or pass a specific User-Agent
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $naIsBot = $detect->isCrawler($userAgent);
+    // Get the name of the bot (very useful)
+    $name = $detect->getMatches(); // Returns the matching bot name/pattern
+    $naIsDesktop = false;
 
     if (
         $_SERVER['SCRIPT_NAME']=='/NicerAppWebOS/index.php'
@@ -336,16 +328,33 @@ NicerApp WebOS from Nicer Enterprises
     ) {
         $_SESSION['startedID'] = cdb_randomString(50);
 
-
         //echo '<pre>t584'; var_dump($naBot); die();
 
         if (!$naBot) {
             $na_error_log_filepath_html =
-                $naWebOS->path.'/NicerAppWebOS/siteLogs/'
-                .$date./*'-'.$appName.*/'-'.$naIP.($naBot?'-BOT':'').'.html';
+                $naWebOS->domainPath.'/siteLogs/user-'.$naIP.($naBot?'-BOT':'').'/'
+                .$date./*'-'.$appName.*/'.html';
             $na_error_log_filepath_txt =
-                $naWebOS->path.'/NicerAppWebOS/siteLogs/'
-                .$date./*'-'.$appName.*/'-'.$naIP.($naBot?'-BOT':'').'.txt';
+                $naWebOS->domainPath.'/siteLogs/user-'.$naIP.($naBot?'-BOT':'').'/'
+                .$date./*'-'.$appName.*/'.txt';
+
+            global $naLogLocation;
+            $naLogLocation = '<!-- saving logs to : '.$na_error_log_filepath_html.' -->'.PHP_EOL;
+
+            $folderName = dirname($na_error_log_filepath_txt);
+            //echo '<pre>t120B:'.json_encode($folderName,JSON_PRETTY_PRINT).'</pre>'; exit();
+            if (!is_dir($folderName)) {
+                global $filePerms_ownerUser;
+                global $filePerms_ownerGroup;
+                global $filePerms_perms;
+                try {
+                    createDirectoryStructure ($folderName.'/');
+                } catch (Exception $e) {
+                    echo '<H1>NicerAppWebOS Error(3)</H1><p><b>Could not create folder structure '.json_encode($na_error_log_filepath_txt).'</b></p>';
+                    exit;
+                }
+            }
+
         } else {
             $na_error_log_filepath_html = null;
             $na_error_log_filepath_txt = null;
@@ -365,7 +374,7 @@ NicerApp WebOS from Nicer Enterprises
         $_SESSION['naErrors'] = [];
         $_SESSION['naErrors_startup'] = [];
         $_SESSION['naErrors_js'] = [ 'bootup' => [] ];
-    } elseif ($_SERVER['SCRIPT_NAME']=='/NicerAppWebOS/db_init.php') {
+    }/* elseif ($_SERVER['SCRIPT_NAME']=='/NicerAppWebOS/db_init.php') {
 
         $na_error_log_filepath_html =
             $naWebOS->path.'/siteLogs/'
@@ -387,7 +396,7 @@ NicerApp WebOS from Nicer Enterprises
         $_SESSION['naErrors'] = [];
         $_SESSION['naErrors_startup'] = [];
         $_SESSION['naErrors_js'] = [ 'bootup' => [] ];
-    }
+    }*/
 
     if ($na_full_init) {
         // MUST be in the following order:
@@ -529,8 +538,8 @@ NicerApp WebOS from Nicer Enterprises
     $time = microtime(true) - $phpScript_startupTime;
     //var_dump (dirname(__FILE__).'/errors.css');
     //date_default_timezone_set('UTC');
-$dtz = new DateTime('now', na_safe_timezone());
-$dtz_offset = $dtz->getOffset();
+    $dtz = new DateTime('now', na_safe_timezone());
+    $dtz_offset = $dtz->getOffset();
     //$unixTimeStamp = time();//date(DATE_ATOM);//date(DATE_RFC2822);//date('Y-m-d H:i:sa');
     $timestamp = date(DATE_RFC2822);
 

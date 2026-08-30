@@ -37,11 +37,12 @@ p {
 <h2 class="contentSectionTitle2" style="width:fit-content;padding:10px;border-radius:10px;">Company overview</h2>
 <div>
 <p class="backdropped naComments_onTheSide">
-<a href="https://nicer.app" target="naHP">https://nicer.app</a>, <a href="https://said.by" target="sbHP">https://said.by</a>, <a href="https://zoned.at" target="zAt">https://zoned.at</a>, <a href="https://github.com/Rene-AJM-Veerman" target="githubNicerEnterprises">https://github.com/Rene-AJM-Veerman</a>, <br/>in addition to all of the content listed at the social media URLs below, <br/>
+<a href="https://nicer.app" target="naHP">https://nicer.app</a>, <a href="https://said.by" target="sbHP">https://said.by</a>, <a href="https://zoned.at" target="zAt">https://zoned.at</a>, <a href="https://github.com/Rene-AJM-Veerman" target="githubNicerAppSoftware">https://github.com/Rene-AJM-Veerman</a>, <br/>in addition to all of the content listed at the social media URLs below, <br/>
 are ENTIRELY Copyrighted (C) 2002-2026 and are 100% Owned by <a href="mailto:rene.veerman.netherlands@gmail.com" target="_new" class="nomod noPushState">Rene A.J.M. Veerman &lt;rene.veerman.netherlands@gmail.com&gt;</a>.
 <br/>
+<br/>
 
-<a class="nomod noPushState" target="rvX" href="https://said.by/Rene-AJM-Veerman/in/hisDiary">https://said.by/Rene-AJM-Veerman/in/hisDiary</a>, <br/><a class="nomod noPushState" target="rvX" href="https://x.com/ReneAjmVeerman">https://x.com/ReneAjmVeerman</a>, <br/><a class="nomod noPushState" target="rvFB" href="https://facebook.com/rene.veerman.90">https://facebook.com/rene.veerman.90</a>, <br/><a class="nomod noPushState" target="rvCKF" href="https://youtube.com/@CheetahKungFu">https://youtube.com/@CheetahKungFu</a>.
+<a class="nomod noPushState" target="rvX" href="https://said.by/Rene-AJM-Veerman/in/hisDiary">https://said.by/Rene-AJM-Veerman/in/hisDiary</a>, <br/><a class="nomod noPushState" target="rvX" href="https://x.com/GavanVeers">https://x.com/GavanVeers</a>, <br/><a class="nomod noPushState" target="rvFB" href="https://facebook.com/rene.veerman.90">https://facebook.com/rene.veerman.90</a>, <br/><a class="nomod noPushState" target="rvCKF" href="https://youtube.com/@CheetahKungFu">https://youtube.com/@CheetahKungFu</a>.
 </p>
 
 <!--
@@ -69,7 +70,7 @@ i will keep NicerApp WebOS (https://nicer.app) as open source  (C)+(R) by myself
     </div>
 
     <p class="backdropped naComments_onTheSide">
-    Should I unexpectedly die for some strange reason, for instance by long standing "dissident" disputes (In addition to a software and graphics developer, i'm also an assertive peace activist who is not without the ability to look at his own ranks with criticism) suddenly becoming lethal in some way, I want my belongings donated to my parents initially, and to the Amsterdam.NL stedelijk museum after their eventual death, who may all do with it all as they please, on condition of keeping copies of https://zoned.at, https://nicer.app and https://said.by up and running.<br/>
+    Should I unexpectedly die for some strange reason, for instance by long standing "dissident" disputes (In addition to a software and graphics developer, i'm also an assertive peace activist who is not without the ability to look at his own ranks with criticism) suddenly becoming lethal in some way, I want my belongings donated to my parents initially, and to the Amsterdam.NL stedelijk museum after their eventual death, who may all do with it all as they please, on condition of keeping copies of https://zoned.at, https://nicer.app and https://said.by up and running, and opensourced entirely as MIT-licensed software.<br/>
     </p>
 
     <h2>Political views</h2>

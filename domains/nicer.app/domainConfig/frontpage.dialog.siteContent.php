@@ -63,25 +63,23 @@
         <p class="backdropped">
         I accept donations for these services via
         </p>
-        <!--
-        -->
 <pre class="backdropped">
 RAJM Veerman
 NL30INGB0007689155
 </pre>
 
-
-<p class="backdropped" style="color:lime">
-2026-Aug-10th, 09:44CEST<br/>
-</p>
-<p class="backdropped">All donations and expenses will be handled in a tax-compliant way.<br/>Please include what specifically you are donating for as part of your money transfer description.<br/>I'm allowed to make about two-thousand Euros extra per year.</p>
-        </div>
+        <p class="backdropped" style="color:lime">
+        2026-Aug-10th, 09:44CEST<br/>
+        </p>
+        <p class="backdropped">All donations and expenses will be handled in a tax-compliant way.<br/>Please include what specifically you are donating for as part of your money transfer description.<br/>I'm allowed to make about two-thousand Euros extra per year without it getting taken by my country's government outright.</p>
+    </div>
 
     <div class="naFrontpage_headerText naFrontpage_headerText_recentAchievement" style="float:left">
     <p class="backdropped" style="color:lime">
     <!--<iframe width="560" height="315" src="https://www.youtube.com/embed/gvnsP1byW7U?si=wSt6jQ1dQQwjyjJu" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>-->
-    <!--<iframe width="560" height="315" src="https://www.youtube.com/embed/NoVX3GRqmAc?si=BjrL-PgVan-3OXIa" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>-->
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/sVBin4Tz5n8?si=H15sDKPCbmKPVqqM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/NoVX3GRqmAc?si=BjrL-PgVan-3OXIa" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <!--<iframe width="560" height="315" src="https://www.youtube.com/embed/sVBin4Tz5n8?si=H15sDKPCbmKPVqqM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>-->
+    <!--<iframe loading="lazy" defer="" width="560" height="315" src="https://www.youtube.com/embed/rdXbpp9G5KA?si=jlLX1d86bmms18w8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>=""</iframe>-->
     </p>
     </div>
 

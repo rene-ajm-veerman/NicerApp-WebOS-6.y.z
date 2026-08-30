@@ -1,19 +1,14 @@
 # NicerApp
 this is a revolutionary and constantly evolving, well-maintained repository of HTML, CSS, JS and PHP code with which you can build websites that use a tiled image, photo or youtube video as site background for information and apps that are put over that background in a semi-transparent way.
 
-# Installation - overview for curious young professionals
+# Installation - overview
 Nicerapp can be run on windows, linux and macOS systems, possibly even on smartphones,
 and all it requires is a webserver that can serve up PHP scripts,
 and the **couchdb database server[0]** which works with **JSON data**.
 
 However, it can be augmented with a **SQL server** like mysql or postgresql[1] **which puts data in tables, rows and columns**.
 
-[0] see https://docs.couchdb.org/en/stable/install/index.html
-
-[1] see https://adodb.org
-
 The default database for nicerapp is couchdb. I find it more flexible and a lot easier to use than SQL data.
-
 The couchdb server software and it's instructions can be found on https://couchdb.apache.org
 
 Regardless of what mix-up of database servers that you use for your site, 
@@ -27,7 +22,6 @@ couchdb : https://github.com/nicerapp/sag
 
 please note : to update the cookie timeout length for couchdb to 1 week (measured in seconds), you have to enter the following command on the linux commandline :
 >  curl http://admin:validpass@192.168.178.xyz:5984/_node/_local/_config/couch_httpd_auth/timeout -X PUT -d '"604800"'   
-
 
 SQL : https://adodb.org
 
