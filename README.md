@@ -43,29 +43,11 @@ and it can also be done on **linux systems[3]** from the **terminal** OS-level a
 **if you have installed NicerApp before:**
 > cd ~/Downloads
 >
-> rm -rf /var/www/NicerAppWebOS-v5.10.z
+> rm -rf /var/www/NicerAppWebOS-v6.y.z
 >
 > curl https://nicer.app/NicerAppWebOS/scripts.install/latest.sh | /usr/bin/sh
 
 [3] if you have no linux system yet, know that a core-i5 with a modest amount of RAM and SSD space runs the latest version just fine, and i recommend to install https://ubuntu.com, or https://kubuntu.com in case you want semi-transparent windows in your OS
-
-# setting up the OS startup and daily maintenance scripts
-
-put the following in /etc/rc.local :
-> #!/bin/bash
-> 
-> /var/www/nicerapp/restart_allApps.sh &
-
-then execute the following command in the ubuntu terminal app :
-> sudo chmod a+x /etc/rc.local
-
-put the following in /etc/cron.daily/nicerapp.sh :
-> #!/bin/bash
-> 
-> /var/www/nicerapp/restart_app_imageSearchCrawler.sh &
-
-then execute the following command in the ubuntu terminal app :
-> sudo chmod a+x /etc/cron.daily/nicerapp.sh
 
 # setting up the apache web server
 
@@ -283,7 +265,6 @@ server {
 
 
 
-
 **don't forget : you need to tell apache to run on the right ports, 
 which are 444, 447 and 448 in this example case, 
 and those ports should NOT be forwarded from your modem / ADSL router / fiber internet connection device to your LAN. 
@@ -390,19 +371,11 @@ After that, the only remaining step is to restart all the server software :
 
 And, of course, to initialize the database **completely**, by going to
 
-https://MYDOMAIN_TLD/NicerAppWebOS/db_init.php
-
-or (re-initialize all except the social media content, nor themes and news)
-
-https://nicer.app/NicerAppWebOS/db_init.php?doLog=y&doTree=no&doThemeData=no&resetThemeData=y&doMenu=y&doAPI_imageSearch=y&doApp_news=no&doApp_webmail=y&doApp_3D_fileExplorer=y
-
-or (re-initialize all except news)
-
-https://nicer.app/NicerAppWebOS/db_init.php?doLog=y&doTree=no&doThemeData=y&resetThemeData=no&doMenu=y&doAPI_imageSearch=y&doApp_news=no&doApp_webmail=y&doApp_3D_fileExplorer=y
+https://MYDOMAIN_TLD/install
 
 # Modifying the HTML for a nicerapp site
-This is done by modifying .../NicerAppWebOS-5.10.z/domains/MYDOMAIN_TLD/domainConfig/index.template.php
-and .../NicerAppWebOS-5.10.z/domains/MYDOMAIN_TLD/domainConfig//desktop.source.js
+This is done by modifying .../domains/MYDOMAIN_TLD/domainConfig/index.template.php
+and .../domains/MYDOMAIN_TLD/domainConfig//desktop.source.js
 
 # Adding new URLs and apps into a nicerapp site
 All apps and pages on a nicerapp site are loaded through a URL that looks somewhat like this :
@@ -419,11 +392,11 @@ And .../ajax_get_content.php is responsible for mapping your http://localhost/vi
 
 One would ask, rightfully so, how to create these /view/* URLs.
 in PHP, that's done with the always available .../nicerapp/functions.php::**base64_encode_url()** and .../nicerapp/functions.php::**base64_decode_url()**
-in JavaScript, it's done with the always available **na.m.base64_encode_url()** and **na.m.base64_decode_url()**
+in JavaScript, it's done with the always available **na.m.encode_base64_url()** and **na.m.decode_base64_url()**
 
 # Questions, bug-reports, feature-requests?
-you can post these to rene.veerman.netherlands@gmail.com, https://github.com/rene-ajm-veerman/nicerApp-WebOS-5.10.z/issues, or https://github.com/rene-ajm-veerman/NicerApp-WebOS-domainConfig/issues, and i will try to respond within 72 hours, even on weekends.
+you can post these to rene.veerman.netherlands@gmail.com, https://github.com/rene-ajm-veerman/nicerApp-WebOS-6.y.z/issues, or https://github.com/rene-ajm-veerman/NicerApp-WebOS-domainConfig/issues, and i will try to respond within 72 hours, even on weekends.
 
 if you need a quick solution towards getting yourself a collection of background images, you can look for 'wallpaper' on https://rarbg.to and use a torrent client (like transmission on ubuntu, or utorrent on windows) to download them.
 
-i will consider making the 15GB of photos and tiled images that is currently served on https://nicer.app available on https://rarbg.to
+the photo collection of over 20-thousand background photographs, will be made available to anyone who pays their first year's subscription fee for a commercial license of NicerApp WebOS.

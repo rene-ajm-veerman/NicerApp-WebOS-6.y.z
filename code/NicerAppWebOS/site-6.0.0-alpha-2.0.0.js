@@ -2739,6 +2739,8 @@ na.site = {
                     content : html
                 };
                 if (na.m.userDevice.isPhone) ptSettings.showOn = 'none';
+                debugger;
+                if (!el.id) el.id='tooltip_'+na.m.randomString();
                 if (el && el.id && $.tooltipster && ptSettings.content!=='') $(el).tooltipster(ptSettings);
             }
             //console.log ('startTooltips : el.id=='+el.id+', cookie::haveShownTutorial='+$.cookie('haveShownTutorial'));

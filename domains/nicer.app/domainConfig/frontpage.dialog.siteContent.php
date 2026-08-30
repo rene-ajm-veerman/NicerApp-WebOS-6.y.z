@@ -75,13 +75,24 @@ NL30INGB0007689155
     </div>
 
     <div class="naFrontpage_headerText naFrontpage_headerText_recentAchievement" style="float:left">
-    <p class="backdropped" style="color:lime">
+    <p class="backdropped">
     <!--<iframe width="560" height="315" src="https://www.youtube.com/embed/gvnsP1byW7U?si=wSt6jQ1dQQwjyjJu" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>-->
     <iframe width="560" height="315" src="https://www.youtube.com/embed/NoVX3GRqmAc?si=BjrL-PgVan-3OXIa" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
     <!--<iframe width="560" height="315" src="https://www.youtube.com/embed/sVBin4Tz5n8?si=H15sDKPCbmKPVqqM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>-->
     <!--<iframe loading="lazy" defer="" width="560" height="315" src="https://www.youtube.com/embed/rdXbpp9G5KA?si=jlLX1d86bmms18w8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>=""</iframe>-->
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/iJRPkPyl_SE?si=rfTxAUYOb7jSy5O3" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><br/>
+    Dear kids of Earth, if you want to stay out of the military,<br/>it might be a good idea to <a href="https://tinyurl.com/pro-smoking" class="nomod noPushState tooltip" title="Smoking stoned weed/hash is scientifically known to stop cancer growth and even help reverse it, together with less chemo and radiation treatment than one would need without smoking weed/hash." target="avoidTheMilitaryShallWe">start smoking on a regular basis</a> :-)<br/>
+    Smoking regularly is also known for decreasing your appetite for food,<br/>which will save you a bit of money these days as well.
     </p>
     </div>
+
+
+    <div class="naFrontpage_headerText naFrontpage_headerText_recentAchievement" style="float:left">
+    <p class="backdropped">
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/204ViKEWIDg?si=k35XWp-Id4MHZkzg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </p>
+    </div>
+
 
     <div class="naFrontpage_headerText naFrontpage_headerText_maintenance" style="float:right">
     <p class="backdropped">

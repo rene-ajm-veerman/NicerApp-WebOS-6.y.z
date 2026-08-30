@@ -58,13 +58,28 @@
         <tr>
         <td rowspan="2" align="right">
         <div style="font-size:x-large;font-weight:bold;text-shadow:0px 0px 4px black, 2px 2px 8px black">
-        <div><p class="backdropped" alt="(C) and (R) 2026 Rene AJM Veerman [rene.veerman.netherlands@gmail.com]">(C) and (R) 2026 <a href="https://zoned.at/d3">René</a> AJM Veerman [<a href="mailto:rene.veerman.netherlands@gmail.com">rene.veerman.netherlands@gmail.com</a>],<br/>also known as <a href="https://www.usmessageboard.com/search/1852780/?c[users]=GavanPeacefan&o=date" class="nomod noPushState" target="usmessageboardDotComSlashGavanPeacefan">Gavan Peacefan Veers</a>.</p></div>
-        <div><p class="backdropped" alt="Founded in 2002 by Rene AJM Veerman [rene.veerman.netherlands@gmail.com]">Founded in <a class="nomod noPushState" target="rvFB" href="https://facebook.com/rene.veerman.90">2002</a> by <a class="nomod noPushState" target="rvX" href="https://x.com/GavanVeers">René AJM Veerman</a>,<br/>official Prophet of the Christian God since around 2010,<br/>and Prophet of the Council of the Gods since 2026.</p></div>
-        <div><p class="backdropped">Student of <a class="nomod noPushState" target="ytCheetahKungFu" href="https://youtube.com/@CheetahKungFu">numerous kung-fu styles</a>, as well as just about every art of war.</p></div>
+        <div><p class="backdropped">(C) and (R) 2026 <a href="https://zoned.at/d3" class="tooltip" title="Diary part 3">René</a> AJM Veerman [<a href="mailto:rene.veerman.netherlands@gmail.com">rene.veerman.netherlands@gmail.com</a>],<br/>also known as <a href="https://www.usmessageboard.com/search/1852780/?c[users]=GavanPeacefan&o=date" class="nomod noPushState tooltip" title="Geopolitical diary" target="usmessageboardDotComSlashGavanPeacefan">Gavan Peacefan Veers</a>.</p></div>
+
         <div><p class="backdropped" alt="Original idea by unknown and/or anonymous humans">Original idea by unknown and/or anonymous human(s) ;-)<br/>For whom (well, for my own conscience too of course) I plan to donate to charities when I finally can again.</p></div>
+
+        <div><p class="backdropped">Founded in <a class="nomod noPushState tooltip" title="Diary part 1" target="rvFB" href="https://facebook.com/rene.veerman.90">2002</a> by <a class="nomod noPushState tooltip" target="rvX" title="Diary part 2" href="https://x.com/GavanVeers">René AJM Veerman</a>,<br/>official Prophet of the Christian God since around 2010,<br/>and Prophet of the Council of the Gods since 2026.</p></div>
+
+        <div><p class="backdropped">Student of <a class="nomod noPushState" target="ytCheetahKungFu" href="https://youtube.com/@CheetahKungFu">numerous kung-fu styles</a>, as well as just about every art of war.</p></div>
+
+
+<pre class="backdropped">
+Straight, celibate - awaiting my 1st meetup with my Angelic wife Emma.
+Born 25-05-1977.
+
+Politically an Assertive Centrist.
+Prophet for The Council of The Gods of Earth.
+Unafraid.
+
+See also : <a href="https://zoned.at/d3" class="nomod noPushState tooltip" target="DiaryPart3" title="Diary part 3">https://zoned.at/d3</a> <a href="https://zoned.at/p1" class="nomod noPushState tooltip" target="PsychiatricDiaryPart1" title="Psychiatric diary part 1">/p1</a> <a href="https://zoned.at/p2" class="nomod noPushState tooltip" target="PsychiatricDiaryPart2" title="Psychiatric diary part 2">/p2</a> <a href="https://zoned.at/p3" class="nomod noPushState tooltip" target="PsychiatricDiaryPart3" title="Psychiatric diary part 3">/p3</a> <a href="https://zoned.at/p4" class="nomod noPushState tooltip" target="PsychiatricDiaryPart4" title="Psychiatric diary part 4">/p4</a> <a href="https://zoned.at/z" class="nomod noPushState tooltip" target="SongTexts" title="SongTexts">/z</a> <a href="https://zoned.at/r" class="nomod noPushState tooltip" target="RefirendaGovernments" title="Refirenda Governments">/r</a>
+</pre>
         </div>
         </td>
-        <td align="center" class="naFrontpage_headerText naFrontpage_headerText_intro" style="width:220px;background:rgba(255,255,255,0.33);"><a class="nomod noPushState" href="/NicerAppWebOS/documentation/selfies/rene-ajm-veerman/IMG_20260826_082746_1.jpg"><img src="/NicerAppWebOS/documentation/selfies/rene-ajm-veerman/IMG_20260826_082746_1.jpg" style="width:200px;margin:5px;border:3px solid rgba(255,255,255,0.33);border-radius:10px;box-shadow:3px 3px 7px 5px rgba(0,0,0,0.8);"></a><br/><div lang="ar" dir="rtl" style="font-size:large;font-weight:bold;text-shadow:0px 0px 5px rgba(0,0,0,0.88),2px 2px 7px rgba(0,0,0,0.89)">الله عظيم حقاً، لكن مجلس الآلهة أعظم بكثير ;-)</div><br/><div style="font-size:large;font-weight:bold;text-shadow:0px 0px 5px rgba(0,0,0,0.88),2px 2px 7px rgba(0,0,0,89)">Allah is very great indeed, but the council of the Gods is still way larger ;-)</div></td>
+        <td align="center" class="naFrontpage_headerText naFrontpage_headerText_intro" style="width:220px;background:rgba(255,255,255,0.33);"><a class="nomod noPushState" href="/NicerAppWebOS/documentation/selfies/rene-ajm-veerman/IMG_20260826_082746_1.jpg"><img src="/NicerAppWebOS/documentation/selfies/rene-ajm-veerman/IMG_20260826_082746_1.jpg" style="width:200px;margin:5px;border:3px solid rgba(255,255,255,0.33);border-radius:10px;box-shadow:3px 3px 7px 5px rgba(0,0,0,0.8);"></a><br/><div lang="ar" dir="rtl" style="font-size:large;font-weight:bold;text-shadow:0px 0px 5px rgba(0,0,0,0.88),2px 2px 7px rgba(0,0,0,0.89)">الله عظيم حقاً، لكن مجلس الآلهة أعظم بكثير ;-)</div><br/><div style="font-size:large;font-weight:bold;text-shadow:0px 0px 5px rgba(0,0,0,0.88),2px 2px 7px rgba(0,0,0,89)">Allah is very great indeed, but The Council of the Gods is still way larger ;-)</div></td>
         </tr>
         </table>
 
