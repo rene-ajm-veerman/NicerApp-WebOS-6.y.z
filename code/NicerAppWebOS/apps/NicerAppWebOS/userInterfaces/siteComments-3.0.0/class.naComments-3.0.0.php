@@ -1241,12 +1241,11 @@ class class_naComments {
                     $mh = str_replace('allowfullscreen>', 'allowfullscreen="">', $mh);
 
                     $c = -1;
-                    $re = '@<br\s*\\*/>\s*<br\s*\\*/>@i';
-                    $re = '@<br \\/><br \\/>@';
+                    $re = '@<br\s*\\/>\s*<br\s*\\/>@';
                     $matches = [];
-                    $c1 = preg_match_all ($re, $mh, $matches);
+                    //$c1 = preg_match_all ($re, $mh, $matches);
                     $mh = preg_replace($re, '', $mh, -1, $c);
-                    $dbg = [['$mh'=>htmlentities($mh),'$c'=>$c, '$c1'=>$c1, '$matches'=>$matches]];
+                    $dbg = [['$mh'=>htmlentities($mh),'$c'=>$c]];//, '$c1'=>$c1, '$matches'=>$matches]];
                     while ($c > 0) {
                         $mh = preg_replace($re, '', $mh, -1, $c);
                         $dbg[] = ['$mh'=>htmlentities($mh),'$c'=>$c];

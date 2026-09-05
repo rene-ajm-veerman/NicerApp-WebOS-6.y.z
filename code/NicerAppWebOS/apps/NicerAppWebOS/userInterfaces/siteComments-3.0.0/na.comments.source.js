@@ -283,11 +283,11 @@ na.apps.loaded['/NicerAppWebOS/apps/NicerAppWebOS/userInterfaces/siteComments'] 
     showHistoryModal: function(commentId, history) {
         // Eenvoudige modal (pas aan naar jouw UI-stijl)
         let html = `
-        <div id="naHistoryModal" style="
+        <div id="naHistoryModal" class="vividDialog" style="
         position:fixed; inset:0; background:rgba(0,0,0,0.75);
         z-index:99999; display:flex; align-items:center; justify-content:center;
         padding:20px; box-sizing:border-box;
-        ">
+        "><div class="vividDialogContent">
         `;
         // Binnen showHistoryModal(), bij de header-buttons:
         html += `
@@ -378,6 +378,7 @@ na.apps.loaded['/NicerAppWebOS/apps/NicerAppWebOS/userInterfaces/siteComments'] 
         }
 
         html += `
+        </div>
         </div>
         </div>
         </div>

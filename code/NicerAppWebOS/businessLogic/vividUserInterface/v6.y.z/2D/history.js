@@ -30,9 +30,9 @@ na.history = {
         // Ensure dialog shell exists
         if ($('#' + opts.dialogId).length === 0) {
             $('body').append(`
-                <div id="${opts.dialogId}" class="vividDialog naHistoryTimeline" style="display:none;">
+                <div id="${opts.dialogId}" class="vividDialog naHistoryTimeline" style="display:none;background:rgba(255,255,255,0.502);padding:14px;">
                     <div class="vividDialogTitle">${opts.title}</div>
-                    <div class="vividDialogContent naHistoryTimelineContent">
+                    <div class="vividDialogContent vividScrollpane naHistoryTimelineContent" style="height:calc(100% - 5.9em);width:calc(100% - 30px);padding:15px;">
                         <div class="naHistoryLoading">Loading history…</div>
                     </div>
                     <div class="vividDialogButtons" style="position:absolute;bottom:10px;">

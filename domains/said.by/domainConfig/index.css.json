@@ -1,6 +1,7 @@
 [
     "{$webPath}/NicerAppWebOS/3rd-party/jQuery/tooltipster/dist/css/tooltipster.bundle.css",
     "{$webPath}/NicerAppWebOS/3rd-party/jQuery/spectrum-master/spectrum.css",
+    "{$webPath}/NicerAppWebOS/apps/NicerAppWebOS/userInterfaces/siteComments-3.0.0/na.comments.css",
     "{$domainPath}/index.css",
     "{$domainPath}/index.dark.css",
     "{$domainPath}/index.textDecorations.dark.css",
