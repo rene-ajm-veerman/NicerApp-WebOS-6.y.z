@@ -25,7 +25,7 @@ na.site = {
         firstCreated : '10 January 2002',
         copyright : '<table style="height:100%;"><tr><td>Copyright (C) 2002-2026 by <a href="mailto:rene.veerman.netherlands@gmail.com" class ="contentSectionTitle3_a"><span class="contentSectionTitle3_span">Rene A.J.M. Veerman</span></a></td><td style="width:40px;"><div class="vividButton" theme="dark" style="position:relative;color:white;height:20px;width:40px;" onclick="na.dismissCopyrightMessage();">Ok</div></td></table>',
         easterEggs : {
-            '2023-12(Dec)-13(Tue) 11:34CET (Amsterdam.NL\'s timezone)' : '<p>at a certain point in a soul\'s career,<br/>that soul (learns to) trancend(s) judgement of IQ and EQ of others.<br/>this is usually only once enough kung-fu has been practiced though.<br/><a class="noPushState nomod" href="https://youtube.com/@cheetahKungFu" target="ckf">https://youtube.com/@cheetahKungFu</a></p>',
+            '2023-12(Dec)-13(Tue) 11:34CET (Amsterdam.NL\'s timezone)' : '<p>at a certain point in a soul\'s career,<br/>that soul (learns to) trancend(s) judgement of IQ and EQ of others. this is usually only once enough kung-fu has been practiced though. <a class="noPushState nomod" href="https://youtube.com/@cheetahKungFu" target="ckf">https://youtube.com/@cheetahKungFu</a></p>',
             '2026-04(April)-18(Saturday) 19:41CET (Amsterdam.NL\'s timezone)' : '<p>Rene AJM Veerman : i realized something just now.<br/>it only takes Time for me to reach Wealthy status.</p>',
             '2026-04(Apr)-19(Sunday) 12:55CET (Amsterdam.NL\' timezone)' : '<p>women in political groups are like ice breakers; they move slow, but they always reach their goals.</p>',
             '2026-04(Apr)-19(Sunday) 13:07CET (Amsterdam.NL\' timezone)' : '<p>If you want to be a hero, make sure you\'re not a girl!.</p>',
@@ -1675,14 +1675,14 @@ na.site = {
 
 
         $('.vividDialog, .vividDialogPopup'/*, vdc[0]*/).each(function(idx,el){
-            if (na.site.c.dialogs['#'+el.id]) delete na.site.c.dialogs['#'+el.id];
+            //if (na.site.c.dialogs['#'+el.id]) delete na.site.c.dialogs['#'+el.id];
             if (!na.site.c.dialogs['#'+el.id]) na.site.c.dialogs['#'+el.id] = new vividUserInterface_2D_dialog({naSite:na.site,el:el});
         });
         $('#siteContent > .vividDialogContent').css({scale:1});
 
 
         $('.vividButton4, .vividButton, .vividButton_icon_50x50_siteTop, .vividButton_icon_50x50, .vividButton_icon_100x100').each(function(idx,el){
-            if (na.site.c.buttons['#'+el.id]) delete na.site.c.buttons['#'+el.id];
+            //if (na.site.c.buttons['#'+el.id]) delete na.site.c.buttons['#'+el.id];
             if (!na.site.c.buttons['#'+el.id]) {
                 na.site.c.buttons['#'+el.id] = new vividUserInterface_2D_button(el);
             };

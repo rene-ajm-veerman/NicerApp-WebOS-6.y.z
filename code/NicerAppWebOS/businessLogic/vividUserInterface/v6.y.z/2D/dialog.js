@@ -12,6 +12,7 @@ class vividUserInterface_2D_dialog {
         t.el = t.cmd.el[0];
         t.el.vividUserInterface_2D_dialog = t;
         t.settings = {};
+        debugger;
 
 
         if (!$('canvas',t.el)[0]) {
@@ -77,18 +78,18 @@ class vividUserInterface_2D_dialog {
 
             html += (
                     !$(t.el).is('.naNoSettings')
-                    ? '<div class="vdSettings" style="z-index:10000;opacity:'+opacity+';position:absolute;top:-15px;left:30px;z-index:7000000">'
-                            +'<img class="btnSettings" style="width:50px;" src="/siteMedia/btnPickColor.png" onclick="na.d.s.visibleDivs = arrayRemove (na.d.s.visibleDivs,\'#siteToolbarThemeEditor\');na.d.s.visibleDivs.push (\'#siteToolbarThemeEditor\'); na.desktop.resize(); na.site.settings.activeDivs = [\'#siteToolbarThemeEditor\']; var d = na.site.c.dialogs[\'#'+this.el.id+'\']; d.displaySettingsDialog(d, \''+t.el.id+'\')"/>'
-                            +'<input type="range" min="1" max="100" value="50" class="sliderOpacityRange" style="width:140px;" onchange="na.te.opacityChange(event);"/>'
+                    ? '<div class="vdSettings" style="opacity:'+opacity+';position:absolute;top:-15px;left:30px;z-index:7000000">'
+                            +'<img class="btnSettings" style="width:50px;display:none;" src="/siteMedia/btnPickColor.png" onclick="na.d.s.visibleDivs = arrayRemove (na.d.s.visibleDivs,\'#siteToolbarThemeEditor\');na.d.s.visibleDivs.push (\'#siteToolbarThemeEditor\'); na.desktop.resize(); na.site.settings.activeDivs = [\'#siteToolbarThemeEditor\']; var d = na.site.c.dialogs[\'#'+this.el.id+'\']; d.displaySettingsDialog(d, \''+t.el.id+'\')"/>'
+                            +'<input type="range" min="1" max="100" value="50" class="sliderOpacityRange" style="display:none;width:140px;" onchange="na.te.opacityChange(event);"/>'
                         +'</div>'
                     : ''
                 )
                 +(
-                    '<div class="vdTools" style="z-index:10000;opacity:'+opacity+';position:absolute;right:40px;top:-20px;z-index:7000000">'
+                    '<div class="vdTools" style="opacity:'+opacity+';position:absolute;right:40px;top:-20px;z-index:7000000">'
                         +(
                             $(t.el).is('.naHas_btnCloseWindow')
                             ? na.m.html_vividButton (
-                                4, 'position:absolute;right:'+roBtnCloseWindow+'px;',
+                                4, 'position:absolute;display:none;right:'+roBtnCloseWindow+'px;',
 
                                 t.el.id+'__btnCloseWindow', 'vividButton_icon_50x50 btnCloseWindow grouped', '_50x50', 'grouped',
                                 '',
@@ -130,7 +131,7 @@ class vividUserInterface_2D_dialog {
                         +(
                             $(t.el).is('.naHas_btnComments')
                             ? na.m.html_vividButton (
-                                4, 'position:absolute;right:'+roBtnComments+'px;',
+                                4, 'position:absolute;display:none;right:'+roBtnComments+'px;',
 
                                 t.el.id+'__btnComments', 'vividButton_icon_50x50 btnComments grouped', '_50x50', 'grouped',
                                 '',
@@ -154,6 +155,9 @@ class vividUserInterface_2D_dialog {
                 var c = na.site.components;
                 if (!c.buttons['#'+el.id]) c.buttons['#'+el.id] = new vividUserInterface_2D_button ({ naSite : na.site, el : el });
             });
+            setTimeout(function(){
+                $('.btnSettings, .sliderOpacityRange, .btnCloseWindow, .btnComments', t.el).fadeIn('normal');
+            },3220);
         //} else {
             //$(t.el).find('.vdSettings').remove();
             //$(t.el).find('.vdBackground').remove();

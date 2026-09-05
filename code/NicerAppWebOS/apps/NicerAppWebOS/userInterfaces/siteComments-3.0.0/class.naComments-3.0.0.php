@@ -1605,11 +1605,11 @@ class class_naComments {
             ]);
 
             // Content bijwerken
-            $dbg = [$doc->msgHTML]; $doc->msgHTML = preg_replace ('/><br>\s*</g','><', $doc-msgHTML);
-            $dbg[] = $doc->msgHTML; $doc->msgHTML = preg_replace ('/><br\/>\s*</g','><', $doc-msgHTML);
-            $dbg[] = $doc->msgHTML; $doc->msgHTML = preg_replace ('/<p><span class="backdropped">\s*<\/span><\/p>/g','', $doc-msgHTML);
-            $dbg[] = $doc->msgHTML; $doc->msgHTML = preg_replace ('/<p class="backdropped">\s*<\/p>/g','', $doc-msgHTML);
-            $dbg[] = $doc->msgHTML; $doc->msgHTML = str_replace('<p><span class="backdropped"', '<p class="backdropped"', $rec['msgHTML']);
+            $dbg = [$doc->msgHTML]; $doc->msgHTML = preg_replace ('/><br>\s*</i','><', $rec['msgHTML']);
+            $dbg[] = $doc->msgHTML; $doc->msgHTML = preg_replace ('/><br\/>\s*</i','><', $doc->msgHTML);
+            $dbg[] = $doc->msgHTML; $doc->msgHTML = preg_replace ('/<p><span class="backdropped">\s*<\/span><\/p>/i','', $doc->msgHTML);
+            $dbg[] = $doc->msgHTML; $doc->msgHTML = preg_replace ('/<p class="backdropped">\s*<\/p>/i','', $doc->msgHTML);
+            $dbg[] = $doc->msgHTML; $doc->msgHTML = str_replace('<p><span class="backdropped"', '<p class="backdropped"', $doc->msgHTML);
             $dbg[] = $doc->msgHTML; $doc->msgHTML = str_replace('</span>', '', $doc->msgHTML);
             $dbg[] = $doc->msgHTML; $doc->msgHTML = str_replace('<p>', '<p class="backdropped">', $doc->msgHTML);
             $dbg[] = $doc->msgHTML;
