@@ -102,6 +102,7 @@
 
 .mainTooltipTheme.tooltipster-sidetip .tooltipster-box {
   background : inherit;
+  overflow : hidden;
 }
 
 /* .tooltipster-arrow-border */

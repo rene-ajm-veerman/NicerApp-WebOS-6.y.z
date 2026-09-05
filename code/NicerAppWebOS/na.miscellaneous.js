@@ -50,17 +50,13 @@ na.m = {
     },
 
     cssTranslation : function (dID, cssObj) {
-        //var cssText = dID+' {\n';
         var cssText = '';
+        cssText += dID+' {\n';
         for (var sel in cssObj) {
-            cssText += sel+' {\n';
-            var v1 = cssObj[sel];
-            for (var k in v1) {
-                var v2 = v1[k];
-                cssText += '\t' + k + ' : '+(typeof v2=='string'?'""':'')+v2+(typeof v2=='string'?'""':'')+'\n';
-            }
-            cssText += '}\n';
+            var v2 = cssObj[sel];
+            cssText += '\t' + sel + ' : '+(typeof v2=='string'?'""':'')+v2+(typeof v2=='string'?'""':'')+'\n';
         }
+        cssText += '}\n';
         return cssText;
     },
 

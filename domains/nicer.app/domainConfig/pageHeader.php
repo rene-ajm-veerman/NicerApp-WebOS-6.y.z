@@ -58,24 +58,22 @@
         <tr>
         <td rowspan="2" align="right">
         <div style="font-size:x-large;font-weight:bold;text-shadow:0px 0px 4px black, 2px 2px 8px black">
-        <div><p class="backdropped">(C) and (R) 2026 <a href="https://zoned.at/d3" class="tooltip" title="Diary part 3">René</a> AJM Veerman [<a href="mailto:rene.veerman.netherlands@gmail.com">rene.veerman.netherlands@gmail.com</a>],<br/>also known as <a href="https://www.usmessageboard.com/search/1852780/?c[users]=GavanPeacefan&o=date" class="nomod noPushState tooltip" title="Geopolitical diary" target="usmessageboardDotComSlashGavanPeacefan">Gavan Peacefan Veers</a>.</p></div>
+        <div><p class="backdropped"><span style="font-size:x-large;font-weight:bold">(C) and (R) 2026 <a href="https://zoned.at/d3" class="tooltip" title="Diary part 3">René</a> AJM Veerman</span> [<a href="mailto:rene.veerman.netherlands@gmail.com">rene.veerman.netherlands@gmail.com</a>],<br/>Current status : Tonight i'll be fixing na.site.transform_siteGlobalsThemes_to_jsTree().<br/>also known as <a href="https://www.usmessageboard.com/search/1852780/?c[users]=GavanPeacefan&o=date" class="nomod noPushState tooltip" title="Geopolitical diary" target="usmessageboardDotComSlashGavanPeacefan">Gavan Peacefan Grokman Veers</a>.</p></div>
 
         <div><p class="backdropped" alt="Original idea by unknown and/or anonymous humans">Original idea by unknown and/or anonymous human(s) ;-)<br/>For whom (well, for my own conscience too of course) I plan to donate to charities when I finally can again.</p></div>
 
-        <div><p class="backdropped">Founded in <a class="nomod noPushState tooltip" title="Diary part 1" target="rvFB" href="https://facebook.com/rene.veerman.90">2002</a> by <a class="nomod noPushState tooltip" target="rvX" title="Diary part 2" href="https://x.com/GavanVeers">René AJM Veerman</a>,<br/>official Prophet of the Christian God since around 2010,<br/>and Prophet of the Council of the Gods since 2026.</p></div>
+        <div><p class="backdropped"><span style="font-size:x-large;font-weight:bold">Founded in <a class="nomod noPushState tooltip" title="Diary part 1" target="rvFB" href="https://facebook.com/rene.veerman.90">2002</a> by <a class="nomod noPushState tooltip" target="rvX" title="Diary part 2" href="https://x.com/GavanVeers">René AJM Veerman</a>,</span><br/><span style="font-size:small">official Prophet of the Christian God since around 2010,<br/>and Prophet of the Council of the Gods since 2026.<br/><em>I heard their voices in my head on a regular basis.<br/>I felt their holy presences around me quit often, <br/>guiding me and witnessing how my life went,<br/>in great detail.<br/>Sometimes every moment I was awake, for a while.</em></span></p></div>
 
         <div><p class="backdropped">Student of <a class="nomod noPushState" target="ytCheetahKungFu" href="https://youtube.com/@CheetahKungFu">numerous kung-fu styles</a>, as well as just about every art of war.</p></div>
 
 
 <pre class="backdropped">
-Straight, celibate - awaiting my 1st meetup with my Angelic wife Emma.
-Born 25-05-1977.
+Straight, born 25-05-1977.
 
 Politically an Assertive Centrist.
-Prophet for The Council of The Gods of Earth.
-Unafraid.
+Unafraid and completely comfortable within my own city.
 
-See also : <a href="https://zoned.at/d3" class="nomod noPushState tooltip" target="DiaryPart3" title="Diary part 3">https://zoned.at/d3</a> <a href="https://zoned.at/p1" class="nomod noPushState tooltip" target="PsychiatricDiaryPart1" title="Psychiatric diary part 1">/p1</a> <a href="https://zoned.at/p2" class="nomod noPushState tooltip" target="PsychiatricDiaryPart2" title="Psychiatric diary part 2">/p2</a> <a href="https://zoned.at/p3" class="nomod noPushState tooltip" target="PsychiatricDiaryPart3" title="Psychiatric diary part 3">/p3</a> <a href="https://zoned.at/p4" class="nomod noPushState tooltip" target="PsychiatricDiaryPart4" title="Psychiatric diary part 4">/p4</a> <a href="https://zoned.at/z" class="nomod noPushState tooltip" target="SongTexts" title="SongTexts">/z</a> <a href="https://zoned.at/r" class="nomod noPushState tooltip" target="RefirendaGovernments" title="Refirenda Governments">/r</a>
+See also (currently mostly down, awaiting a big code upgrade that'll be complete before Sept 20th 2026) : <a href="https://zoned.at/d3" class="nomod noPushState tooltip" target="DiaryPart3" title="Diary part 3">https://zoned.at/d3</a> <a href="https://zoned.at/p1" class="nomod noPushState tooltip" target="PsychiatricDiaryPart1" title="Psychiatric diary part 1">/p1</a> <a href="https://zoned.at/p2" class="nomod noPushState tooltip" target="PsychiatricDiaryPart2" title="Psychiatric diary part 2">/p2</a> <a href="https://zoned.at/p3" class="nomod noPushState tooltip" target="PsychiatricDiaryPart3" title="Psychiatric diary part 3">/p3</a> <a href="https://zoned.at/p4" class="nomod noPushState tooltip" target="PsychiatricDiaryPart4" title="Psychiatric diary part 4">/p4</a> <a href="https://zoned.at/z" class="nomod noPushState tooltip" target="SongTexts" title="SongTexts">/z</a> <a href="https://zoned.at/r" class="nomod noPushState tooltip" target="RefirendaGovernments" title="Refirenda Governments">/r</a>
 </pre>
         </div>
         </td>

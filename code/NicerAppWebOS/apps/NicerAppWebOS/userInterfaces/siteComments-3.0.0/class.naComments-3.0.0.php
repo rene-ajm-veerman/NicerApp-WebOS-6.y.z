@@ -842,6 +842,8 @@ class class_naComments {
         global $naIP;
         global $naWebOS;
         global $naUsername;
+        $users = [];
+        global $users;
         $html = '';
         global $cr;
         $cr = $results;
@@ -936,10 +938,75 @@ class class_naComments {
         };
 
         function printItem($it, $openIDs, $t) {
+
+
+            function fetchUserRecord ($username) {
+                global $naWebOS;
+                $dba = $naWebOS->dbsAdmin->findConnection('couchdb');
+                $cdba = $dba->cdb;
+                $dbg = $naWebOS->dbsAdmin->findConnection('couchdb');
+                $cdbg = $dbg->cdb;
+
+                $dbName = '_users';
+                try {
+                    $cdba->setDatabase($dbName, true);
+                    $cdbg->setDatabase($dbName, true);
+                } catch (Exception $e) {
+                    return $e->getMessage();
+                }
+
+                $findCommand = [
+                    'selector' => [
+                        'name' => $dbg->translate_plainUserName_to_couchdbUserName($username)//, // unwrap from ajax call's data field
+                        //                'parentID' => '#'
+                    ],
+                    'fields' => ['username', 'realname', 'displayName'],
+                    'limit' => 200
+                ];
+                //echo '<pre>'; var_dump ($_SERVER); echo '</pre>';
+                //echo '<pre>'; echo json_encode ($findCommand, JSON_PRETTY_PRINT); echo '</pre>';
+                //exit();
+
+                $bm = 'abc';
+                $oldBM = 'def';
+                $results = [];
+                $call = $cdba->find($findCommand);
+                //echo '<pre>'; echo json_encode ($call, JSON_PRETTY_PRINT); echo '</pre>';
+
+                $oldBM = $bm;
+                if (
+                    isset($call)
+                    && property_exists($call,'body')
+                    && property_exists($call->body, 'bookmark')
+                    && is_string($call->body->bookmark)
+                    && $call->body->bookmark !== ''
+                    && $call->body->bookmark !== 'nil'
+                ) {
+                    $bm = $call->body->bookmark;
+                } else {
+                    $bm = 'abc';
+                };
+
+                $results = array_merge_recursive($results, [
+                    'userRealName' => $call->body->docs[0]->realname
+                ]);
+                if (
+                    count($call->body->docs)===1
+                    && isset($call->body->docs[0])
+                    && property_exists($call->body->docs[0], 'displayName')
+                ) $results[count($results)-1]['displayName'] = $call->body->docs[0]->displayName;
+
+                //exit();
+
+                return $results;
+            }
+
+
             global $naLAN;
             global $naIP;
             global $naWebOS;
             global $naUsername;
+            global $users;
             $its_id = $it['_id'];
             if (in_array($its_id,$openIDs)) $style='style="display:block"'; else $style='';
             $html = '<div id="naComment_'.($its_id!=='#'?$its_id:'_').'" class="naComment_entry" '.$style.'>'.PHP_EOL;
@@ -1055,13 +1122,22 @@ class class_naComments {
 
 
             $html .= "\t".'<div class="naComment_header">';
-
-            $loginResult = $_SESSION['loginResult'];
-            if (array_key_exists('clientUsername', $it)) {
-                $html .= "\t".'<span class="naComment_username">'
-                . (array_key_exists('displayName',$loginResult)?$loginResult['displayName']:$it['clientUsername'])
-                . '</span>'.PHP_EOL;
+            if (
+                array_key_exists('clientUsername', $it)
+                && is_string($it['clientUsername'])
+                && trim($it['clientUsername'])!==''
+            ) {
+                $u = $it['clientUsername'];
+            } else {
+                $u = 'Guest';
             }
+            global $users;
+            if (!isset($users[$u])) $users[$u] = [];
+            $users[$u] = negotiateOptions ($users[$u], fetchUserRecord($u));
+
+            $html .= "\t".'<span class="naComment_username">'
+            . (array_key_exists('displayName',$users[$u])?$users[$u]['displayName']:$users[$u]['userRealName'])
+            . '</span>'.PHP_EOL;
 
             $html .=
             '<span class="naComment_clientDatetime" style="display:none;">'.$it['clientDatetime'].'</span>'

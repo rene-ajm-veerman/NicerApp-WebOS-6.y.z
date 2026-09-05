@@ -299,7 +299,6 @@ NicerApp WebOS from Nicer Enterprises
     );
     //$naLAN = false;
 
-
     $_SESSION['started'] = time();//microtime(true);
     global $date;
     $now = DateTime::createFromFormat('U', $_SESSION['started']);
@@ -341,19 +340,36 @@ NicerApp WebOS from Nicer Enterprises
             global $naLogLocation;
             $naLogLocation = '<!-- saving logs to : '.$na_error_log_filepath_html.' -->'.PHP_EOL;
 
-            $folderName = dirname($na_error_log_filepath_txt);
+            $absoluteDir = /* $folderName = */ dirname($na_error_log_filepath_txt);
             //echo '<pre>t120B:'.json_encode($folderName,JSON_PRETTY_PRINT).'</pre>'; exit();
-            if (!is_dir($folderName)) {
-                global $filePerms_ownerUser;
-                global $filePerms_ownerGroup;
-                global $filePerms_perms;
+            if (!is_dir($absoluteDir)) {
+                set_error_handler(function ($severity, $message, $file, $line) {
+                    throw new ErrorException($message, 0, $severity, $file, $line);
+                });
+
                 try {
-                    createDirectoryStructure ($folderName.'/');
-                } catch (Exception $e) {
-                    echo '<H1>NicerAppWebOS Error(3)</H1><p><b>Could not create folder structure '.json_encode($na_error_log_filepath_txt).'</b></p>';
-                    exit;
+                    @mkdir($absoluteDir, 0775, true);
+                    // Force the new folder to belong to the www-data group natively
+                    @chgrp($absoluteDir, 'www-data');
+                    @chmod($absoluteDir, 02775); // 2 enables the SetGID bit programmatically
+                } catch (Throwable $e) {
+                    // ignore for now
+                } finally {
+                    restore_error_handler();
                 }
             }
+
+            // if (!is_dir($folderName)) {
+            //     global $filePerms_ownerUser;
+            //     global $filePerms_ownerGroup;
+            //     global $filePerms_perms;
+            //     try {
+            //         createDirectoryStructure ($folderName.'/');
+            //     } catch (Exception $e) {
+            //         echo '<H1>NicerAppWebOS Error(3)</H1><p><b>Could not create folder structure '.json_encode($na_error_log_filepath_txt).'</b></p>';
+            //         exit;
+            //     }
+            // }
 
         } else {
             $na_error_log_filepath_html = null;

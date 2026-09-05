@@ -54,7 +54,7 @@
     I've been thinking on how to prevent over-usage of my system, and the answer is a side-module, another human+AI-written statistical algorithm, to compute graphdata of daily usage hours (measured in seconds) per user/IP-address, per app, per NicerApp domain, results also stored in database for quick retrieval upon display or decision-time.
     </p>
     </div>
-
+<div style="height:450px"></div>
 
     <div class="naFrontpage_headerText naFrontpage_headerText_recentAchievement" style="float:left">
         <p class="backdropped" style="color:lime">
@@ -73,25 +73,7 @@ NL30INGB0007689155
         </p>
         <p class="backdropped">All donations and expenses will be handled in a tax-compliant way.<br/>Please include what specifically you are donating for as part of your money transfer description.<br/>I'm allowed to make about two-thousand Euros extra per year without it getting taken by my country's government outright.</p>
     </div>
-
-    <div class="naFrontpage_headerText naFrontpage_headerText_recentAchievement" style="float:left">
-    <p class="backdropped">
-    <!--<iframe width="560" height="315" src="https://www.youtube.com/embed/gvnsP1byW7U?si=wSt6jQ1dQQwjyjJu" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>-->
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/NoVX3GRqmAc?si=BjrL-PgVan-3OXIa" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-    <!--<iframe width="560" height="315" src="https://www.youtube.com/embed/sVBin4Tz5n8?si=H15sDKPCbmKPVqqM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>-->
-    <!--<iframe loading="lazy" defer="" width="560" height="315" src="https://www.youtube.com/embed/rdXbpp9G5KA?si=jlLX1d86bmms18w8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>=""</iframe>-->
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/iJRPkPyl_SE?si=rfTxAUYOb7jSy5O3" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><br/>
-    Dear kids of Earth, if you want to stay out of the military,<br/>it might be a good idea to <a href="https://tinyurl.com/pro-smoking" class="nomod noPushState tooltip" title="Smoking stoned weed/hash is scientifically known to stop cancer growth and even help reverse it, together with less chemo and radiation treatment than one would need without smoking weed/hash." target="avoidTheMilitaryShallWe">start smoking on a regular basis</a> :-)<br/>
-    Smoking regularly is also known for decreasing your appetite for food,<br/>which will save you a bit of money these days as well.
-    </p>
-    </div>
-
-
-    <div class="naFrontpage_headerText naFrontpage_headerText_recentAchievement" style="float:left">
-    <p class="backdropped">
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/204ViKEWIDg?si=k35XWp-Id4MHZkzg" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-    </p>
-    </div>
+<div style="height:550px"></div>
 
 
     <div class="naFrontpage_headerText naFrontpage_headerText_maintenance" style="float:right">
@@ -173,5 +155,8 @@ NL30INGB0007689155
     ?>
 
     <h1 class="contentSectionTitle1">Tarot cardgame</h1 >
+    <p class="backdropped">
+    For live readings, go to <a href="https://oranum.com">oranum.com</a> (not officially affiliated/partnered with my own companies).
+    </p>
     <?=naTarotDecksAlbum();?>
 

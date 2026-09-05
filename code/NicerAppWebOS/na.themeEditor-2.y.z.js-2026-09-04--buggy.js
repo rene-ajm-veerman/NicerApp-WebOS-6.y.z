@@ -5,7 +5,8 @@ class naThemeEditor {
  * mediumsized online tech companies (as defined by .../NicerAppWebOS/LICENSE.html) : 1 million euros for a perpetual license for all your users and staff.
  * small online tech companies (as defined by .../NicerAppWebOS/LICENSE.html) : one hundred thousand euros for a perpetual license for all your users and staff.
  */
-    settings = {
+
+     settings = {
         current : { 
             firstRun : true, 
             forDialogID : 'siteContent',
@@ -26,12 +27,15 @@ class naThemeEditor {
     }
 
     onload (forDialogID) {
-        /*na.m.waitForCondition ('na.te.onload(): $.spectrum()?', function () {
-            return jQuery.spectrum=='function'
+        na.m.waitForCondition ('na.te.onload(): $.spectrum()?', function () {
+            var r =
+                typeof jQuery.spectrum=='object'
+                && typeof jQuery.jstree=='object'
+                && typeof $('#themeEditor_jsTree_selectors').jstree('get_json')=='object';
+            return r;
         }, function() {
             na.te.onload_do(forDialogID);
-        }, 200);*/
-            na.te.onload_do(forDialogID);
+        }, 200);
     }
 
     onload_do  (forDialogID) {
@@ -67,10 +71,27 @@ class naThemeEditor {
                         new naVividMenu ($('#siteToolbarThemeEditor__selector')[0], true);
         //}, 1000);
         */
-        if (!na.site.c.menus['#textFontFamily'])
-            na.site.c.menus['#textFontFamily'] =
-                new naVividMenu ($('#textFontFamily')[0], true);
+        if (!na.site.c.menus['#textFontFamily']) {
+            na.site.c.menus['#textFontFamily'] = new naVividMenu('textFontFamily', 'textFontFamily', function(menu) {
+                // optional: any post-init callback you need
+                debugger;
+            });
+        };
+        var m = na.site.c.menus['#textFontFamily'];
+        $('.vividMenu_mainUL',m.menu).css({
+            display:'block'//,
+            //position:'absolute',
+            //top : $(m.menu).offset().top + 40,
+            //left : $(m.menu).offset().left + 40
+        });
 
+        const rect = m.menu.getBoundingClientRect();
+        $('.submenu', m.menu).css({
+            position: 'fixed',
+            top:  rect.top  + 20,
+            left: rect.left + 20
+        });
+        $('.submenu',m.menu).css({opacity:1});
 
         $('#textFontFamily')[0].addEventListener('mouseover', function() {
             clearTimeout (na.te.s.c.timeout_hover_textFontFamily);
@@ -139,14 +160,14 @@ class naThemeEditor {
             * /
         });*/
 
-        /*
+            /*
         var
-        url = '/NicerAppWebOS/apps/NicerAppWebOS/content-management-systems/NicerAppWebOS/blogEditor/ajax_getTreeNodes.php',
+        url = '/NicerAppWebOS/apps/NicerAppWebOS/content-management-systems/NicerAppWebOS/cmsManager/ajax_getTreeNodes.php',
         ac = {
             type : 'GET',
             url : url,
             success  (data, ts, xhr) {
-        */
+                let dat2 = typeof data=='string'?JSON.parse(data):data;//*/
                 let dat2 = na.te.transform_siteGlobalsThemes_to_jsTree();
                 na.te.s.c.dbSelectors = dat2;
                 let dat = dat2.dat;
@@ -176,7 +197,8 @@ class naThemeEditor {
                 if ($.jstree) $.jstree.defaults.core.error = function (a,b,c,d) {
                     //debugger;
                 };
-                na.te.initSelectorsTree (dat);
+                na.te.initSelectorsTree (dat2);
+                //debugger;
 
                 if (did) setTimeout (function() {
                     $('#themeEditor_jsTree_selectors').jstree('deselect_all').jstree('select_node', did);
@@ -184,13 +206,13 @@ class naThemeEditor {
 
 
                 $('#siteToolbarLeft .lds-facebook').fadeOut('slow');
-          /*  },
-            error  (xhr, textStatus, errorThrown) {
-                na.site.ajaxFail(fncn, url, xhr, textStatus, errorThrown);
-            }
-        };
-        $.ajax(ac);
-        */
+        //     },
+        //     error  (xhr, textStatus, errorThrown) {
+        //         na.site.ajaxFail(fncn, url, xhr, textStatus, errorThrown);
+        //     }
+        // };
+        // $.ajax(ac);
+
 
         var 
         url = '/NicerAppWebOS/apps/NicerAppWebOS/content-management-systems/NicerAppWebOS/cmsManager/ajax_getTreeNodes.php',
@@ -224,6 +246,7 @@ class naThemeEditor {
                 if ($.jstree) $.jstree.defaults.core.error = function (a,b,c,d) {
                     //debugger;
                 };
+                //debugger;
                 $('#themeEditor_jsTree_backgrounds').css({
                     height : $('#siteToolbarLeft .vividDialogContent').height() - $('#jsTree_navBar').height()
                 }).jstree('destroy').jstree({
@@ -285,6 +308,9 @@ class naThemeEditor {
                         "state", "types", "wholerow", "multiselect"
                     ]
                 }).on('changed.jstree', function (e, data) {
+                    $('img[srcpreload]').each (function (idx,el) {
+                        el.src = el.srcpreload;
+                    })
                     if (data.action=='select_node') {
                         na.te.s.c.selectedBackground = data;
                         for (var i=0; i<data.selected.length; i++) {
@@ -333,7 +359,7 @@ class naThemeEditor {
         if (na.te.s.c.forDialogID) {
             var
             div = $('#'+na.te.s.c.forDialogID),
-            bg = $('#'+na.te.s.c.forDialogID+' > .vividDialogBackground1')[0];
+            bg = $('#'+na.te.s.c.forDialogID+' > .vdBackground')[0];
         } else {
             var
             div = $(na.te.s.c.forElements),
@@ -385,7 +411,7 @@ class naThemeEditor {
             var bgEl = document.createElement('img');
             bgEl.onload = function () {
                 if (na.te.s.c.forDialogID) {
-                    var bg = $('#'+na.te.s.c.forDialogID+' > .vividDialogBackground1')[0];
+                    var bg = $('#'+na.te.s.c.forDialogID+' > .vdBackground')[0];
                 } else {
                     var bg = $(na.te.s.c.forElements)[0];
                 }
@@ -403,15 +429,17 @@ class naThemeEditor {
                 $('#themeEditor_photoScaleY').val(na.te.s.c.scaleY);
             };
             bgEl.src = bgSrc;
+        } else if ($(bg).css('backgroundColor')) {
+            debugger;
         }
         
         $('#siteToolbarThemeEditor').css({ display : 'flex', flexDirection : 'row', flexWrap : 'wrap' });
         
         var x = $('#colorpicker').css('display'), y = 'abc';
         if (typeof c==='undefined') c = 'rgba(0,0,0,0.5)';
-        //debugger;
         if ($.spectrum) $('#colorpicker').css({display:'block'}).spectrum ({
             color:c, 
+            flat : true,
             type:'flat',
             showAlpha : true,
             showPalette : false,
@@ -419,18 +447,20 @@ class naThemeEditor {
             change  (color) {
                 if (typeof color=='object') color = 'rgba('+color._r+', '+color._g+', '+color._b+', '+color._a+')';
                 if (na.te.s.c.forDialogID) {
-                    var bg = $('#'+na.te.s.c.forDialogID+' > .vividDialogBackground1')[0];
+                    var bg = $('#'+na.te.s.c.forDialogID+' > .vdBackground')[0];
                 } else {
                     var bg = $(na.te.s.c.forElements);
                 };
+                debugger;
                 $(bg).css({ background : color, opacity : 1 });
-                na.site.saveTheme();
+                na.site.saveTheme({callback:na.site.loadTheme});
             }});
         //if (na.te.s.c.selectedButtonID!=='btnSelectBackgroundColor') $('#colorpicker').next().css({display:x});
         var x = $('#borderColorpicker').css('display');
         if (typeof c2==='undefined') c2 = 'black';
         if ($.spectrum) $('#borderColorpicker').css({display:'block'}).spectrum ({
             color:c2, 
+            flat : true,
             type: "flat", 
             showAlpha : true,
             showPalette : false, 
@@ -480,7 +510,7 @@ class naThemeEditor {
             $('.mediaThumb', $('#themeEditor_photoAlbum')[0].contentWindow.document).each(function(idx,el) {
                 //na.m.log (300, 'el.src='+el.src.replace('thumbs/', ''));
                 if (x && x.indexOf(el.src.replace('thumbs/', ''))!==-1) {
-                    var scale = $('#'+forDialogID+' > .vividDialogBackground1').css('backgroundSize').match(/\d+/);
+                    var scale = $('#'+forDialogID+' > .vdBackground').css('backgroundSize').match(/\d+/);
                     if (scale) na.te.s.c.scale = scale[0];
                     na.te.s.c.selectedImage = el;
                     na.m.log (300, 'na.te.s.c.selectedImage = '+el.src);
@@ -520,8 +550,7 @@ class naThemeEditor {
     }
 
     initSelectorsTree  (dat) {
-        na.te.s.c.dbSelectors = dat;
-        debugger;
+        na.te.s.c.dbSelectors = dat.dat;
         na.m.waitForCondition ('na.te.initSelectorsTree(): $.jstree()?', function() {
             return typeof $.jstree=='object' && typeof $.jstree.create=='function'
         }, function() {
@@ -529,7 +558,7 @@ class naThemeEditor {
                 height : $('#siteToolbarLeft .vividDialogContent').height() - $('#jsTree_navBar').height()
             }).jstree('destroy').jstree({
                 core : {
-                    data : dat,
+                    data : dat.dat,
                     check_callback : true,
                     multiple : false
                 },
@@ -602,8 +631,8 @@ class naThemeEditor {
                             '#btnSelectTextSettings', '#btnSelectTextShadowSettings'
                         ]);
                     else if (
-                        rec.text.match(/#site.*\s\>\s\.vividDialogBackground1$/)
-                        || rec.text.match(/#app__.*\s\>\s\.vividDialogBackground1$/)
+                        rec.text.match(/#site.*\s\>\s\.vdBackground$/)
+                        || rec.text.match(/#app__.*\s\>\s\.vdBackground$/)
                     )
                         na.te.enableButtons([
                             '#btnSelectBackgroundFolder' , '#btnSelectBackgroundImage'
@@ -641,8 +670,24 @@ class naThemeEditor {
                             '#btnSelectBackgroundColor', '#btnSelectBorderSettings' , '#btnSelectBoxShadowSettings',
                             '#btnSelectTextSettings', '#btnSelectTextShadowSettings'
                         ]);
+                    } else if (data.node.text.match(/:before/)) {
+                        na.te.s.c.forDialogID = null;
+                        na.te.s.c.forElements = data.node.text.replace(/&gt;/g, '>');
+                        na.te.enableButtons([
+                            '#btnDeleteElement',
+                            '#btnSelectBackgroundFolder' , '#btnSelectBackgroundImage',
+                            '#btnSelectBackgroundColor', '#btnSelectBorderSettings' , '#btnSelectBoxShadowSettings',
+                            '#btnSelectTextSettings', '#btnSelectTextShadowSettings'
+
+                        ]);
+                        if (data.instance.get_node(data.node.parent).text!=='main') {
+                            //debugger;
+                            na.te.enableButtons([
+                                '#btnDeleteElement'
+                            ]);
+                        }
                     } else if (data.node.text.match(regExApps)) {
-                        na.te.s.c.forDialogID = data.node.text.replace('#','');
+                        na.te.s.c.forDialogID = data.node.text.replace('#','').replace(/&gt;/g, '>');;
                         //debugger;
                         na.te.s.c.forElements = null;
                         na.te.enableButtons([
@@ -652,7 +697,7 @@ class naThemeEditor {
                         ]);
                     } else {
                         na.te.s.c.forDialogID = null;
-                        na.te.s.c.forElements = data.node.text;
+                        na.te.s.c.forElements = data.node.text.replace(/&gt;/g, '>');;
                         na.te.enableButtons([
                             '#btnDeleteElement',
                             '#btnSelectBackgroundFolder' , '#btnSelectBackgroundImage',
@@ -699,7 +744,7 @@ class naThemeEditor {
                     //setTimeout (function () {
 
                         let
-                        bg = $('#'+na.te.s.c.forDialogID+' > .vividDialogBackground1'),
+                        bg = $('#'+na.te.s.c.forDialogID+' > .vdBackground'),
                         bg3 = $(rec.text),
                         src = na.te.s.c.elementsCSS[rec.id].background;
 
@@ -709,7 +754,7 @@ class naThemeEditor {
                                 background : src,
                                 opacity : 1
                             });
-                        else if (rec.text.match(/\s+\.newsApp__item__outer\s+>\s+.vividDialogBackground1\s*/)) {
+                        else if (rec.text.match(/\s+\.newsApp__item__outer\s+>\s+.vdBackground\s*/)) {
                             $(bg3).css({
                                 background : src.match(/url\(/)
                                     ? src.match(/url\(.*\).*%/)
@@ -751,13 +796,22 @@ class naThemeEditor {
     enableButtons (buttons) {
         for (var i=0; i<buttons.length; i++) {
             na.site.components.buttons[buttons[i]].enable();
+            $('img[srcpreload]').each (function (idx,el) {
+                el.src = $(el).attr('srcpreload');
+            })
+
         }
     }
 
     transform_siteGlobalsThemes_to_jsTree (specifier) {
         var
         themeName = na.site.globals.themeName,
+        themeData = na.site.loadTheme_fetchDialogs(themeData);
+        //IS THIS NECESSARY?? na.site.loadTheme_applySettings (themeData, null, false); // apply theme changes, all except .background in this case.
+        na.site.globals.themes[na.site.globals.themeName] = $.extend({}, themeData);
+        var
         inputData = na.site.globals.themes[themeName];
+
         if (!inputData) inputData = na.site.globals.themes.default;
         inputData = inputData.themeSettings;
 
@@ -776,12 +830,12 @@ class naThemeEditor {
         for (var key in inputData.dat) {
             var value = inputData.dat[key], newID = na.m.randomString();
             //if (typeof value.length!=='undefined') continue;
-            if (key=='css') {
+            if (key=='Selectors') {
                 for (var key2 in value) break;
                 outputData.dat.push ({
                     id : newID,
                     parent : parentID,
-                    text : 'main',
+                    text : 'Selectors',
                     state : {
                         opened : true,
                         selected : (
@@ -792,7 +846,7 @@ class naThemeEditor {
                 });
                 if ('site'+parentName==na.te.s.c.forDialogID) outputData.did = newID;
                 for (var divSel in value) {
-                    //if (divSel.match(/\> .vividDialogBackground1/)) continue;
+                    //if (divSel.match(/\> .vdBackground/)) continue;
                     var newID2 = na.m.randomString();
                     outputData.dat.push ({
                         id : newID2,
@@ -805,63 +859,6 @@ class naThemeEditor {
                     });
                     if (divSel=='#'+na.te.s.c.forDialogID) outputData.did = newID2;
                 }
-            } else if (key=='Extras' || key=='Apps') {
-                outputData.dat.push ({
-                    id : newID,
-                    parent : parentID,
-                    text : key,
-                    state : {
-                        opened : true
-                    },
-                    type : type
-                });
-                for (var cssText in value) {
-                    if (cssText.match(/\> .vividDialogBackground1/)) continue;
-                    var vdata = value[cssText].css;
-                    var newID2 = na.m.randomString();
-                    outputData.dat.push ({
-                        id : newID2,
-                        parent : newID,
-                        text : cssText,
-                        state : {
-                            opened : true
-                        },
-                        type : 'naCSS'
-                    });
-                    if (divSel=='#'+na.te.s.c.forDialogID) outputData.did = newID2;
-
-                    for (var divSel in vdata) {
-                        var newID3 = na.m.randomString();
-                        outputData.dat.push ({
-                            id : newID3,
-                            parent : newID2,
-                            text : divSel,
-                            state : {
-                                opened : true
-                            },
-                            type : 'naElement'
-                        });
-                        na.te.s.c.elementsCSS[newID3] = vdata[divSel];
-                        if (divSel=='#'+na.te.s.c.forDialogID) outputData.did = newID3;
-                    }
-                }
-            } else {
-                outputData.dat.push ({
-                    id : newID,
-                    parent : parentID,
-                    text : key,
-                    state : {
-                        opened : true
-                    },
-                    type : type
-                });
-                if (typeof value=='object') {
-                    var call = na.te.transform_siteGlobalsThemes_to_jsTree__recurse (
-                        {dat:value,did:outputData.did}, outputData, key, newID, type
-                    );
-                    $.extend (outputData.dat, call.dat)
-                    if (call.did) outputData.did = call.did;
-                };
             };
         };
         //if (outputData.dat.length > 50) debugger;
@@ -876,6 +873,7 @@ class naThemeEditor {
             var it = jsonNodes[i];
             na.te.transform_jsTree_to_siteGlobalsThemes__do (it, themeSettings);
         }
+        debugger;
         return themeSettings;
     }
 
@@ -889,39 +887,28 @@ class naThemeEditor {
          * to be used in na.site.saveTheme() and na.site.loadTheme()
          */
 
-        switch (it.type) {
-            /*
-            case 'naSelectorSet' :
-                var data = {};
-                data[it.text] = {};
-                themeSettings = $.extend (themeSettings, data);
-                break;
-            case 'naCSS' :
-                var data = {};
-                data[it.text] = {};
-                themeSettings = $.extend (themeSettings, data);
-                break;
-            */
-            case 'naElement' :
-                var
-                parent = $('#themeEditor_jsTree_selectors').jstree(true).get_node(it.parent),
-                regExDialogs = /#site(.*)[\s\w\.\#\d\>]*/,
-                regExApps = /#app__(.*)__(.*)$/;
+        var
+        cssSelector = it.text.replace(/&gt;/g, '>'),
+        data = na.site.fetchTheme(cssSelector);
+        debugger;
 
-                if (
-                    !it.text.match(regExDialogs)
-                    && !it.text.match(regExApps)
-                    && !it.text.match(/Dialog/)
-                    //&& !it.text.match(/Extras/)
-                ) {
-                    if (!themeSettings[parent.text]) themeSettings[parent.text] = { css : {} };
-                    if (!themeSettings[parent.text].css) themeSettings[parent.text].css = {};
-                    themeSettings[parent.text].css = $.extend (
-                        themeSettings[parent.text].css, na.site.fetchTheme(it.text)
-                    );
-                }
+        switch (it.type) {
+            case 'naSelectorSet':
+                if (!themeSettings[cssSelector]) themeSettings[cssSelector] = {};
+                break;
+            case 'naCSS':
+                break;
+            case 'naElement':
+                var
+                jsonNodes = $('#themeEditor_jsTree_selectors').jstree(true).get_json('#', { flat: true });
+
+                debugger;
+
                 break;
         }
+
+
+        //themeSettings = $.extend (themeSettings, data);
         return themeSettings;
     }
     
@@ -1051,7 +1038,7 @@ class naThemeEditor {
     }
     
     specificitySelected  (event) {
-        var sn = $(event.currentTarget).html();
+        var sn = $(event.currentTarget).html() || event;
         if (!sn) return false;
 
         na.te.s.c.specificity = null;
@@ -1071,9 +1058,14 @@ class naThemeEditor {
                 na.site.c.buttons['#btnDeleteSpecificity'].enable();
             }
 
+
+
+
             na.site.loadTheme (function () { // **POSSIBLY** NOT NEEDED
                 var btn = $('#'+na.te.s.c.selectedButtonID)[0];
                 if (btn) na.te.onclick(btn, false);
+                debugger;
+                na.site.setSpecificity();
             }, s.themeName);
 
 
@@ -1202,7 +1194,6 @@ class naThemeEditor {
 
             setTimeout (function(theme) {
                 na.site.loadTheme(function() {
-                    debugger;
                     var btn = $('#'+na.te.s.c.selectedButtonID)[0];
                     if (btn) na.te.onclick(btn, false);
 
@@ -1571,7 +1562,6 @@ class naThemeEditor {
         na.te.borderSettingsSelected (evt2, false); //event.currentTarget === ct
     }
     borderSettingsSelected  (color) {
-        debugger;
         if (color) na.te.s.c.borderColor = color; else color = na.te.s.c.borderColor;
         if (typeof color=='object') color = 'rgba('+color._r+', '+color._g+', '+color._b+', '+color._a+')'; // firefox bugfix
 
@@ -1585,7 +1575,7 @@ class naThemeEditor {
             //$(bg).css({ border : newBorder, borderRadius : newBorderRadius });
             //$('#'+na.te.s.c.forDialogID).css({borderRadius : Math.round((newBorderRadius/4)*3) });
             //$('.boxShadow', bg).css({ border : newBorder, borderRadius : newBorderRadius });
-            $('#'+na.te.s.c.forDialogID+' > .vividDialogBackground1').css({ border:newBorder, borderRadius : newBorderRadius });
+            $('#'+na.te.s.c.forDialogID+' > .vdBackground').css({ border:newBorder, borderRadius : newBorderRadius });
             $(bg).css({borderRadius:newBorderRadius});
         } else {
             var
@@ -1599,10 +1589,10 @@ class naThemeEditor {
             //$('.boxShadow', bg).css({ border : newBorder, borderRadius : newBorderRadius });
             $(na.te.s.c.forElements).css({ border:newBorder, borderRadius : newBorderRadius });
             debugger;
-            $(na.te.s.c.forElements+' > .vividDialogBackground1').css({ borderRadius : newBorderRadius });
+            $(na.te.s.c.forElements+' > .vdBackground').css({ borderRadius : newBorderRadius });
             //$(bg).css({borderRadius:newBorderRadius});
         }
-        /*if (na.te.s.c.fireSaveTheme) */na.site.saveTheme();
+        /*if (na.te.s.c.fireSaveTheme) */na.site.saveTheme(na.site.loadTheme);
     }
     
     selectBoxShadowSettings  (event, updateHTML) {
@@ -1623,7 +1613,7 @@ class naThemeEditor {
             if (na.te.s.c.forDialogID) {
                 var
                 div = $('#'+na.te.s.c.forDialogID),
-                bg = $('#'+na.te.s.c.forDialogID+' > .vividDialogBackground1');
+                bg = $('#'+na.te.s.c.forDialogID+' > .vdBackground');
             } else {
                 var
                 div = $(na.te.s.c.forElements),
@@ -1787,7 +1777,7 @@ class naThemeEditor {
             $(na.te.s.c.forElements).css ({ boxShadow : newBoxSetting });
 
 
-        na.site.saveTheme();
+        na.site.saveTheme({callback:na.site.loadTheme});
         
     }
     boxSettingsChanged_shadowColor  (color) {
@@ -1803,7 +1793,7 @@ class naThemeEditor {
 
         var
         div = $('#'+na.te.s.c.forDialogID),
-        bg =  $('#'+na.te.s.c.forDialogID+' > .vividDialogBackground1'),
+        bg =  $('#'+na.te.s.c.forDialogID+' > .vdBackground'),
         bg1 = bg.css('background').replace(/\'/g, '\\\'').replace(/"/g, '\''),
         opacity = bg1.indexOf('url(')!==-1 ? bg.css('opacity') : 1,
         border = div.css('border'),
@@ -1858,7 +1848,7 @@ class naThemeEditor {
                     $('#themeEditor_backgroundColor .sp-container').fadeIn('slow', 'swing', function() {
                         if (na.te.s.c.forDialogID) {
                             var
-                            bg =  $('#'+na.te.s.c.forDialogID+' > .vividDialogBackground1'),
+                            bg =  $('#'+na.te.s.c.forDialogID+' > .vdBackground'),
                             bg1 = bg.css('backgroundColor');
                         } else {
                             var
@@ -1949,7 +1939,7 @@ class naThemeEditor {
         rgbRegEx = /rgb\((\d{1,3})\,\s*(\d{1,3})\,\s*(\d{1,3})\)(.*)/,
         opacity = $(evt.currentTarget).val()/100;
         
-        if (bg && $(bg).children('.vividDialogBackground1')[0]) bg = $(bg).children('.vividDialogBackground1');
+        if (bg && $(bg).children('.vdBackground')[0]) bg = $(bg).children('.vdBackground');
         
         var bg1 = $(bg).css('background');        
         
@@ -1963,15 +1953,15 @@ class naThemeEditor {
         } else { 
             $(bg).add('.boxShadow_bg, .textShadow_bg').css({ opacity : opacity });
         }
-        /*if (na.te.s.c.fireSaveTheme) */na.site.saveTheme();
+        /*if (na.te.s.c.fireSaveTheme) */na.site.saveTheme({callback:na.site.loadTheme});
     }
     
     imageSelected  (el) {
         na.te.s.c.selectedImage = el;
 
         let 
-        bg = $('#'+na.te.s.c.forDialogID+' > .vividDialogBackground1'),
-        bg2 = $(na.te.s.c.forElements+' > .vividDialogBackground1'),
+        bg = $('#'+na.te.s.c.forDialogID+' > .vdBackground'),
+        bg2 = $(na.te.s.c.forElements+' > .vdBackground'),
         bg3 = $(na.te.s.c.forElements),
         bg4 = bg2.length > 0 ? bg2 : bg3,
         src = el.src.replace('thumbs/','');
@@ -2043,13 +2033,12 @@ debugger;
                     });
                     var evt2 = { currentTarget : $('#textSettings')[0] };
 
-                    /*
                     setTimeout(function() {
-                        if (!na.site.c.menus['#textFontFamily'])
-                        na.site.c.menus['#textFontFamily'] = new naVividMenu($('#textFontFamily')[0], true, function(menu) {
+                        //if (!na.site.c.menus['#textFontFamily'])
+                        na.site.c.menus['#textFontFamily'] = new naVividMenu('textFontFamily', 'textFontFamily', function(menu) {
                         });
                     }, 500);
-                    */
+
 
                     na.te.updateTextSettingsControls(evt2);
 
@@ -2073,7 +2062,7 @@ debugger;
                     if (na.te.s.c.forDialogID) {
                         var
                         div = $('#'+na.te.s.c.forDialogID),
-                        bg =  $('#'+na.te.s.c.forDialogID+' > .vividDialogBackground1');
+                        bg =  $('#'+na.te.s.c.forDialogID+' > .vdBackground');
                     } else {
                         var
                         div = $(na.te.s.c.forElements),
@@ -2227,10 +2216,11 @@ debugger;
         if (na.te.s.c.forDialogID) {
             var
             div = $('#'+na.te.s.c.forDialogID),
-            bg =  $('#'+na.te.s.c.forDialogID+' > .vividDialogBackground1');
+            bg =  $('#'+na.te.s.c.forDialogID+' > .vdBackground');
         } else {
             var div = bg = $(na.te.s.c.forElements);
         };
+        var
         bg1 = bg.css('background').replace(/\'/g, '\\\'').replace(/"/g, '\''),
         opacity = bg1.match(/url\(/) ? bg.css('opacity') : 1,
         border = div.css('border'),
@@ -2258,7 +2248,7 @@ debugger;
             na.te.textSettingsSelected_updateDialog();
             na.te.textSettingsSelected(evt2,false);
             na.te.selectTextShadowSettings(false);
-            //na.site.saveTheme();
+            na.site.saveTheme({callback:na.site.loadTheme});
         }, 100);
         
     }
@@ -2308,6 +2298,7 @@ debugger;
         newFontFamily = newFontFamily ? newFontFamily : na.te.s.c.selectedFontFamily, //$('#textFontFamily').val(),//.replace(/ /g, '+'),
         els = $('#'+na.te.s.c.selectedTextShadowID+' > div')
                 .add(el).add(el2).add(el3);
+        debugger;
         if (newFontFamily) na.te.s.c.selectedFontFamily = newFontFamily;
 
         els.css ({
@@ -2316,7 +2307,7 @@ debugger;
             fontSize : newFontSize+'px',
             fontFamily : newFontFamily
         });
-        na.site.saveTheme();
+        na.site.saveTheme({callback:na.site.loadTheme});
 
         $('.textShadow_containerDiv').removeClass('selected');
         $('#'+na.te.s.c.selectedTextShadowID+'_containerDiv').addClass('selected');
@@ -2353,11 +2344,12 @@ debugger;
             
         $(el).add(el2).css({ fontWeight : newFontWeight, fontSize : newFontSize+'px', fontFamily : newFontFamily });
         $(el).add(el2).css({ textShadow : newTextShadow });
-        /*if (na.te.s.c.fireSaveTheme) */na.site.saveTheme();
+        /*if (na.te.s.c.fireSaveTheme) */na.site.saveTheme({callback:na.site.loadTheme});
         window.dispatchEvent(new Event('resize'));        
     }
     
     textSettingsSelected_textColor  (color) {
+        debugger;
         if (color) na.te.s.c.textColor = color; else color = na.te.s.c.textColor;
         if (typeof color=='object') color = 'rgba('+color._r+', '+color._g+', '+color._b+', '+color._a+')'; // firefox bugfix
         if (na.te.s.c.forDialogID) {
@@ -2369,7 +2361,7 @@ debugger;
             var el = el2 = el3 = $(na.te.s.c.forElements);
         };
         $(el).add(el2).add(el3).css ({ color : color });
-        /*if (na.te.s.c.fireSaveTheme) */na.site.saveTheme();
+        /*if (na.te.s.c.fireSaveTheme) */na.site.saveTheme({callback:na.site.loadTheme});
     }
     
     textSettingsSelected_textShadowColor  (color) {
@@ -2382,12 +2374,12 @@ debugger;
     textBackgroundOpacityChange  (evt) {
         var 
         fncn = 'na.te.textBackgroundOpacityChange(evt)->na.site.saveTheme(*callback*)',
-        opacityValue = $('#btnOptions_menu input.sliderOpacityRange').val() / 100;
-        
+        opacityValue = $('#textBackgroundOpacity').val() / 100;
+
         na.te.s.c.textBackgroundOpacity = opacityValue;
-        /*$('li span, p, h1, h2, h3').css ({
+        $('li span, p, h1, h2, h3').css ({
             background : 'rgba(0,0,0,'+opacityValue+')'
-        });*/
+        });
         
         na.site.saveTheme(function() {
             /*
@@ -2474,96 +2466,112 @@ debugger;
             text : 'New Graphics',
             type : 'naCSS'
         }, 'last');
-        debugger;
         $('#themeEditor_jsTree_selectors').jstree('deselect_all').jstree('select_node', newNodeID);
         $('#themeEditor_jsTree_selectors').jstree(true).edit(na.te.s.c.selectedSelector.node);
     }
 
-    onclick_btnAddElement  () {
-        if ($('div, p, span, li, ol, ul, h1, h2, h3, h4').css('cursor').match(/grab/)) {
-            $('div, p, span, li, ol, ul, h1, h2, h3, h4').css({cursor:'inherit'}).each (function(){debugger; this.removeEventListener('click',na.te.btnAddElement_clickElement)});
+    btnAddElement_clickElement  (evt) {
+        //works just fine :
+        if (evt) na.m.log (100,
+            '\n#'+evt.target.id+'.'+evt.target.className.replace(' ', '.')+'\n'
+            +'#'+evt.currentTarget.id+'.'+evt.currentTarget.className.replace(' ', '.')+'\n',
+                           false
+        );
+
+        if (
+            evt.target.tagName!==evt.currentTarget.tagName
+            || evt.target.id!==evt.currentTarget.id
+            || evt.target.className!==evt.currentTarget.className
+        ) {
+            if (!na.te.s.c.addingElements) {
+                //na.te.s.c.addingElements = true;
+            } else {
+                if (
+                    !na.te.s.c.pickedElement
+                    || (
+                        /*na.te.s.c.pickedElement.length>0
+                        &&*/ na.te.s.c.lastPickedElement!==evt.target
+                    )
+                ) {
+                    na.te.s.c.pickedElement = [ { evt : $.extend({},evt) } ];
+                    na.te.s.c.lastPickedElement = evt.target;
+                } else na.te.s.c.pickedElement.push ({ evt : $.extend({},evt) });
+                evt.preventDefault();
+            }
         } else {
-            na.te.s.c.addingElements = true;
-            $('div, p, span, li, ol, ul, h1, h2, h3, h4').css({cursor:'url(/siteMedia/btnSettings2.32x32.png) 16 16, grab'}).each (function(idx,el) { this.addEventListener('click',na.te.btnAddElement_clickElement,{capture:true})});
+                //na.te.s.c.addingElements = true;
+                if (na.te.s.c.pickedElement) {
+                    na.te.s.c.pickedElement.push ({ evt : $.extend({},evt) });
+                } else {
+                    return false;
+                    na.te.s.c.pickedElement = [ { evt : $.extend({},evt) } ];
+                }
+
+                na.te.s.c.lastPickedElement = evt.target;
+                var msg = '';
+                $('#siteToolbarThemeEditor__elementPicker').html('<div class="vividListSelector vividScrollpane"></div>').delay(50);
+                for (var i=0; i<na.te.s.c.pickedElement.length; i++) {
+                    var ev = na.te.s.c.pickedElement[i].evt;
+                    msg +=
+                    //'\n#'+ev.target.id+'.'+ev.target.className.replace(' ', '.')+'\n'
+                    '\n'+ev.currentTarget.tagName+'#'+ev.currentTarget.id+'.'+ev.currentTarget.className.replace(' ', '.')+'\n';
+                    var itemHTML = '<div class="vividButton" style="display:inline-block;width:fit-content;position:relative;z-index:900000">'+ev.currentTarget.tagName+'</div><div class="vividButton" style="display:inline-block;width:fit-content;position:relative;"><div class="vdBackground"></div><span style="opacity:1">#'+ev.currentTarget.id+'</span></div><div class="vividButton" style="display:inline-block;width:fit-content;position:relative;"><div class="vdBackground"></div><span style="opacity:1">.'+ev.currentTarget.className.replace(' ', '</span></div><div class="vividButton" style="display:inline-block;width:fit-content;position:relative;"><div class="vdBackground"></div><span style="opacity:1">.')+'</div>';
+                    var divEl = document.createElement('div');
+                    $(divEl).html(itemHTML);
+                    $('.vividButton4, .vividButton, .vividButton_icon_50x50_siteTop, .vividButton_icon_50x50', divEl).each(function(idx,el){
+                        if (na.site.c.buttons['#'+el.id]) delete na.site.c.buttons['#'+el.id];
+                        if (!na.site.c.buttons['#'+el.id]) {
+                            na.site.c.buttons['#'+el.id] = new vividUserInterface_2D_button(el);
+                            el.addEventListener ('click', na.te.btnAddElement_clickSelector, {capture:true});
+                        };
+                    });
+                    $('#siteToolbarThemeEditor__elementPicker > .vividListSelector').append(divEl);
+                }
+
+                var itemHTML = '<div class="vividButton btnSave" style="display:inline-block;width:fit-content;position:relative;z-index:900000">Save</div>';
+                var divEl = document.createElement('div');
+                $(divEl).html(itemHTML);
+                $('.vividButton', divEl).each(function(idx,btnEl){
+                    btnEl.addEventListener ('click', function() {
+                        na.te.s.c.addingElements = false;
+                        $('#siteToolbarThemeEditor__elementPicker').fadeOut('normal');
+                        $('div, p, span, li, ol, ul, h1, h2, h3, h4').css({cursor:'inherit'}).each (function(){this.removeEventListener('click',na.te.btnAddElement_clickElement)});
+                    } )
+                });
+                $('#siteToolbarThemeEditor__elementPicker > .vividListSelector').append(divEl);
+
+                na.m.log (110, msg);
+                var br = evt.target.getBoundingClientRect();
+                $('#siteToolbarThemeEditor__elementPicker').css({position:'absolute',left:br.left,top:br.top+br.height,zIndex:900000}).fadeIn('slow');
+                evt.preventDefault();
+
+                na.te.s.c.newElementID = na.m.randomString();
+                $('#themeEditor_jsTree_selectors').jstree().create_node(na.te.s.c.selectedSelector.node, {
+                    id : na.te.s.c.newElementID,
+                    text : 'New Element',
+                    type : 'naElement',
+                }, 'last');
+                na.te.s.c.elementsCSS[na.te.s.c.newElementID] = {
+                    background : $(ev.currentTarget).css('background')
+                };
+                na.te.s.c.addingElements = false;
+                delete na.te.s.c.pickedElement;
+
+                //$('#themeEditor_jsTree_selectors').jstree('deselect_all').jstree('select_node', na.te.s.c.newElementID);
         }
     }
 
-    btnAddElement_clickElement  () {
-        /*
-        //works just fine :
-        na.m.log (100,
-            '\n#'+event.target.id+'.'+event.target.className.replace(' ', '.')+'\n'
-            +'#'+event.currentTarget.id+'.'+event.currentTarget.className.replace(' ', '.')+'\n',
-            false
-        );
-        */
-
-        if (!na.te.s.c.addingElements) return false;
-
-        if (
-            event.target.tagName!==event.currentTarget.tagName
-            || event.target.id!==event.currentTarget.id
-            || event.target.className!==event.currentTarget.className
-        ) {
-            if (
-                !na.te.s.c.pickedElement
-                || (
-                    na.te.s.c.pickedElement.length>0
-                    && na.te.s.c.lastPickedElement!==event.target
-                )
-            ) {
-                na.te.s.c.pickedElement = [ { event : $.extend({},event) } ];
-                na.te.s.c.lastPickedElement = event.target;
-            } else na.te.s.c.pickedElement.push ({ event : $.extend({},event) });
+    onclick_btnAddElement  () {
+        if ($('div, p, span, li, ol, ul, h1, h2, h3, h4').css('cursor').match(/grab/)) {
+            $('div, p, span, li, ol, ul, h1, h2, h3, h4').css({cursor:'inherit'}).each (function(){this.removeEventListener('click',na.te.btnAddElement_clickElement)});
         } else {
-            na.te.s.c.pickedElement.push ({ event : $.extend({},event) });
-            na.te.s.c.lastPickedElement = event.target;
-            var msg = '';
-            $('#siteToolbarThemeEditor__elementPicker').html('<div class="vividListSelector vividScrollpane"></div>').delay(50);
-            for (var i=0; i<na.te.s.c.pickedElement.length; i++) {
-                var ev = na.te.s.c.pickedElement[i].event;
-                msg +=
-                    //'\n#'+ev.target.id+'.'+ev.target.className.replace(' ', '.')+'\n'
-                    '\n'+ev.currentTarget.tagName+'#'+ev.currentTarget.id+'.'+ev.currentTarget.className.replace(' ', '.')+'\n';
-                var itemHTML = '<div class="vividButton" style="display:inline-block;width:fit-content;position:relative;z-index:900000">'+ev.currentTarget.tagName+'</div><div class="vividButton" style="display:inline-block;width:fit-content;position:relative;"><div class="vividDialogBackground1"></div><span style="opacity:1">#'+ev.currentTarget.id+'</span></div><div class="vividButton" style="display:inline-block;width:fit-content;position:relative;"><div class="vividDialogBackground1"></div><span style="opacity:1">.'+ev.currentTarget.className.replace(' ', '</span></div><div class="vividButton" style="display:inline-block;width:fit-content;position:relative;"><div class="vividDialogBackground1"></div><span style="opacity:1">.')+'</div>';
-                var divEl = document.createElement('div');
-                $(divEl).html(itemHTML);
-                $('.vividButton', divEl).each(function(idx,btnEl) {
-                    var jsEl = new naVividButton (btnEl);
-                    btnEl.addEventListener ('click', na.te.btnAddElement_clickSelector, {capture:true});
-                });
-                $('#siteToolbarThemeEditor__elementPicker > .vividListSelector').append(divEl);
-            }
-
-            var itemHTML = '<div class="vividButton btnSave" style="display:inline-block;width:fit-content;position:relative;z-index:900000">Save</div>';
-            var divEl = document.createElement('div');
-            $(divEl).html(itemHTML);
-            $('.vividButton', divEl).each(function(idx,btnEl){
-                btnEl.addEventListener ('click', function() {
-                    na.te.s.c.addingElements = false;
-                    $('#siteToolbarThemeEditor__elementPicker').fadeOut('normal');
-                    $('div, p, span, li, ol, ul, h1, h2, h3, h4').css({cursor:'inherit'}).each (function(){this.removeEventListener('click',na.te.btnAddElement_clickElement)});
-                } )
+            na.te.s.c.addingElements = true;
+            $('div, p, span, li, ol, ul, h1, h2, h3, h4').css({cursor:'url(/siteMedia/btnSettings2.32x32.png) 16 16, grab'}).each (function(idx,el) {
+                if (!$(el)[0].hasClickHandler) {
+                    this.addEventListener('click',na.te.btnAddElement_clickElement,{capture:true})
+                    $(el)[0].hasClickHandler = true;
+                }
             });
-            $('#siteToolbarThemeEditor__elementPicker > .vividListSelector').append(divEl);
-
-            na.m.log (110, msg);
-            var br = event.target.getBoundingClientRect();
-            $('#siteToolbarThemeEditor__elementPicker').css({position:'absolute',left:br.left,top:br.top+br.height,zIndex:900000}).fadeIn('slow');
-            event.preventDefault();
-
-            na.te.s.c.newElementID = na.m.randomString();
-            $('#themeEditor_jsTree_selectors').jstree().create_node(na.te.s.c.selectedSelector.node, {
-                id : na.te.s.c.newElementID,
-                text : 'New Element',
-                type : 'naElement',
-            }, 'last');
-            na.te.s.c.elementsCSS[na.te.s.c.newElementID] = {
-                background : $(ev.currentTarget).css('background')
-            };
-
-            //$('#themeEditor_jsTree_selectors').jstree('deselect_all').jstree('select_node', na.te.s.c.newElementID);
-
         }
     }
 
@@ -2590,12 +2598,12 @@ debugger;
         $('#themeEditor_jsTree_selectors').jstree().rename_node (na.te.s.c.newElementID, selector);
     }
 
-    onclick_btnDeleteGraphics  (event) {
-        na.te.deleteElement(nit);
+    onclick_btnDeleteGraphics  (evt) {
+        na.te.deleteElement(evt);
     }
 
-    onclick_btnDeleteElement  (nit) {
-        na.te.deleteElement(nit);
+    onclick_btnDeleteElement  (evt) {
+        na.te.deleteElement(evt);
     }
 
     deleteElement  (nit) {
@@ -2618,7 +2626,7 @@ debugger;
         $('#themeEditor_jsTree_selectors')
             .jstree('delete_node', node);
 
-        na.site.saveTheme (na.site.loadTheme);
+        na.site.saveTheme ({callback:na.site.loadTheme});
     }
 
 };

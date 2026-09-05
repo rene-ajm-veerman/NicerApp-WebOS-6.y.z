@@ -54,7 +54,7 @@ na.site = {
         // NOTE : all of these na.site.globals app get overridden by values stuck in databases of some sort (lol),
         //          and are listed by the index.php file as 'var naGlobals', before merging it's (sub-)values.
         domain : 'nicer.app',
-        domainPath : '/var/www/nicer.app-5.10.z/domains/nicer.app',
+        domainPath : '/var/www/NicerAppWebOS-v6.y.z/domains/nicer.app',
 
         // these are all pixel values, without the CSS 'NNNNpx' notation.
         //margin : 8,
@@ -970,8 +970,6 @@ na.site = {
         return '<div class="vividDialogPopup_background">&nbsp;</div>'+m;
     },
 
-
-
     onclick_displayErrors : function (event) {
         var
         msg = '',
@@ -1335,6 +1333,8 @@ na.site = {
         });
         ec.events.push(naEventData);
 
+
+
         var
         fncn = (
             url2.match(/\/view\//)
@@ -1642,6 +1642,7 @@ na.site = {
                         }, function () {
                             if (!na.site.globals.themes[na.site.globals.themeName].themeSettings)
                                 na.site.globals.themes[na.site.globals.themeName].themeSettings = na.te.transform_jsTree_to_siteGlobalsThemes();
+
                             //na.site.globals.themes.default = na.site.loadTheme_fetchDialogs();
                         }, null);
                     })] },
@@ -2739,7 +2740,6 @@ na.site = {
                     content : html
                 };
                 if (na.m.userDevice.isPhone) ptSettings.showOn = 'none';
-                debugger;
                 if (!el.id) el.id='tooltip_'+na.m.randomString();
                 if (el && el.id && $.tooltipster && ptSettings.content!=='') $(el).tooltipster(ptSettings);
             }
@@ -3370,6 +3370,7 @@ na.site = {
             //$('.vividDialog').css(dat.themeSettings['.vividDialog']);
             //$('.vividDialog > .vdBackground').css(dat.themeSettings['.vividDialog > .vdBackground']);
         };
+
         if (dat.themeSettings) {
             loop1:
             for (var category in dat.themeSettings) {
@@ -3390,9 +3391,9 @@ na.site = {
                         break loop2;
                     case 'Extras' :
                         for (var btnAddGraphics_jsTreeText in categoryItems) {
-                            var it = categoryItems[btnAddGraphics_jsTreeText].css;
+                            var it = categoryItems[btnAddGraphics_jsTreeText];
                             for (var divSel in it) {
-                                var dit = it[divSel];
+                                var dit = it[divSel].css;
                                 html += na.m.cssTranslation (btnAddGraphics_jsTreeText, dit);
                             }
                         }
@@ -3402,7 +3403,10 @@ na.site = {
         }
         $('#cssThemeSettings').remove();
         $('#cssPageSpecific').after (html);
-        debugger;
+        //debugger; // you might want to inspect 'html' at some point..
+
+
+
         /*
         for (var category in dat.themeSettings) {
             if (
@@ -3561,12 +3565,12 @@ na.site = {
 
         na.m.log (1451, 'na.saveTheme() : STARTING.', false);
 
-        var tApp = null;
+        var theApp = null;
         if (
             na.site.globals.themes
             && na.site.globals.themes[theme]
             && na.site.globals.themes[theme].apps
-        ) tApp = na.site.globals.themes[theme].apps;
+        ) theApp = na.site.globals.themes[theme].apps;
 
         var
         themeData = {
@@ -3581,8 +3585,7 @@ na.site = {
             backgroundChange_minutes : $('#backgroundChange_minutes').val(),
             menusFadingSpeed : $('#menusFadingSpeed').val(),
             menusUseRainbowPanels : 'true',//$('#menusUseRainbowPanels')[0].checked ? 'true' : 'false',
-            dialogs : {},
-            apps : tApp,
+            apps : theApp,
             view : na.site.globals.view,
             //view : na.site.components.app,
             textBackgroundOpacity : 0.4//parseInt($('#textBackgroundOpacity').val()) / 100
@@ -3631,8 +3634,8 @@ na.site = {
         }*/
 
         // Fetch dialogs properly
-        debugger;
         themeData = na.site.loadTheme_fetchDialogs(themeData) || themeData;
+        debugger;
 
         //IS THIS NECESSARY?? na.site.loadTheme_applySettings (themeData, null, false); // apply theme changes, all except .background in this case.
         na.site.globals.themes[na.site.globals.themeName] = $.extend({}, themeData);
@@ -3647,10 +3650,6 @@ na.site = {
         } catch (err) {
             debugger;
         }
-        /*
-         * "{\"dbID\":\"zXYQzSQdAQJ29XGtpDEp\",\"themeSettings\":{\"Dialogs\":[],\"Apps\":{},\"Extras\":{}},\"apps\":[],\"background\":\"https://nicer.app//siteMedia/backgrounds/Landscape/scenery/thumbs/3840/mountains_snow_forest_lake_clouds.jpg\",\"backgroundSearchKey\":\"Landscape\",\"textBackgroundOpacity\":0.4,\"changeBackgroundsAutomatically\":false,\"backgroundChange_hours\":\"0\",\"backgroundChange_minutes\":\"1\",\"theme\":\"default\",\"role\":\"nicer_app___Guests\",\"specificityName\":\"current page for user Guest at the client\",\"vdSettings_show\":\"transparent\",\"menusFadingSpeed\":\"300\",\"menusUseRainbowPanels\":\"true\",\"dialogs\":{},\"user\":\"nicer_app___Guest\",\"url\":\"/view/eyJcL05pY2VyQXBwV2ViT1NcL2FwcHNcL05pY2VyQXBwV2ViT1NcL2FwcGxpY2F0aW9uc1wvMkRcL2xvZ3MiOnsicGFnZSI6ImluZGV4IiwiYXBwRm9sZGVyIjoiXC9OaWNlckFwcFdlYk9TXC9hcHBzXC9OaWNlckFwcFdlYk9TXC9hcHBsaWNhdGlvbnNcLzJEXC9sb2dzIiwiYmVnaW5EYXRlVGltZSI6MTc4MjE2MjEwMjAwMCwiZW5kRGF0ZVRpbWUiOm51bGx9fQ\"}"
-         */
-
 
         //if (themeData.dialogs.indexOf('+')!==-1) themeData.dialogs = themeData.dialogs.replace(/\+/g, ' ');
         //if (themeData.dialogs.indexOf('\\')!==-1) themeData.dialogs = themeData.dialogs.replace(/\\/g, '');
@@ -3701,15 +3700,26 @@ na.site = {
                 na.site.ajaxFail(fncn, url, xhr, textStatus, errorThrown);
             }
         };
-        debugger;
         $.ajax(ac2);
     },
 
     loadTheme_fetchDialogs : function (themeData) {
         var themeData2 = $.extend ({}, na.site.globals.themes[na.site.globals.themeName], themeData);
         try {
-            if (!themeData2.themeSettings) themeData2.themeSettings = {};
-            themeData2.themeSettings = na.te.transform_jsTree_to_siteGlobalsThemes();
+            if (!themeData2.themeSettings) themeData2.themeSettings = { Dialogs : {} };
+            if (!themeData2.themeSettings.Dialogs) themeData2.themeSettings.Dialogs = {};
+            $('.vividDialog > .vividDialogContent').each (function(idx,el) {
+                var
+                d = $(el).parents('.vividDialog'),
+                cssSelector1 = '#'+d[0].id+'.vividDialog',
+                cssSelector2 = '#'+d[0].id+'.vividDialog > .vdBackground';
+
+                if (!themeData2.themeSettings.Dialogs[d[0].id]) themeData2.themeSettings.Dialogs[d[0].id] = { css : {} };
+                themeData2.themeSettings.Dialogs[d[0].id].css = $.extend (
+                    themeData2.themeSettings.Dialogs[d[0].id].css, na.site.fetchTheme(cssSelector1), na.site.fetchTheme(cssSelector2)
+                );
+            });
+
         } catch (err) {
             var dbg = {
                 msg : err.message,
