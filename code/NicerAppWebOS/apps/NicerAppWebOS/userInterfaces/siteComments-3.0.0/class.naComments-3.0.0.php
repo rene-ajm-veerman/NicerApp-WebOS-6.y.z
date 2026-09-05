@@ -971,7 +971,7 @@ class class_naComments {
                 $oldBM = 'def';
                 $results = [];
                 $call = $cdba->find($findCommand);
-                //echo '<pre>'; echo json_encode ($call, JSON_PRETTY_PRINT); echo '</pre>';
+                //echo '<pre>'; echo json_encode ($call, JSON_PRETTY_PRINT); echo '</pre>'; exit;
 
                 $oldBM = $bm;
                 if (
@@ -991,10 +991,9 @@ class class_naComments {
                     'userRealName' => $call->body->docs[0]->realname
                 ]);
                 if (
-                    count($call->body->docs)===1
-                    && isset($call->body->docs[0])
+                    isset($call->body->docs[0])
                     && property_exists($call->body->docs[0], 'displayName')
-                ) $results[count($results)-1]['displayName'] = $call->body->docs[0]->displayName;
+                ) $results['displayName'] = $call->body->docs[0]->displayName;
 
                 //exit();
 
@@ -1134,6 +1133,7 @@ class class_naComments {
             global $users;
             if (!isset($users[$u])) $users[$u] = [];
             $users[$u] = negotiateOptions ($users[$u], fetchUserRecord($u));
+            //echo '<pre>'.json_encode($users,JSON_PRETTY_PRINT).'</pre>';
 
             $html .= "\t".'<span class="naComment_username">'
             . (array_key_exists('displayName',$users[$u])?$users[$u]['displayName']:$users[$u]['userRealName'])

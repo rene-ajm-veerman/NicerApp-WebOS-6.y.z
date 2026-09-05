@@ -25,7 +25,6 @@ na.history = {
         };
         const opts = Object.assign({}, defaults, options);
 	    opts.documentID = documentID;
-	    debugger;
 
         // Ensure dialog shell exists
         if ($('#' + opts.dialogId).length === 0) {
