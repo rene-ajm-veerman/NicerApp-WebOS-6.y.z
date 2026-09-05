@@ -1239,6 +1239,32 @@ class class_naComments {
                     $mh = $it['msgHTML'];
                     $mh = str_replace('<iframe', '<iframe loading="lazy" defer=""', $mh);
                     $mh = str_replace('allowfullscreen>', 'allowfullscreen="">', $mh);
+
+                    $c = -1;
+                    $re = '@<br\s*\\*/>\s*<br\s*\\*/>@i';
+                    $re = '@<br \\/><br \\/>@';
+                    $matches = [];
+                    $c1 = preg_match_all ($re, $mh, $matches);
+                    $mh = preg_replace($re, '', $mh, -1, $c);
+                    $dbg = [['$mh'=>htmlentities($mh),'$c'=>$c, '$c1'=>$c1, '$matches'=>$matches]];
+                    while ($c > 0) {
+                        $mh = preg_replace($re, '', $mh, -1, $c);
+                        $dbg[] = ['$mh'=>htmlentities($mh),'$c'=>$c];
+                    };
+                    $dbg[] = '----2----';
+                    $dbg[] = $mh; $mh = preg_replace ('/><br\s*\/></','><', $mh);
+                    $dbg[] = $mh; $mh = preg_replace ('/><p>\s*<\/p>/','><', $mh);
+                    $dbg[] = $mh; $mh = preg_replace ('/<p><span class="backdropped">\s*<\/span><\/p>/','', $mh);
+                    $dbg[] = $mh; $mh = preg_replace ('/<p class="backdropped">\s*<\/p>/','', $mh);
+                    $dbg[] = $mh; $mh = str_replace('<p><span class="backdropped"', '<p class="backdropped"', $mh);
+                    $dbg[] = $mh; $mh = str_replace('</span>', '', $mh);
+                    $dbg[] = $mh; $mh = str_replace('<p>', '<p class="backdropped">', $mh);
+                    $dbg[] = $mh;
+                    foreach ($dbg as $i=>$dl) {
+                        if (is_string($dbg[$i]))$dbg[$i] = htmlentities($dl);
+                    }
+
+                    //$html .= "\t".'<div class="naComment_msgHTML" style="opacity:'.($h?0.4:1).'"><pre>'.json_encode($dbg,JSON_PRETTY_PRINT).'</pre></div>'.PHP_EOL;
                     $html .= "\t".'<div class="naComment_msgHTML" style="opacity:'.($h?0.4:1).'">'.$mh.'</div>'.PHP_EOL;
                 }
 
@@ -1580,9 +1606,14 @@ class class_naComments {
             ]);
 
             // Content bijwerken
-            $doc->msgHTML = str_replace('<p><span class="backdropped"', '<p class="backdropped"', $rec['msgHTML']);
-            $doc->msgHTML = str_replace('</span>', '', $doc->msgHTML);
-            $doc->msgHTML = str_replace('<p>', '<p class="backdropped">', $doc->msgHTML);
+            $dbg = [$doc->msgHTML]; $doc->msgHTML = preg_replace ('/><br>\s*</g','><', $doc-msgHTML);
+            $dbg[] = $doc->msgHTML; $doc->msgHTML = preg_replace ('/><br\/>\s*</g','><', $doc-msgHTML);
+            $dbg[] = $doc->msgHTML; $doc->msgHTML = preg_replace ('/<p><span class="backdropped">\s*<\/span><\/p>/g','', $doc-msgHTML);
+            $dbg[] = $doc->msgHTML; $doc->msgHTML = preg_replace ('/<p class="backdropped">\s*<\/p>/g','', $doc-msgHTML);
+            $dbg[] = $doc->msgHTML; $doc->msgHTML = str_replace('<p><span class="backdropped"', '<p class="backdropped"', $rec['msgHTML']);
+            $dbg[] = $doc->msgHTML; $doc->msgHTML = str_replace('</span>', '', $doc->msgHTML);
+            $dbg[] = $doc->msgHTML; $doc->msgHTML = str_replace('<p>', '<p class="backdropped">', $doc->msgHTML);
+            $dbg[] = $doc->msgHTML;
 
             // Laatste bewerkingstijd bijwerken
             $now = time();
@@ -1594,7 +1625,8 @@ class class_naComments {
 
             echo json_encode([
                 'ok' => true,
-                'id' => $doc->_id
+                'id' => $doc->_id//,
+                //'dbg' => $dbg
             ]);
 
         } catch (Exception $e) {
@@ -1862,7 +1894,7 @@ class class_naComments {
             $uDB2 = $naWebOS->dbs->findConnection('couchdb'); // adjust as needed
             $screenshots = new naScreenshots($uDB2);
 
-            $html = '<div class="naComment_linkedScreenshots" style="margin-top:10px; display:flex; flex-wrap:wrap; gap:10px;">';
+            $html = '<div class="naComment_linkedScreenshots" style="margin-top:10px; display:grid; grid-template-columns:1fr 1fr 1fr; flex-wrap:wrap; gap:10px;">';
             $count = 0;
 
             foreach ($urls as $url) {
