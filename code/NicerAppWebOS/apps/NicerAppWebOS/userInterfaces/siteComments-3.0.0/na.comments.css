@@ -7,12 +7,12 @@
     font-weight : bold;
 }
 
-.naDateTimeHeader {
+.naDateTimeHeader, .naComment_edited {
     font-size : small;
     color : navy;
 }
 .naComment_edited {
-    color : navy;
+    color : purple;
 }
 
 .naHistoryActions {

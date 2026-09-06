@@ -13,7 +13,7 @@
 <?php
     $root = realpath(dirname(__FILE__).'/../../../../../..');
     require_once ($root.'/NicerAppWebOS/boot.php');
-    set_time_limit(5 * 60);
+    set_time_limit(60);
     /*
     if (session_status() === PHP_SESSION_NONE) {
         ini_set('session.gc_maxlifetime', 3600);
@@ -56,7 +56,7 @@ error_reporting(E_ALL);
     */
     //$dbs = $couchdb->getAllDbs();
     $dbList = '';
-    $albums = array();
+    $albums = [];
 
 
 
@@ -94,7 +94,7 @@ error_reporting(E_ALL);
                         $it2 = $cdb->get($docs->body->rows[$j]->id);
                         $parentsURL = $it2->body->text;
 
-                        //echo '<pre style="color:yellow;">'; var_dump ($it2); echo '</pre>';// exit();
+                        //echo '<pre style="color:navy;">'; var_dump ($it2); echo '</pre>';// exit();
                         
                         while ($it2->body->parent!=='#') {
                             $done = false;
@@ -104,7 +104,14 @@ error_reporting(E_ALL);
                                     property_exists($it3->body,'id')
                                     && $it3->body->id===$it2->body->parent
                                 ) {
-                                    $parentsURL = $it3->body->text . '/' . $parentsURL;
+                                    //echo '<pre style="color:darkred;">'; var_dump ($it3); echo '</pre>';// exit();
+                                    global $naWebOS;
+                                    $it3text = (
+                                      strpos($it3->body->text,$naWebOS->domainForDB)!==false
+                                      ? $naWebOS->dbs->findConnection('couchdb')->translate_couchdbUserName_to_plainUserName($it3->body->text)
+                                      : $it3->body->text
+                                    );
+                                    $parentsURL = $it3text . '/' . $parentsURL;
                                     $done = true;
                                     break;
                                 }
@@ -114,10 +121,14 @@ error_reporting(E_ALL);
                         }
                     }
                     if ($parentsURL!=='') {
-                        if (strpos($dbName,'tree___user')!==false) $parentsURL = 'Users/'.$parentsURL;
-                        if (strpos($dbName,'tree___role')!==false) $parentsURL = 'Groups/'.$parentsURL;
+                        if (strpos($parentsURL, 'Users/')===false && strpos($dbName,'tree___user')!==false) $parentsURL = 'Users/'.$parentsURL;
+                        if (strpos($parentsURL, 'Groups/')===false && strpos($dbName,'tree___role')!==false) $parentsURL = 'Groups/'.$parentsURL;
                         //echo '<pre style="color:lime;font-weight:bold;">'; var_dump ($baseDir.'/'.$parentsURL); var_dump (is_string(realpath($baseDir.'/'.$parentsURL))); echo '</pre>';
-                        if (is_string(realpath($baseDir.'/'.$parentsURL))) array_push($albums, $parentsURL);
+                        if (
+                            is_string(realpath($baseDir.'/'.$parentsURL))
+                            && !in_array($parentsURL, $albums)
+                        ) array_push($albums, $parentsURL);
+                        //echo '<pre style="color:navy;">'; var_dump ($parentsURL); echo '</pre>';// exit();
                     }
                     
                 }
@@ -127,9 +138,9 @@ error_reporting(E_ALL);
     };
     if (false) {
         echo '<div style="color:white;">'; var_dump ($parentsURL); echo '</div>';
-        echo '<div style="color:yellow;">'; var_dump ($dbList); echo '</div>';
-        echo '<pre style="color:lime;">'; var_dump ($albums); echo '</pre>'; 
-        exit();
+        echo '<div style="color:green;">'; var_dump ($dbList); echo '</div>';
+        echo '<pre style="color:lime;background:rgba(0,0,50,0.555)">'; var_dump ($albums); echo '</pre>';
+        //exit();
     };
 
     
@@ -137,7 +148,6 @@ error_reporting(E_ALL);
     ----- format the photo albums found into HTML to be used in the tinyMCE popup 
     ---*/
     foreach ($albums as $idx => $albumRelativePath) {
-    set_time_limit(5 * 60);
         $targetDir = $baseDir.'/'.$albumRelativePath;
         //echo '<pre style="color:lime;">'; var_dump ($targetDir); echo '</pre>'; exit();
         $thumbDir = $targetDir.'/thumbs';

@@ -85,6 +85,7 @@ class NicerAppWebOS {
 
         // You'll need this too.
         $this->domainPath = $this->path.'/domains/'.$this->domainFolder;
+        $this->domainForDB = str_replace('.','_',$this->domainFolder);
 
 
         if (false) {

@@ -866,8 +866,8 @@ debugger;
                     function () {
                         return (
                             tinymce.ready
-                            //&& tinymce.get('tinymce1')!==null
-                            //&& typeof tinymce.get('tinymce1')=='object'
+                            && typeof tinymce.get('tinymce1')=='object'
+                            && tinymce.get('tinymce1')!==null
                             && $('#tinymce1')[0]
                         );
                     },
