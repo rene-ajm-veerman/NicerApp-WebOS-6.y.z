@@ -1682,7 +1682,7 @@ na.site = {
 
 
         $('.vividButton4, .vividButton, .vividButton_icon_50x50_siteTop, .vividButton_icon_50x50, .vividButton_icon_100x100').each(function(idx,el){
-            //if (na.site.c.buttons['#'+el.id]) delete na.site.c.buttons['#'+el.id];
+            if (na.site.c.buttons['#'+el.id]) delete na.site.c.buttons['#'+el.id];
             if (!na.site.c.buttons['#'+el.id]) {
                 na.site.c.buttons['#'+el.id] = new vividUserInterface_2D_button(el);
             };
