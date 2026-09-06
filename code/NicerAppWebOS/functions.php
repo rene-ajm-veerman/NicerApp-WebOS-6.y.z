@@ -107,7 +107,7 @@ function naDateTimeHeader ($s, $tz) {
     //return $agoHTML;
     $originalDatetime = date ('Y-m(F)-d(l) H:i:s', $sa+$tza).' GMT'.($tz===0?'':($tz>0?'+':'-').$tz.'m');
     $html =
-        '<span class="naDateTimeHeader" title="'.$originalDatetime.'">'.$agoHTML.'</span>';
+        '<span class="naDateTimeHeader">'.$originalDatetime.' - '.$agoHTML.'</span>';
     return $html;
 }
 

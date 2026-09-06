@@ -84,7 +84,6 @@ na.apps.loaded['/NicerAppWebOS/apps/NicerAppWebOS/userInterfaces/siteComments'] 
             data : data,
             success : function (data, ts, xhr) {
                 $('#siteComments .vividDialogContent').html(data).delay(100);
-                $('#siteComments .vdBackground').remove();//css({opacity:0.4,height:'100%'});
 
                 na.comments.onload(function () {
                     na.site.startUIvisuals();
@@ -118,9 +117,8 @@ na.apps.loaded['/NicerAppWebOS/apps/NicerAppWebOS/userInterfaces/siteComments'] 
             const id  = $('.naComment_id', el).text().trim();   // or data-id or whatever you use
             $('.naComment_msgHTML > a > img',el).remove();
             $('.naComment_msgHTML > p > iframe, .naComment_msgHTML > p', el).each(function(idx,el2){
-		    $(el2).add($(el2).parents('.naComment_msgHTML')).css({display:'block'});
-	    });
-
+                $(el2).add($(el2).parents('.naComment_msgHTML')).css({display:'block'});
+            });
 
             // Normalize root marker (adjust if your root uses something else than '#')
             if (pid === '#' || pid === '' || !pid) pid = 'root';

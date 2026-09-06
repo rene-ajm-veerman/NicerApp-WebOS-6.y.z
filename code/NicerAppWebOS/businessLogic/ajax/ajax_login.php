@@ -42,7 +42,7 @@ $_SESSION['cdb_pw'] = $_POST['pw'];
 try {
     //$cdb_authSession_cookie = $cdb->login($username, $_POST['pw'], Sag::$AUTH_COOKIE);
 
-    $xec = 'curl -vD - -X POST http://'.$username.':'.$_POST['pw'].'@127.0.0.1:5984/_session -d \'name='.$username.'&password='.$_POST['pw'].'\'';
+    $xec = 'curl -vD - -X POST http://'.rawurlencode($username).':'.rawurlencode($_POST['pw']).'@127.0.0.1:5984/_session -d \'name='.$username.'&password='.$_POST['pw'].'\'';
     exec ($xec, $output, $result);
     if ($debug) { echo '<pre>'; var_dump ($xec); echo PHP_EOL; var_dump ($output); echo '</pre>'; };
     preg_match_all('/=(.*?);/', $output[6], $output2);

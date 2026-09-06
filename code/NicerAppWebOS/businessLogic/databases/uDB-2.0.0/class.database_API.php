@@ -55,7 +55,7 @@ class class_NicerAppWebOS_database_API {
         global $naWebOS;
 
         $db = null;
-        //echo 't932:'; var_dump ($ct); var_dump($cRec);
+        //echo 't932:<pre style="color:navy">'; var_dump ($ct); var_dump($cRec); echo '</pre>';
         if (strpos('couchdb', $ct)!==false) {
             //echo '<span style="color:purple">Now logging in as '.$username.'</span><br/>'.PHP_EOL;
             $db = new class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 ( clone $naWebOS, $username, $cRec );

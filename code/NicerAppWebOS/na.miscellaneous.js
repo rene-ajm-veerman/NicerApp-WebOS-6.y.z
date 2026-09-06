@@ -474,7 +474,7 @@ require('fs').writeFileSync('full_unicode_js.base64', base64);
 	//return now+' - '+dt.getTime()+' - '+ago;
         agoHTML = na.m.secondsToTimeString(ago)+' ago',
         originalDatetime = na.m.dateObj_toDateString (dt),
-        html = '<span class="naDateTimePosted">'+agoHTML+'</span>';
+        html = '<span class="naDateTimeHeader">'+originalDatetime+' - '+agoHTML+'</span>';
         return html;
     },
 
