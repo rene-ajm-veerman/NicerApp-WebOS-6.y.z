@@ -37,6 +37,7 @@ global $naWebOS;
 {$javascriptLinks}
     <script type="text/javascript" src="/NicerAppWebOS/3rd-party/tinymce-4.9.11/js/tinymce/tinymce.js"></script>
     <script type="text/javascript" src="/NicerAppWebOS/3rd-party/tinymce-4.9.11/js/tinymce/jquery.tinymce.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
 
     <script type="module" src="https://unpkg.com/chart.js@4.2.1/dist/chart.umd.js" integrity="sha512-vCUbejtS+HcWYtDHRF2T5B0BKwVG/CLeuew5uT2AiX4SJ2Wff52+kfgONvtdATqkqQMC9Ye5K+Td0OTaz+P7cw==" crossorigin="anonymous" referrerpolicy="no-referrer">
     import { BubbleController, CategoryScale, Chart, ChartColors, Colors, Legend, LinearScale, PointElement } from 'chart.js';

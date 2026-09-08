@@ -86,7 +86,6 @@ error_reporting(E_ALL);
                 //$dbList .= 'count : '.count($docs).'<br/>';
                 $parentsURL = '';
                 for ($i=0; $i<count($docs->body->rows); $i++) {
-    set_time_limit(5 * 60);
                     $it = $cdb->get($docs->body->rows[$i]->id);
                     //echo '<pre style="color:red;">'; var_dump ($it); echo '</pre>';// exit();
                     if (property_exists($it->body, 'type') && $it->body->type==='naMediaAlbum') {

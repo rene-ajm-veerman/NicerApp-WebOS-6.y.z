@@ -627,7 +627,7 @@ class naThemeEditor {
                         '#btnSelectTextSettings', '#btnSelectTextShadowSettings',
                         '#btnSelectBackgroundFolder' , '#btnSelectBackgroundImage'
                     ]);
-                if (data.node && data.node.type=='naElement') {
+                //if (data.node && data.node.type=='naElement') {
                     var
                     regExSite = /#site([\w\d]+)$/,
                     regExApps = /#app__([\w\d]+)__([\w\d]+)$/;
@@ -670,7 +670,7 @@ class naThemeEditor {
                             ]);
                         }
                     }
-                }
+                //}
             }
         } else if (which=='selectedBackground') {
             var data = na.te.s.c.selectedBackground;

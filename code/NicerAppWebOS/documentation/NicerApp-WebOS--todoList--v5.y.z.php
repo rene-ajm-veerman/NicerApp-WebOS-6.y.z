@@ -35,8 +35,10 @@ The yearly release stage of a new <a href="https://github.com/rene-ajm-veerman/N
 
             <li class="todoList_l1"><div>Start on .../businessLogic/class.diaries.2.y.z.php.</div></li>
             <li class="todoList_l1"><div>Start on .../businessLogic/regionalCloud.</div></li>
-            </ol>
+        </ol>
     </div></li>
+
+    <li class="todoList"><div>(2026) Build a VAPID enabled database-updated detection system for browser apps, and release that permanently as open source, based on uDB-2.y.z.</div></li>
 
     <li class="todoList"><div>(2026) Permanently and completely fix the web-based theme editor for NA.</div></li>
 

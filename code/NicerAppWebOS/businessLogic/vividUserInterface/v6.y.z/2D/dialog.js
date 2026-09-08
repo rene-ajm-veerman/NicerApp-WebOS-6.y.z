@@ -12,8 +12,6 @@ class vividUserInterface_2D_dialog {
         t.el = t.cmd.el[0];
         t.el.vividUserInterface_2D_dialog = t;
         t.settings = {};
-        debugger;
-
 
         if (!$('canvas',t.el)[0]) {
             var c = document.createElement('canvas');

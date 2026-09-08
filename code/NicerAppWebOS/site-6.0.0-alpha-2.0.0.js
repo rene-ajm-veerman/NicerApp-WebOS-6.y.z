@@ -283,6 +283,12 @@ na.site = {
                     $('#siteMenu .vividMenu_mainUL, #siteMenu_forReal').css({visibility:'visible'});
                 }});
 
+                var s = na.te.settings.current.specificity;
+                if (s) {
+                    themeData = na.site.loadTheme_fetchDialogs(themeData);
+                    na.site.globals.themes[na.site.globals.themeName] = $.extend({}, na.site.globals.themes[na.site.globals.themeName], themeData);
+                    na.site.loadTheme_applySettings (themeData, null, false); // apply theme changes, all except .background in this case.
+                }
 
                 na.site.startUIvisuals(null, function() {
                     var fncn = 'na.site.initialize()::desktopIdle()::startUIvisuals( ()=>{...} )';
@@ -306,7 +312,7 @@ na.site = {
 
                         var d = new vividUserInterface_2D_dialog ({ naSite : t, el : $(el) });
                         switch (el.id) {
-                            case 'sgiteTaskbar' : c.taskbar = d; break;
+                            case 'siteTaskbar' : c.taskbar = d; break;
                             case 'siteSettingsMenu' : c.settingsMenu = d; break;
                         }
                         if (
@@ -396,7 +402,6 @@ na.site = {
                         backgroundChange_minutes : $('#backgroundChange_minutes').val(),
                         menusFadingSpeed : $('#menusFadingSpeed').val(),
                         menusUseRainbowPanels : 'true',//$('#menusUseRainbowPanels')[0].checked ? 'true' : 'false',
-                        dialogs : {},
                         apps : tApp,
                         view : na.site.globals.view,
                         textBackgroundOpacity : 0.4//parseInt($('#textBackgroundOpacity').val()) / 100
@@ -448,12 +453,7 @@ na.site = {
                         themeData.dialogs = $.extend (themeData.dialogs, na.fetchTheme (selector));
                     }*/
 
-                    // if (s) {
-                    //     themeData = na.site.loadTheme_fetchDialogs(themeData);
-                    //     na.site.globals.themes[na.site.globals.themeName] = $.extend({}, na.site.globals.themes[na.site.globals.themeName], themeData);
-                    //     na.site.loadTheme_applySettings (themeData, null, false); // apply theme changes, all except .background in this case.
-                    // }
-                    //t.startTooltips();
+                    t.startTooltips();
 
                     for (var appID in na.apps.loaded) {
                         var app = na.apps.loaded[appID];
@@ -3401,9 +3401,10 @@ na.site = {
                 }
             }
         }
+        html += '</style>';
         $('#cssThemeSettings').remove();
         $('#cssPageSpecific').after (html);
-        //debugger; // you might want to inspect 'html' at some point..
+        debugger; // you might want to inspect 'html' at some point..
 
 
 
@@ -3634,7 +3635,7 @@ na.site = {
         }*/
 
         // Fetch dialogs properly
-        themeData = na.site.loadTheme_fetchDialogs(themeData) || themeData;
+        themeData = $.extend(themeData,na.site.loadTheme_fetchDialogs(themeData));
         debugger;
 
         //IS THIS NECESSARY?? na.site.loadTheme_applySettings (themeData, null, false); // apply theme changes, all except .background in this case.
@@ -3644,7 +3645,17 @@ na.site = {
         // ENCAPSULATE (ENCODE) json objects for HTTP transport
         try {
             var themeData2 = $.extend({},themeData);
-            themeData2.themeSettings = JSON.stringify(themeData.themeSettings);
+
+            /* 2026-09-08(Tuesday) 22:22 CET Thanks, Gemini!! :-)
+             * <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+             */
+
+            // Directly replaces your old JSON serialization line
+            themeData2.themeSettings = _.cloneDeep(themeData.themeSettings);
+
+            themeData2.themeSettings = JSON.stringify(themeData.themeSettings); // won't work without the _.cloneDeep() call prior to this in latest kubuntu linux chrome.'
+            debugger;
+
             themeData2.apps = JSON.stringify(Object.assign({},themeData.apps));
             themeData2.view = JSON.stringify(Object.assign({},themeData.view));
         } catch (err) {
@@ -3770,6 +3781,65 @@ na.site = {
             +$(selector).css("borderTopRightRadius")+' '
             +$(selector).css("borderBottomRightRadius")+' '
             +$(selector).css("borderBottomLeftRadius")+' ';
+
+        if (!$(selector+' > .vdBackground')[0]) {
+            if ($(selector).css('opacity')!=='') {
+                ret[selector].opacity = $(selector).css('opacity');
+            };
+            if ($(selector).css('backgroundSize')!=='') {
+                ret[selector].backgroundSize = $(selector).css('backgroundSize');
+            };
+
+            if ($(selector).css('backgroundImage') && $(selector).css('backgroundImage')!=='' && !$(selector).css('backgroundImage').match(/none/)) {
+                ret[selector].background =
+                $(selector).css('backgroundImage').match(/url\(.*\).*%/)
+                ? $(selector).css('backgroundImage')
+                : $(selector).css('backgroundImage').replace(')',') 0% 0% / ')
+                +$(selector).css('backgroundSize')+' '
+                +$(selector).css('backgroundRepeat');
+            } else if ($(selector).css('backgroundColor') !== '') {
+                ret[selector].background = $(selector).css('backgroundColor');
+            }
+        } else if (
+            !selector.match(/,/)
+            && $(selector+' > .vdBackground').length>0
+        ) { // for vividDialogs only
+            ret[selector+' > .vdBackground'] = {
+                opacity : $(selector+' > .vdBackground').css('opacity'),
+                background :
+                $(selector+' > .vdBackground').css('background') && $(selector+' > .vdBackground').css('background') !==''
+                ? $(selector+' > .vdBackground').css('background').match(/url\(.*\).*%/)
+                ? $(selector+' > .vdBackground').css('background')
+                : $(selector+' > .vdBackground').css('background').replace(')',') 0% 0% / ')
+                : 'none',
+                borderRadius : $(selector).css('borderRadius'),
+                backgroundSize : $(selector+' > .vdBackground').css('backgroundSize'),
+                boxShadow : $(selector+' > .vdBackground').css('boxShadow')
+            };
+            ret[selector+' > .vdBackground'].borderRadius = ret[selector].borderRadius;
+
+            // bugfix for firefox :
+            if (
+                ret[selector+' > .vdBackground'].background===''
+                && $(selector+' > .vdBackground').css('backgroundImage') !== ''
+            ) ret[selector+' > .vdBackground'].background =
+            $(selector+' > .vdBackground').css('backgroundImage').replace(/http.*?\/\/.*?\//,'')+' '
+            +$(selector+' > .vdBackground').css('backgroundSize')+' '
+            +$(selector+' > .vdBackground').css('backgroundRepeat');
+
+            if (
+                ret[selector+' > .vdBackground'].background
+                && (
+                    ret[selector+' > .vdBackground'].background===''
+                    || ret[selector+' > .vdBackground'].background.match('none')
+                )
+                && $(selector+' > .vdBackground').css('backgroundColor') !== ''
+            ) ret[selector+' > .vdBackground'].background = $(selector+' > .vdBackground').css('backgroundColor');
+        } else if (!$(selector)[0]) {
+            $(selector).css('backgroundImage', 'none');
+            ret[selector].background = $(selector).css('backgroundColor');
+        };
+
         return ret;
     },
 
