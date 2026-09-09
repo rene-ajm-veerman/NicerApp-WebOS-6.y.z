@@ -149,7 +149,6 @@ class naThemeEditor {
         */
                 let dat2 = na.te.transformHTMLandCSS_to_jsTree();
                 let dat3 = na.te.transform_siteGlobalsThemes_to_jsTree();
-                debugger;
                 let dat4 = dat2;//$.extend(dat2, dat3);
                 na.te.s.c.dbSelectors = dat4;
                 let dat = dat4.dat;
@@ -901,7 +900,7 @@ debugger;
                state : {
                    opened : true
                },
-               type : 'naElement'
+               type : 'naSelectorSet'
            });
            if (pd.id==na.te.s.c.forDialogID) outputData.did = newID2;
 
@@ -931,7 +930,6 @@ debugger;
             });
         });
 
-debugger;
         return outputData;
 
     }
@@ -1639,7 +1637,6 @@ debugger;
         na.te.borderSettingsSelected (evt2, false); //event.currentTarget === ct
     }
     borderSettingsSelected  (color) {
-        debugger;
         if (color) na.te.s.c.borderColor = color; else color = na.te.s.c.borderColor;
         if (typeof color=='object') color = 'rgba('+color._r+', '+color._g+', '+color._b+', '+color._a+')'; // firefox bugfix
 
@@ -2549,7 +2546,7 @@ debugger;
 
     onclick_btnAddElement  () {
         if ($('div, p, span, li, ol, ul, h1, h2, h3, h4').css('cursor').match(/grab/)) {
-            $('div, p, span, li, ol, ul, h1, h2, h3, h4').css({cursor:'inherit'}).each (function(){debugger; this.removeEventListener('click',na.te.btnAddElement_clickElement)});
+            $('div, p, span, li, ol, ul, h1, h2, h3, h4').css({cursor:'inherit'}).each (function(){ this.removeEventListener('click',na.te.btnAddElement_clickElement)});
         } else {
             na.te.s.c.addingElements = true;
             $('div, p, span, li, ol, ul, h1, h2, h3, h4').css({cursor:'url(/siteMedia/btnSettings2.32x32.png) 16 16, grab'}).each (function(idx,el) { this.addEventListener('click',na.te.btnAddElement_clickElement,{capture:true})});
@@ -2565,12 +2562,11 @@ debugger;
             false
         );
         */
-
         if (!na.te.s.c.addingElements) return false;
 
         if (
             event.target.tagName!==event.currentTarget.tagName
-            || event.target.id!==event.currentTarget.id
+            // JUST DONT || event.target.id!==event.currentTarget.id
             || event.target.className!==event.currentTarget.className
         ) {
             if (
@@ -2595,10 +2591,15 @@ debugger;
                     '\n'+ev.currentTarget.tagName+'#'+ev.currentTarget.id+'.'+ev.currentTarget.className.replace(' ', '.')+'\n';
                 var itemHTML = '<div class="vividButton" style="display:inline-block;width:fit-content;position:relative;z-index:900000">'+ev.currentTarget.tagName+'</div><div class="vividButton" style="display:inline-block;width:fit-content;position:relative;"><div class="vividDialogBackground1"></div><span style="opacity:1">#'+ev.currentTarget.id+'</span></div><div class="vividButton" style="display:inline-block;width:fit-content;position:relative;"><div class="vividDialogBackground1"></div><span style="opacity:1">.'+ev.currentTarget.className.replace(' ', '</span></div><div class="vividButton" style="display:inline-block;width:fit-content;position:relative;"><div class="vividDialogBackground1"></div><span style="opacity:1">.')+'</div>';
                 var divEl = document.createElement('div');
-                $(divEl).html(itemHTML);
+                $(divEl).html(itemHTML).delay(500);
+                divEl.id = na.m.randomString();
                 $('.vividButton', divEl).each(function(idx,btnEl) {
-                    var jsEl = new naVividButton (btnEl);
-                    btnEl.addEventListener ('click', na.te.btnAddElement_clickSelector, {capture:true});
+                    if (na.site.c.buttons['#'+btnEl.id]) delete na.site.c.buttons['#'+btnEl.id];
+                    if (!na.site.c.buttons['#'+btnEl.id]) {
+                        na.site.c.buttons['#'+btnEl.id] = new vividUserInterface_2D_button(btnEl);
+                    };
+                    var btnEl = na.site.c.buttons['#'+divEl.id];
+                    divEl.addEventListener ('click', na.te.btnAddElement_clickSelector, {capture:true});
                 });
                 $('#siteToolbarThemeEditor__elementPicker > .vividListSelector').append(divEl);
             }
@@ -2636,7 +2637,17 @@ debugger;
     }
 
     btnAddElement_clickSelector  (event) {
-        event.target.parentNode.this.select();
+        if (event.target.parentNode.this)
+            if ($(event.target.parentNode).is('.selected'))
+                event.target.parentNode.this.deselect();
+            else
+                event.target.parentNode.this.select();
+
+        if (event.target.this)
+            if ($(event.target).is('.selected'))
+                event.target.this.deselect();
+            else
+                event.target.this.select();
 
         // edit the treeview node
         var selector = '';

@@ -1731,30 +1731,31 @@ na.site = {
         $('p, h1, h2, h3').addClass('todoList');
         */
 
-        na.site.bindTodoListAnimations (
-            '.todoList, '
-            //+'.contentSectionTitle3, contentSectionTitle3_a, '
-            +'p.todoList, h1.todoList, h2.todoList, h3.todoList, '
-            +'li > a, '
-            +'.todoList > li, '
-            +'.todoList > li > div, '
-            +'.todoList > li > pre, '
-            +'.todoList_l1 > li, '
-            +'.todoList_l1 > li > div, '
-            +'.todoList_l1 > li > pre, '
-            +'.todoList_l2 > li, '
-            +'.todoList_l2 > li > div, '
-            +'.todoList_l2 > li > pre '
-        );
+        if (el.tagName=='body') {
+            na.site.bindTodoListAnimations (
+                '.todoList, '
+                //+'.contentSectionTitle3, contentSectionTitle3_a, '
+                +'p.todoList, h1.todoList, h2.todoList, h3.todoList, '
+                +'li > a, '
+                +'.todoList > li, '
+                +'.todoList > li > div, '
+                +'.todoList > li > pre, '
+                +'.todoList_l1 > li, '
+                +'.todoList_l1 > li > div, '
+                +'.todoList_l1 > li > pre, '
+                +'.todoList_l2 > li, '
+                +'.todoList_l2 > li > div, '
+                +'.todoList_l2 > li > pre '
+            );
 
-
-        const themeName = na.site.globals.themeName;
-        const themes = na.site.globals.themes;
-        if (themes && themeName && themes[themeName]) {
-            na.site.loadTheme_applySettings(themes[themeName]);
-        } else {
-            console.warn('Theme missing:', themeName, themes);
-        }
+            const themeName = na.site.globals.themeName;
+            const themes = na.site.globals.themes;
+            if (themes && themeName && themes[themeName]) {
+                na.site.loadTheme_applySettings(themes[themeName]);
+            } else {
+                console.warn('Theme missing:', themeName, themes);
+            }
+        };
 
         if (typeof callback=='function') callback(divID);
     },
@@ -3404,7 +3405,7 @@ na.site = {
         html += '</style>';
         $('#cssThemeSettings').remove();
         $('#cssPageSpecific').after (html);
-        debugger; // you might want to inspect 'html' at some point..
+        //debugger; // you might want to inspect 'html' at some point..
 
 
 
@@ -3635,8 +3636,13 @@ na.site = {
         }*/
 
         // Fetch dialogs properly
-        themeData = $.extend(themeData,na.site.loadTheme_fetchDialogs(themeData));
-        debugger;
+        //themeData = $.extend(themeData,na.site.loadTheme_fetchDialogs(themeData));
+        themeData = $.extend(themeData,{themeSettings:na.te.transform_jsTree_to_siteGlobalsThemes()});
+        if (
+            !themeData.themeSettings
+            || !themeData.themeSettings.Dialogs
+            || !themeData.themeSettings.Dialogs['#siteContent']
+        ) themeData = $.extend(themeData,na.site.loadTheme_fetchDialogs(themeData));
 
         //IS THIS NECESSARY?? na.site.loadTheme_applySettings (themeData, null, false); // apply theme changes, all except .background in this case.
         na.site.globals.themes[na.site.globals.themeName] = $.extend({}, themeData);
@@ -3652,9 +3658,7 @@ na.site = {
 
             // Directly replaces your old JSON serialization line
             themeData2.themeSettings = _.cloneDeep(themeData.themeSettings);
-
             themeData2.themeSettings = JSON.stringify(themeData.themeSettings); // won't work without the _.cloneDeep() call prior to this in latest kubuntu linux chrome.'
-            debugger;
 
             themeData2.apps = JSON.stringify(Object.assign({},themeData.apps));
             themeData2.view = JSON.stringify(Object.assign({},themeData.view));
