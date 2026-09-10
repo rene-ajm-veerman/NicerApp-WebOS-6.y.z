@@ -147,9 +147,16 @@ class naThemeEditor {
             url : url,
             success  (data, ts, xhr) {
         */
-                let dat2 = na.te.transformHTMLandCSS_to_jsTree();
+
+
+                //let dat2 = na.te.transformHTMLandCSS_to_jsTree();
+
+                na.site.globals.themes[na.site.globals.themeName] = $.extend(
+                    na.site.loadTheme_fetchDialogs(),
+                    na.site.globals.themes[na.site.globals.themeName]
+                );
                 let dat3 = na.te.transform_siteGlobalsThemes_to_jsTree();
-                let dat4 = dat2;//$.extend(dat2, dat3);
+                let dat4 = dat3;
                 na.te.s.c.dbSelectors = dat4;
                 let dat = dat4.dat;
                 let did = dat4.did;
@@ -523,7 +530,6 @@ class naThemeEditor {
 
     initSelectorsTree  (dat) {
         na.te.s.c.dbSelectors = dat;
-        debugger;
         na.m.waitForCondition ('na.te.initSelectorsTree(): $.jstree()?', function() {
             return typeof $.jstree=='object' && typeof $.jstree.create=='function'
         }, function() {
@@ -756,20 +762,21 @@ class naThemeEditor {
         }
     }
 
-    transform_siteGlobalsThemes_to_jsTree (specifier) {
+    transform_siteGlobalsThemes_to_jsTree (sourceData) {
         var
         themeName = na.site.globals.themeName,
         inputData = na.site.globals.themes[themeName];
         if (!inputData) inputData = na.site.globals.themes.default;
+
+        if (sourceData && sourceData.themeSettings) inputData = $.extend(inputData,sourceData);
         inputData = inputData.themeSettings;
-debugger;
+
         var
         outputData = na.te.transform_siteGlobalsThemes_to_jsTree__recurse(
             {dat:inputData,did:null},
             {dat:[],did:null},
             'Selectors', '#', 'naSelectorSet'
         );
-        debugger;
         return outputData;
     }
 
