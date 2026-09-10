@@ -331,11 +331,9 @@ NicerApp WebOS from Nicer Enterprises
 
         if (!$naBot) {
             $na_error_log_filepath_html =
-                $naWebOS->domainPath.'/siteLogs/user-'.$naIP.($naBot?'-BOT':'').'/'
-                .$date./*'-'.$appName.*/'.html';
+            $naWebOS->domainPath.'/siteLogs/'.$date.'/user-'.$naIP.($naBot?'-BOT':'').'.html';
             $na_error_log_filepath_txt =
-                $naWebOS->domainPath.'/siteLogs/user-'.$naIP.($naBot?'-BOT':'').'/'
-                .$date./*'-'.$appName.*/'.txt';
+                $naWebOS->domainPath.'/siteLogs/'.$date.'/user-'.$naIP.($naBot?'-BOT':'').'.txt';
 
             global $naLogLocation;
             $naLogLocation = '<!-- saving logs to : '.$na_error_log_filepath_html.' -->'.PHP_EOL;
