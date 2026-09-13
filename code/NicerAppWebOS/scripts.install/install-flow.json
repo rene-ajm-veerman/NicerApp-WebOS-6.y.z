@@ -1,0 +1,79 @@
+{
+  "meta": {
+    "title": "NicerApp WebOS 6.y.z Installation",
+    "description": "High-level installation flowchart for recreating the official install scripts",
+    "author": "René AJM Veerman / phpFlowcharts"
+  },
+  "direction": "TD",
+  "nodes": {
+    "start": {
+      "type": "start",
+      "label": "Start Installation"
+    },
+    "detect_os": {
+      "type": "process",
+      "label": "Detect OS\\n(Linux / Windows / macOS)"
+    },
+    "is_linux": {
+      "type": "decision",
+      "label": "Is Linux?"
+    },
+    "apt_update": {
+      "type": "process",
+      "label": "apt update &&\\napt install -y curl"
+    },
+    "download_installer": {
+        "type": "process",
+        "label": "Download & run official installer",
+        "copy": "curl https://nicer.app/NicerAppWebOS/scripts.install/latest.sh | /usr/bin/sh"
+    },
+    "check_previous": {
+      "type": "decision",
+      "label": "Previous install\\nexists?"
+    },
+    "cleanup": {
+        "type": "process",
+        "label": "Remove previous installation",
+        "copy": "rm -rf /var/www/NicerAppWebOS-*"
+    },
+    "extract": {
+      "type": "process",
+      "label": "Extract package\\n+ set permissions"
+    },
+    "apache_vhost": {
+      "type": "process",
+      "label": "Configure Apache\\nVirtualHost + a2ensite"
+    },
+    "couchdb": {
+      "type": "process",
+      "label": "Install / configure\\nCouchDB + credentials"
+    },
+    "set_perms": {
+      "type": "process",
+      "label": "Run setPermissions.sh"
+    },
+    "done": {
+      "type": "end",
+      "label": "Installation Complete\\n→ http://localhost"
+    },
+    "error_os": {
+      "type": "error",
+      "label": "Unsupported OS\\n(manual install required)"
+    }
+  },
+  "edges": [
+    { "from": "start", "to": "detect_os" },
+    { "from": "detect_os", "to": "is_linux" },
+    { "from": "is_linux", "to": "apt_update", "label": "Yes" },
+    { "from": "is_linux", "to": "error_os", "label": "No" },
+    { "from": "apt_update", "to": "check_previous" },
+    { "from": "check_previous", "to": "cleanup", "label": "Yes" },
+    { "from": "check_previous", "to": "download_installer", "label": "No" },
+    { "from": "cleanup", "to": "download_installer" },
+    { "from": "download_installer", "to": "extract" },
+    { "from": "extract", "to": "apache_vhost" },
+    { "from": "apache_vhost", "to": "couchdb" },
+    { "from": "couchdb", "to": "set_perms" },
+    { "from": "set_perms", "to": "done" }
+  ]
+}

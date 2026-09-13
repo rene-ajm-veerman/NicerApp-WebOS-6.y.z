@@ -39,8 +39,8 @@
         and available as <a href="https://nicer.app/downloads" class="nomod noPushState" target="naDownload">full package here</a>,<br/>
         </p>
         <p>
-        2026-08-30, 02:33am CEST:<br/>
-        E.T.A. until next alpha/beta release : no longer than 2 weeks from now.
+        2026-09(September)-14(Monday), 01:00am CEST:<br/>
+        E.T.A. until next alpha/beta release : no longer than 1 week from now.
         </p>
 
 <!--        <p><a href="https://said.by/view/eyJcL05pY2VyQXBwV2ViT1NcL2FwcHNcL05pY2VyQXBwV2ViT1NcL2NvbnRlbnQtbWFuYWdlbWVudC1zeXN0ZW1zXC9OaWNlckFwcFdlYk9TIjp7ImNtc1ZpZXdNZWRpYSI6eyJjb2RlUGF0aCI6IlwvdmFyXC93d3dcL25pY2VyLmFwcC01LjEwLnpcL2RvbWFpbnNcL3NhaWQuYnlcL3NpdGVEYXRhXC9zYWlkLmJ5XC9Vc2Vyc1wvUmVuZSBBSk0gVmVlcm1hblwvTWVkaWEgQWxidW1zXC9OZXciLCJmaWxlbmFtZSI6IlNjcmVlbnNob3RfMjAyNjA2MTJfMjAxMjQwLnBuZyJ9fX0" class="nomod noPushState" target="naScreenshots-20260623-1016CET-AMS">Screenshot</a> <a href="https://said.by/Rene-AJM-Veerman/about/NicerApp" class="nomod noPushState" target="naScreenshots-collection">collection</a> of <a class="nomod noPushState" target="naDiary-20260623-1008CET-AMS" href="https://nicer.app/view/eyJhaWQiOjAsImZkcyI6NTcxMjAwLCJycCI6IlwvMjAyNiBCZXN0XC8ifQ?idxStart=0&pw=alwaysXMASzzz">this</a>.</p>-->

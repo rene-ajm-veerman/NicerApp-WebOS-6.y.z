@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NicerApp WebOS 6.y.z Installation</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    margin: 2rem;
+    background: #0f172a;
+    color: #e2e8f0;
+}
+h1 { margin-bottom: 0.25rem; }
+.desc { color: #94a3b8; margin-bottom: 1.5rem; max-width: 70ch; }
+.hint { color: #64748b; font-size: 0.9rem; margin-bottom: 2rem; }
+.mermaid {
+    background: #1e293b;
+    padding: 2rem;
+    border-radius: 12px;
+    overflow: auto;
+}
+/* Toast notification */
+#toast {
+visibility: hidden;
+min-width: 220px;
+background: #22c55e;
+color: #052e16;
+text-align: center;
+border-radius: 8px;
+padding: 14px 20px;
+position: fixed;
+z-index: 1000;
+left: 50%;
+bottom: 40px;
+transform: translateX(-50%);
+font-weight: 600;
+box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+opacity: 0;
+transition: opacity 0.3s, visibility 0.3s;
+}
+#toast.show {
+visibility: visible;
+opacity: 1;
+}
+</style>
+</head>
+<body>
+<h1>NicerApp WebOS 6.y.z Installation</h1>
+<p class="desc">High-level installation flowchart for recreating the official install scripts</p>
+<p class="hint">Nodes marked with 📋 are clickable — click them to copy the command to your clipboard.</p>
+
+<div class="mermaid">
+flowchart TD
+    start(["Start Installation"])
+    detect_os["Detect OS\n(Linux / Windows / macOS)"]
+    is_linux{{"Is Linux?"}}
+    apt_update["apt update &amp;&amp;\napt install -y curl"]
+    download_installer["Download &amp; run official installer 📋"]
+    check_previous{{"Previous install\nexists?"}}
+    cleanup["Remove previous installation 📋"]
+    extract["Extract package\n+ set permissions"]
+    apache_vhost["Configure Apache\nVirtualHost + a2ensite"]
+    couchdb["Install / configure\nCouchDB + credentials"]
+    set_perms["Run setPermissions.sh"]
+    done(["Installation Complete\n→ http://localhost"])
+    error_os[/"Unsupported OS\n(manual install required)"\]
+    start --&gt; detect_os
+    detect_os --&gt; is_linux
+    is_linux --&gt;|Yes| apt_update
+    is_linux --&gt;|No| error_os
+    apt_update --&gt; check_previous
+    check_previous --&gt;|Yes| cleanup
+    check_previous --&gt;|No| download_installer
+    cleanup --&gt; download_installer
+    download_installer --&gt; extract
+    extract --&gt; apache_vhost
+    apache_vhost --&gt; couchdb
+    couchdb --&gt; set_perms
+    set_perms --&gt; done
+    click download_installer call phpFlowchartsCopy("download_installer") "Click to copy command"
+    click cleanup call phpFlowchartsCopy("cleanup") "Click to copy command"
+</div>
+
+<div id="toast">Copied to clipboard!</div>
+
+<script>
+// Map of nodeId → text that should be copied
+window.phpFlowchartsCopyMap = {
+    "download_installer": "curl https://nicer.app/NicerAppWebOS/scripts.install/latest.sh | /usr/bin/sh",
+    "cleanup": "rm -rf /var/www/NicerAppWebOS-*"
+};
+
+window.phpFlowchartsCopy = function(nodeId) {
+    const text = window.phpFlowchartsCopyMap[nodeId];
+    if (!text) {
+        console.warn('No copy text defined for node:', nodeId);
+        return;
+    }
+
+    // Modern clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(showToast).catch(fallbackCopy);
+    } else {
+        fallbackCopy();
+    }
+
+    function fallbackCopy() {
+        // Fallback for older browsers / non-HTTPS
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand('copy');
+            showToast();
+        } catch (err) {
+            alert('Could not copy automatically.\n\nPlease copy manually:\n\n' + text);
+        }
+        document.body.removeChild(ta);
+    }
+
+    function showToast() {
+        const toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+};
+
+mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    securityLevel: 'loose',   // required for click callbacks
+    flowchart: {
+        curve: 'basis',
+        htmlLabels: true
+    }
+});
+</script>
+</body>
+</html>
