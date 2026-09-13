@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Multi-Trajectory Hypersonic Simulation</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #020202; font-family: 'Courier New', Courier, monospace; }
+        #telemetry-hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #00ff66;
+            background: rgba(0, 20, 5, 0.85);
+            padding: 20px;
+            border: 1px solid #00ff66;
+            border-radius: 5px;
+            pointer-events: none;
+            min-width: 300px;
+            box-shadow: 0 0 15px rgba(0,255,102,0.2);
+        }
+        .hud-line { margin-bottom: 8px; display: flex; justify-content: space-between; font-size: 13px; }
+        .hud-value { font-weight: bold; text-shadow: 0 0 5px #00ff66; }
+        #controls-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: #888;
+            font-size: 12px;
+        }
+    </style>
+    <!-- Standard Three.js via CDN -->
+    <script src="three.min.js"></script>
+    <script src="OrbitControls.js"></script>
+</head>
+<body>
+
+    <div id="telemetry-hud">
+        <div style="text-align: center; border-bottom: 1px solid #00ff66; padding-bottom: 5px; margin-bottom: 10px; font-size: 15px;">GLOBAL SALVO TELEMETRY</div>
+        <div class="hud-line"><span>SIM TIME:</span><span id="hud-time" class="hud-value">0.00 s</span></div>
+        <div class="hud-line"><span>ACTIVE MISSILES:</span><span id="hud-active" class="hud-value">3</span></div>
+        <div class="hud-line"><span>STATUS:</span><span id="hud-status" class="hud-value">IN FLIGHT</span></div>
+    </div>
+
+    <div id="controls-info">Left Click + Drag to Rotate | Right Click + Drag to Pan | Scroll to Zoom</div>
+
+    <script>
+        const EARTH_RADIUS = 6371;
+        const GRAVITY = 9.80665 / 1000;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        camera.position.set(0, -EARTH_RADIUS * 2, EARTH_RADIUS * 2);
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        dirLight.position.set(10, 10, 10);
+        scene.add(dirLight);
+
+        // --- PROCEDURAL CORS-SAFE MAP TEXTURE GENERATION ---
+        // Creates a stylized global matrix internally to avoid server hanging
+        function generateProceduralMap() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+
+            // Base ocean profile
+            ctx.fillStyle = '#112244';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw stylized wireframe grid continents for scientific interface appearance
+            ctx.strokeStyle = '#2d5a9e';
+            ctx.lineWidth = 1;
+            for(let i=0; i<canvas.width; i+=40) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for(let j=0; j<canvas.height; j+=40) {
+                ctx.beginPath();
+                ctx.moveTo(0, j);
+                ctx.lineTo(canvas.width, j);
+                ctx.stroke();
+            }
+
+            // Draw abstract landmass contours so reference points are visible
+            ctx.fillStyle = '#1c3d75';
+            // Americas approximation
+            ctx.beginPath(); ctx.html = '';
+            ctx.moveTo(300, 200); ctx.lineTo(550, 300); ctx.lineTo(450, 500); ctx.lineTo(600, 800);
+            ctx.lineTo(500, 900); ctx.lineTo(350, 600); ctx.lineTo(200, 400); ctx.closePath(); ctx.fill();
+            // Eurasia / Africa approximation
+            ctx.beginPath();
+            ctx.moveTo(800, 150); ctx.lineTo(1500, 150); ctx.lineTo(1700, 400); ctx.lineTo(1400, 700);
+            ctx.lineTo(1000, 800); ctx.lineTo(900, 500); ctx.lineTo(750, 300); ctx.closePath(); ctx.fill();
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const earthGeo = new THREE.SphereGeometry(EARTH_RADIUS, 64, 64);
+        const earthMat = new THREE.MeshStandardMaterial({
+            map: generateProceduralMap(),
+            roughness: 0.7,
+            metalness: 0.1
+        });
+        const earth = new THREE.Mesh(earthGeo, earthMat);
+        scene.add(earth);
+
+        // Convert Lat/Long to 3D Vector on Sphere
+        function latLongToVector3(lat, lon, radius) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180);
+            const x = -(radius * Math.sin(phi) * Math.cos(theta));
+            const z = (radius * Math.sin(phi) * Math.sin(theta));
+            const y = (radius * Math.cos(phi));
+            return new THREE.Vector3(x, y, z);
+        }
+
+        // Lat, Lon Targets
+        const locations = {
+            usa: { lat: 34.73, lon: -120.56 },
+            uk: { lat: 54.41, lon: -0.77 },
+            france: { lat: 43.15, lon: 6.07 },
+            vilnius: { lat: 54.68, lon: 25.27 },
+            moscow: { lat: 55.75, lon: 37.61 },
+            beijing: { lat: 39.90, lon: 116.40 }
+        };
+
+        const missions = [
+            { start: locations.usa, target: locations.beijing, color: 0xff3300 },
+            { start: locations.uk, target: locations.vilnius, color: 0xffaa00 },
+            { start: locations.france, target: locations.moscow, color: 0xff00ff }
+        ];
+
+        let activeSalvo = [];
+
+        missions.forEach(m => {
+            let startPos = latLongToVector3(m.start.lat, m.start.lon, EARTH_RADIUS);
+            let targetPos = latLongToVector3(m.target.lat, m.target.lon, EARTH_RADIUS);
+
+            // Midpoint ballistic arc altitude boost
+            let midPos = startPos.clone().add(targetPos).normalize().multiplyScalar(EARTH_RADIUS + 1500);
+
+            let meshGeo = new THREE.ConeGeometry(8, 40, 8);
+            meshGeo.rotateX(Math.PI / 2);
+            let meshMat = new THREE.MeshBasicMaterial({ color: m.color });
+            let mesh = new THREE.Mesh(meshGeo, meshMat);
+            scene.add(mesh);
+
+            // Path trail visualization setup
+            const trailGeometry = new THREE.BufferGeometry();
+            const trailPositions = [];
+            const trailMat = new THREE.LineBasicMaterial({ color: m.color, linewidth: 2 });
+            const trailLine = new THREE.Line(trailGeometry, trailMat);
+            scene.add(trailLine);
+
+            activeSalvo.push({
+                start: startPos,
+                mid: midPos,
+                target: targetPos,
+                mesh: mesh,
+                trailPositions: trailPositions,
+                trailLine: trailLine,
+                progress: 0,
+                speed: 0.0015 + Math.random() * 0.001
+            });
+        });
+
+        let simTime = 0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            simTime += 0.05;
+
+            let activeCount = 0;
+
+            activeSalvo.forEach(item => {
+                if (item.progress < 1) {
+                    item.progress += item.speed;
+                    activeCount++;
+
+                    // Quadratic Bezier formula mapping trajectory curves
+                    let p0 = item.start;
+                    let p1 = item.mid;
+                    let p2 = item.target;
+
+                    let t = item.progress;
+                    let x = Math.pow(1 - t, 2) * p0.x + 2 * (1 - t) * t * p1.x + Math.pow(t, 2) * p2.x;
+                    let y = Math.pow(1 - t, 2) * p0.y + 2 * (1 - t) * t * p1.y + Math.pow(t, 2) * p2.y;
+                    let z = Math.pow(1 - t, 2) * p0.z + 2 * (1 - t) * t * p1.z + Math.pow(t, 2) * p2.z;
+
+                    item.mesh.position.set(x, y, z);
+                    item.mesh.lookAt(p2);
+
+                    // Add vector tracking point to trajectory path array
+                    item.trailPositions.push(x, y, z);
+                    item.trailLine.geometry.setAttribute('position', new THREE.Float32BufferAttribute(item.trailPositions, 3));
+                    item.trailLine.geometry.computeBoundingSphere();
+                } else {
+                    item.mesh.visible = false;
+                }
+            });
+
+            document.getElementById('hud-time').innerText = simTime.toFixed(1) + " s";
+            document.getElementById('hud-active').innerText = activeCount;
+            if(activeCount === 0) document.getElementById('hud-status').innerText = "ALL IMPACTS CONFIRMED";
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>

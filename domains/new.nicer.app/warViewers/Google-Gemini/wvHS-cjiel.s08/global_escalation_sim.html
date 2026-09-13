@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Strategic Escalation Simulation</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #030307; font-family: 'Courier New', Courier, monospace; user-select: none; }
+        
+        #dashboard {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #00ffaa;
+            background: rgba(5, 15, 10, 0.9);
+            padding: 20px;
+            border: 1px solid #00ffaa;
+            border-radius: 4px;
+            min-width: 320px;
+            box-shadow: 0 0 20px rgba(0, 255, 170, 0.15);
+            pointer-events: auto;
+        }
+
+        .faction-block {
+            margin: 12px 0;
+            padding: 10px;
+            border: 1px dashed rgba(0, 255, 170, 0.4);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .nato-color { color: #33aaff; }
+        .brics-color { color: #ff3344; }
+
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; }
+        .stat-val { font-weight: bold; }
+
+        .btn-panel { display: flex; gap: 10px; margin-top: 15px; }
+        button {
+            background: #113322;
+            color: #00ffaa;
+            border: 1px solid #00ffaa;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            width: 100%;
+            transition: all 0.2s;
+        }
+        button:hover { background: #00ffaa; color: #000; box-shadow: 0 0 10px #00ffaa; }
+
+        #alert-banner {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(20, 0, 0, 0.85);
+            color: #ff3333;
+            border: 1px solid #ff3333;
+            padding: 15px;
+            max-width: 350px;
+            font-size: 12px;
+            display: none;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.3);
+            white-space: pre-line;
+        }
+    </style>
+    <script src="three.min.js"></script>
+    <script src="OrbitControls.js"></script>
+</head>
+<body>
+
+    <div id="dashboard">
+        <div style="text-align: center; font-size: 16px; font-weight: bold; border-bottom: 1px solid #00ffaa; padding-bottom: 6px;">STRATEGIC ENGAGEMENT LOG</div>
+        
+        <div class="faction-block">
+            <div class="stat-row nato-color" style="font-weight: bold; font-size: 14px;"><span>NATO + EU + ALLIES</span></div>
+            <div class="stat-row"><span>Structural Assets:</span><span id="nato-cities" class="stat-val nato-color">100%</span></div>
+            <div class="stat-row"><span>Intercept Capability:</span><span id="nato-def" class="stat-val">Active</span></div>
+        </div>
+
+        <div class="faction-block">
+            <div class="stat-row brics-color" style="font-weight: bold; font-size: 14px;"><span>BRICS ALLIANCE</span></div>
+            <div class="stat-row"><span>Structural Assets:</span><span id="brics-cities" class="stat-val brics-color">100%</span></div>
+            <div class="stat-row"><span>Intercept Capability:</span><span id="brics-def" class="stat-val">Active</span></div>
+        </div>
+
+        <div class="stat-row" style="margin-top: 15px; padding: 0 10px;">
+            <span>ACTIVE VECTORS:</span><span id="global-vectors" style="color: #ffaa00; font-weight: bold;">0</span>
+        </div>
+
+        <div class="btn-panel">
+            <button id="btn-restart">RESTART ENGAGEMENT</button>
+        </div>
+    </div>
+
+    <div id="alert-banner">
+        <div style="font-weight: bold; margin-bottom: 5px; text-decoration: underline;">LOGISTICAL YIELD DETECTED</div>
+        <div id="alert-text">Simulating tactical calculations...</div>
+    </div>
+
+    <script>
+        const EARTH_RADIUS = 6371;
+        let scene, camera, renderer, controls, earth;
+        let globalSalvo = [];
+        let simulationActive = true;
+
+        let natoNodes = [
+            { name: "Washington DC", lat: 38.90, lon: -77.03, status: 1 },
+            { name: "London", lat: 51.50, lon: -0.12, status: 1 },
+            { name: "Paris", lat: 48.85, lon: 2.35, status: 1 },
+            { name: "Berlin", lat: 52.52, lon: 13.40, status: 1 },
+            { name: "Tokyo", lat: 35.67, lon: 139.65, status: 1 }
+        ];
+
+        let bricsNodes = [
+            { name: "Moscow", lat: 55.75, lon: 37.61, status: 1 },
+            { name: "Beijing", lat: 39.90, lon: 116.40, status: 1 },
+            { name: "New Delhi", lat: 28.61, lon: 77.20, status: 1 },
+            { name: "Brasilia", lat: -15.79, lon: -47.88, status: 1 },
+            { name: "Pretoria", lat: -25.74, lon: 28.18, status: 1 }
+        ];
+
+        function latLongToVector3(lat, lon, radius) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180);
+            const x = -(radius * Math.sin(phi) * Math.cos(theta));
+            const z = (radius * Math.sin(phi) * Math.sin(theta));
+            const y = (radius * Math.cos(phi));
+            return new THREE.Vector3(x, y, z);
+        }
+
+        function generateProceduralMap() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048; canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = '#060c1a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#14294d'; ctx.lineWidth = 1;
+            for(let i=0; i<canvas.width; i+=50) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); ctx.stroke(); }
+            for(let j=0; j<canvas.height; j+=50) { ctx.beginPath(); ctx.moveTo(0,j); ctx.lineTo(canvas.width,j); ctx.stroke(); }
+
+            ctx.fillStyle = '#0f2042';
+            ctx.beginPath(); ctx.moveTo(200, 150); ctx.lineTo(500, 200); ctx.lineTo(450, 450); ctx.lineTo(300, 400); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(400, 480); ctx.lineTo(550, 550); ctx.lineTo(480, 850); ctx.lineTo(380, 600); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(750, 150); ctx.lineTo(1600, 100); ctx.lineTo(1500, 550); ctx.lineTo(900, 500); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(850, 450); ctx.lineTo(1100, 480); ctx.lineTo(1000, 800); ctx.lineTo(800, 600); ctx.closePath(); ctx.fill();
+
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100000);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            camera.position.set(0, EARTH_RADIUS * 1.5, EARTH_RADIUS * 1.5);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+            let sun = new THREE.DirectionalLight(0xffffff, 1.0);
+            sun.position.set(1, 1, 1).normalize();
+            scene.add(sun);
+
+            const earthGeo = new THREE.SphereGeometry(EARTH_RADIUS, 64, 64);
+            const earthMat = new THREE.MeshStandardMaterial({
+                map: generateProceduralMap(),
+                roughness: 0.8, metalness: 0.1
+            });
+            earth = new THREE.Mesh(earthGeo, earthMat);
+            scene.add(earth);
+
+            plotNodeMarkers(natoNodes, 0x33aaff);
+            plotNodeMarkers(bricsNodes, 0xff3344);
+
+            document.getElementById('btn-restart').addEventListener('click', resetSimulation);
+
+            animate();
+        }
+
+        function plotNodeMarkers(nodes, color) {
+            nodes.forEach(node => {
+                let pos = latLongToVector3(node.lat, node.lon, EARTH_RADIUS);
+                let pinGeo = new THREE.SphereGeometry(30, 8, 8);
+                let pinMat = new THREE.MeshBasicMaterial({ color: color });
+                let pinMesh = new THREE.Mesh(pinGeo, pinMat);
+                pinMesh.position.copy(pos);
+                scene.add(pinMesh);
+                node.marker = pinMesh;
+            });
+        }
+
+        function triggerSingleLaunch(origin, destination, colorHex) {
+            let startPos = latLongToVector3(origin.lat, origin.lon, EARTH_RADIUS);
+            let targetPos = latLongToVector3(destination.lat, destination.lon, EARTH_RADIUS);
+            
+            let distance = startPos.distanceTo(targetPos);
+            let peakAltitude = Math.min(2500, distance * 0.4); 
+            let midPos = startPos.clone().add(targetPos).normalize().multiplyScalar(EARTH_RADIUS + peakAltitude);
+
+            let meshGeo = new THREE.ConeGeometry(8, 35, 6);
+            meshGeo.rotateX(Math.PI / 2);
+            let meshMat = new THREE.MeshBasicMaterial({ color: colorHex });
+            let mesh = new THREE.Mesh(meshGeo, meshMat);
+            scene.add(mesh);
+
+            let trailPositions = [];
+            let trailGeo = new THREE.BufferGeometry();
+            let trailMat = new THREE.LineBasicMaterial({ color: colorHex, opacity: 0.6, transparent: true });
+            let trailLine = new THREE.Line(trailGeo, trailMat);
+            scene.add(trailLine);
+
+            globalSalvo.push({
+                mesh: mesh,
+                trailLine: trailLine,
+                trailPositions: trailPositions,
+                p0: startPos, p1: midPos, p2: targetPos,
+                progress: 0,
+                speed: 0.004 + Math.random() * 0.003,
+                destinationNode: destination
+            });
+        }
+
+        let launchTimer = 0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            if (simulationActive) {
+                launchTimer += 0.016;
+
+                if (launchTimer > 1.2) {
+                    launchTimer = 0;
+                    executeSalvoExchange();
+                }
+
+                updateTrajectoryVectors();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        function executeSalvoExchange() {
+            let activeNato = natoNodes.filter(n => n.status > 0);
+            let activeBrics = bricsNodes.filter(b => b.status > 0);
+
+            if (activeNato.length === 0 || activeBrics.length === 0) {
+                endSimulationExchange(activeNato.length === 0 ? "NATO / EU ALLIANCE YIELDS" : "BRICS ALLIANCE YIELDS");
+                return;
+            }
+
+            if (Math.random() > 0.3) {
+                let source = activeNato[Math.floor(Math.random() * activeNato.length)];
+                let target = activeBrics[Math.floor(Math.random() * activeBrics.length)];
+                triggerSingleLaunch(source, target, 0x33aaff);
+            }
+
+            if (Math.random() > 0.3) {
+                let source = activeBrics[Math.floor(Math.random() * activeBrics.length)];
+                let target = activeNato[Math.floor(Math.random() * activeNato.length)];
+                triggerSingleLaunch(source, target, 0xff3344);
+            }
+        }
+
+        function updateTrajectoryVectors() {
+            let activeVectors = 0;
+
+            for (let i = globalSalvo.length - 1; i >= 0; i--) {
+                let v = globalSalvo[i];
+                if (v.progress < 1) {
+                    v.progress += v.speed;
+                    activeVectors++;
+
+                    let t = v.progress;
+                    let x = Math.pow(1 - t, 2) * v.p0.x + 2 * (1 - t) * t * v.p1.x + Math.pow(t, 2) * v.p2.x;
+                    let y = Math.pow(1 - t, 2) * v.p0.y + 2 * (1 - t) * t * v.p1.y + Math.pow(t, 2) * v.p2.y;
+                    let z = Math.pow(1 - t, 2) * v.p0.z + 2 * (1 - t) * t * v.p1.z + Math.pow(t, 2) * v.p2.z;
+
+                    v.mesh.position.set(x, y, z);
+                    v.mesh.lookAt(v.p2);
+
+                    v.trailPositions.push(x, y, z);
+                    v.trailLine.geometry.setAttribute('position', new THREE.Float32BufferAttribute(v.trailPositions, 3));
+                    v.trailLine.geometry.computeBoundingSphere();
+                } else {
+                    processVectorImpact(v.destinationNode);
+                    scene.remove(v.mesh);
+                    scene.remove(v.trailLine);
+                    globalSalvo.splice(i, 1);
+                }
+            }
+
+            document.getElementById('global-vectors').innerText = activeVectors;
+        }
+
+        function processVectorImpact(node) {
+            if (node.status > 0) {
+                node.status -= 0.25; 
+                if (node.status <= 0) {
+                    node.status = 0;
+                    if(node.marker) node.marker.material.color.setHex(0x333333); 
+                }
+                updateDashboardStats();
+            }
+        }
+
+        function updateDashboardStats() {
+            let totalNato = natoNodes.reduce((acc, curr) => acc + curr.status, 0) / natoNodes.length * 100;
+            let totalBrics = bricsNodes.reduce((acc, curr) => acc + curr.status, 0) / bricsNodes.length * 100;
+
+            document.getElementById('nato-cities').innerText = Math.round(totalNato) + "%";
+            document.getElementById('brics-cities').innerText = Math.round(totalBrics) + "%";
+        }
+
+        function endSimulationExchange(msg) {
+            simulationActive = false;
+            document.getElementById('alert-text').innerText = msg + "\n\nCritical asset overhead limit reached. Structural assets compromised.";
+            document.getElementById('alert-banner').style.display = 'block';
+        }
+
+        function resetSimulation() {
+            globalSalvo.forEach(v => {
+                scene.remove(v.mesh);
+                scene.remove(v.trailLine);
+            });
+            globalSalvo = [];
+
+            natoNodes.forEach(n => { n.status = 1; if(n.marker) n.marker.material.color.setHex(0x33aaff); });
+            bricsNodes.forEach(b => { b.status = 1; if(b.marker) b.marker.material.color.setHex(0xff3344); });
+
+            updateDashboardStats();
+            document.getElementById('global-vectors').innerText = "0";
+            document.getElementById('alert-banner').style.display = 'none';
+            
+            simulationActive = true;
+            launchTimer = 0;
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        window.onload = init;
+    </script>
+</body>
+</html>

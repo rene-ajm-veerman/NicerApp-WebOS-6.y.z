@@ -288,6 +288,7 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
         $uDBversion = $this->dataSetName_uDBversion();
         $dataSetName = $uDBversion.$domainName.'___'.str_replace('.','_',$dbSuffix);
         $dataSetName = strtolower($dataSetName);
+        //echo 'dataSetName() : '.$dataSetName.'<br/>'; exit;
         return $dataSetName;
     }
 

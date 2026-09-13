@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hypersonic Trajectory & Payload Telemetry Simulation</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #050505; font-family: 'Courier New', Courier, monospace; }
+        #telemetry-hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #00ff66;
+            background: rgba(0, 20, 5, 0.85);
+            padding: 20px;
+            border: 1px solid #00ff66;
+            border-radius: 5px;
+            pointer-events: none;
+            min-width: 280px;
+            box-shadow: 0 0 15px rgba(0,255,102,0.2);
+        }
+        .hud-line { margin-bottom: 8px; display: flex; justify-content: space-between; }
+        .hud-value { font-weight: bold; text-shadow: 0 0 5px #00ff66; }
+        #controls-info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: #888;
+            font-size: 12px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+    <div id="telemetry-hud">
+        <div style="text-align: center; border-bottom: 1px solid #00ff66; padding-bottom: 5px; margin-bottom: 10px; font-size: 16px;">FLIGHT TELEMETRY</div>
+        <div class="hud-line"><span>STAGE:</span><span id="hud-stage" class="hud-value">LAUNCH</span></div>
+        <div class="hud-line"><span>ALTITUDE:</span><span id="hud-alt" class="hud-value">0.00 km</span></div>
+        <div class="hud-line"><span>VELOCITY:</span><span id="hud-vel" class="hud-value">0.00 m/s</span></div>
+        <div class="hud-line"><span>SPEED:</span><span id="hud-mach" class="hud-value">Mach 0.00</span></div>
+        <div class="hud-line"><span>SUB-MUNITIONS:</span><span id="hud-drones" class="hud-value">STOWED</span></div>
+    </div>
+
+    <div id="controls-info">Left Click + Drag to Rotate | Right Click + Drag to Pan | Scroll to Zoom</div>
+
+    <script>
+        const EARTH_RADIUS = 6371; 
+        const GRAVITY = 9.80665 / 1000; 
+        const R_AIR = 287.05; 
+
+        let simTime = 0;
+        let flightState = 'BOOST'; 
+        let missile = {
+            pos: new THREE.Vector3(EARTH_RADIUS + 0.1, 0, 0), 
+            vel: new THREE.Vector3(0.1, 2.5, 0.5), 
+            mass: 15000, 
+        };
+        let subMunitions = [];
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        camera.position.set(EARTH_RADIUS * 1.2, EARTH_RADIUS * 0.5, EARTH_RADIUS * 1.2);
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        const ambientLight = new THREE.AmbientLight(0x333333);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+        dirLight.position.set(5, 3, 5).normalize();
+        scene.add(dirLight);
+
+        const earthGeo = new THREE.SphereGeometry(EARTH_RADIUS, 64, 64);
+        const earthMat = new THREE.MeshStandardMaterial({
+            color: 0x112244,
+            wireframe: true, 
+            transparent: true,
+            opacity: 0.6
+        });
+        const earth = new THREE.Mesh(earthGeo, earthMat);
+        scene.add(earth);
+
+        const atmGeo = new THREE.SphereGeometry(EARTH_RADIUS + 100, 64, 64);
+        const atmMat = new THREE.MeshBasicMaterial({ color: 0x0055ff, wireframe: true, transparent: true, opacity: 0.05 });
+        const atm = new THREE.Mesh(atmGeo, atmMat);
+        scene.add(atm);
+
+        const missileGeo = new THREE.ConeGeometry(5, 40, 8);
+        missileGeo.rotateZ(-Math.PI / 2); 
+        const missileMat = new THREE.MeshBasicMaterial({ color: 0xff3300 });
+        const missileMesh = new THREE.Mesh(missileGeo, missileMat);
+        scene.add(missileMesh);
+
+        const pathMaxPoints = 10000;
+        const pathPositions = new Float32Array(pathMaxPoints * 3);
+        const pathGeo = new THREE.BufferGeometry();
+        pathGeo.setAttribute('position', new THREE.BufferAttribute(pathPositions, 3));
+        const pathMat = new THREE.LineBasicMaterial({ color: 0xffaa00 });
+        const pathLine = new THREE.Line(pathGeo, pathMat);
+        scene.add(pathLine);
+        let pathCount = 0;
+
+        function getSpeedOfSound(altitudeKm) {
+            let temp = 288.15 - (6.5 * Math.min(altitudeKm, 11)); 
+            if (altitudeKm > 11 && altitudeKm < 20) temp = 216.65; 
+            else if (altitudeKm >= 20) temp = 216.65 + (1.0 * (altitudeKm - 20));
+            return Math.sqrt(1.4 * R_AIR * temp) / 1000; 
+        }
+
+        const dt = 0.05; 
+
+        function animate() {
+            requestAnimationFrame(animate);
+            simTime += dt;
+
+            let currentRadius = missile.pos.length();
+            let altitude = currentRadius - EARTH_RADIUS;
+
+            if (altitude <= 0 && simTime > 5) {
+                flightState = 'IMPACT';
+                missile.vel.set(0,0,0);
+            }
+
+            if (flightState !== 'IMPACT') {
+                let gravVector = missile.pos.clone().normalize().multiplyScalar(-GRAVITY);
+                
+                if (flightState === 'BOOST' && simTime > 30) {
+                    flightState = 'HYPERSONIC_CRUISE';
+                    missile.vel.x *= 1.5;
+                    missile.vel.y *= 0.2; 
+                } else if (flightState === 'HYPERSONIC_CRUISE' && simTime > 120) {
+                    flightState = 'DISPERSAL';
+                    deployPayload(missile.pos, missile.vel);
+                }
+
+                missile.vel.add(gravVector.multiplyScalar(dt));
+                missile.pos.add(missile.vel.clone().multiplyScalar(dt));
+
+                missileMesh.position.copy(missile.pos);
+                
+                if (missile.vel.lengthSq() > 0) {
+                    let dir = missile.vel.clone().normalize();
+                    let mx = new THREE.Matrix4().lookAt(new THREE.Vector3(), dir, new THREE.Vector3(0,1,0));
+                    missileMesh.quaternion.setFromRotationMatrix(mx);
+                }
+
+                if (pathCount < pathMaxPoints) {
+                    let arr = pathLine.geometry.attributes.position.array;
+                    arr[pathCount * 3] = missile.pos.x;
+                    arr[pathCount * 3 + 1] = missile.pos.y;
+                    arr[pathCount * 3 + 2] = missile.pos.z;
+                    pathCount++;
+                    pathLine.geometry.attributes.position.needsUpdate = true;
+                    pathLine.geometry.setDrawRange(0, pathCount);
+                }
+            }
+
+            subMunitions.forEach(drone => {
+                let grav = drone.pos.clone().normalize().multiplyScalar(-GRAVITY);
+                let alt = drone.pos.length() - EARTH_RADIUS;
+                if (alt < 40) {
+                    drone.vel.y += 0.005 * dt; 
+                }
+                drone.vel.add(grav.multiplyScalar(dt));
+                drone.pos.add(drone.vel.clone().multiplyScalar(dt));
+                drone.mesh.position.copy(drone.pos);
+            });
+
+            let speedKms = missile.vel.length();
+            let speedMs = speedKms * 1000;
+            let speedOfSound = getSpeedOfSound(altitude);
+            let mach = speedKms / speedOfSound;
+
+            document.getElementById('hud-stage').innerText = flightState;
+            document.getElementById('hud-alt').innerText = altitude.toFixed(2) + " km";
+            document.getElementById('hud-vel').innerText = speedMs.toFixed(1) + " m/s";
+            document.getElementById('hud-mach').innerText = "Mach " + mach.toFixed(2);
+            document.getElementById('hud-drones').innerText = subMunitions.length > 0 ? `${subMunitions.length} ACTIVE (LOITER)` : "STOWED";
+
+            controls.target.copy(missileMesh.position);
+            controls.update();
+
+            renderer.render(scene, camera);
+        }
+
+        function deployPayload(originPos, originVel) {
+            if (subMunitions.length > 0) return; 
+
+            const droneGeo = new THREE.BoxGeometry(2, 2, 6);
+            const droneMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
+
+            for (let i = 0; i < 8; i++) {
+                let droneMesh = new THREE.Mesh(droneGeo, droneMat);
+                scene.add(droneMesh);
+
+                let variance = new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.1,
+                    (Math.random() - 0.5) * 0.05,
+                    (Math.random() - 0.5) * 0.1
+                );
+
+                subMunitions.push({
+                    pos: originPos.clone(),
+                    vel: originVel.clone().add(variance),
+                    mesh: droneMesh
+                });
+            }
+        }
+
+        window.addEventListener('resize', onWindowResize, false);
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

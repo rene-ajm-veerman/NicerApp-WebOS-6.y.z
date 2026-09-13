@@ -45,7 +45,7 @@ class NicerAppWebOS {
         $fn = dirname(__FILE__).'/../version.json';
         $this->about = file_exists($fn)?json_decode (file_get_contents($fn)):[];
         //echo '<pre style="color:purple;">'; var_dump($_GET); echo '</pre>';
-        //echo '<pre style="color:red;">'; var_dump($_SERVER); echo '</pre>';
+        //echo '<pre style="color:red;">t123:'; var_dump($_SERVER); echo '</pre>';
         $this->baseIndentLevel = 1;
 
         $p1 = realpath(dirname(__FILE__).DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR);
@@ -82,6 +82,7 @@ class NicerAppWebOS {
                 $this->webPath = realpath($_SERVER['PWD'].'/../..');
             }
         }
+        //echo $this->domainFolder.'<br/>'; exit;
 
         // You'll need this too.
         $this->domainPath = $this->path.'/domains/'.$this->domainFolder;

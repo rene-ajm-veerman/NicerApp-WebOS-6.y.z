@@ -9,7 +9,7 @@ rene.veerman.netherlands@gmail.com
 NicerApp WebOS from Nicer Enterprises
 */
 
-    require_once (__DIR__.'/businessLogic/vendor/autoload.php');
+    require_once (realpath(__DIR__.'/businessLogic/vendor/autoload.php'));
     use Jaybizzle\CrawlerDetect\CrawlerDetect;
     define ("SESSION_ERRORS_ID", "NicerApp_WebOS_errors_PHP");
     define ("SEID", SESSION_ERRORS_ID);
