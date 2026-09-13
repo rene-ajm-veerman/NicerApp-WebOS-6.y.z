@@ -119,11 +119,10 @@
       "Demons are spiritual individuals who are sometimes referred to as 'fallen angels', and they usually obey a specific God or number of Gods that often commit evil acts."
     ],
     "about Humans": {
-      "organisational structure, by a hierarchial list of profession names": {
-        "PRIORITIZED_LIST: farmers, doctors, artists, writers, scientists, engineers, construction workers, workers in professions other than construction (who may be slaves according to some description or another, even in today's world), and other civilians": {
-          "per region? PRIORITIZED_LIST: one or more government(s), political parties, politicians, warriors, spies, judges, lawyers, diplomats, activists, business leaders, traders, sales staff, consumers": {}
-        }
-      },
+      "organisational structure, by a hierarchial list of profession names": [
+        "PRIORITIZED_LIST: farmers, doctors, artists, writers, scientists, engineers, construction workers, workers in professions other than construction (who may be slaves according to some description or another, even in today's world), and other civilians",
+        "per region? PRIORITIZED_LIST: one or more government(s), political parties, politicians, warriors, spies, judges, lawyers, diplomats, activists, business leaders, traders, sales staff, consumers"
+      ],
       "what is a trades person?": "a trader buys and sells finished products, produced by farmers or industries or companies.",
       "what is a company?": "a company is a group of humans who are led by business leaders who employ workers and/or farmers and/or artists.",
       "what is employment?": "it is the voluntary exchange of a person's time to work in a certain job or jobs by which they receive money and/or housing, temperature control for their bodies and all other necessities for an individual's life. employment requires that a worker pass one or more school exams.",
