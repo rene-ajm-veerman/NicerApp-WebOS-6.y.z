@@ -20,7 +20,8 @@
     },
     "apt_update": {
       "type": "process",
-      "label": "apt update &&\\napt install -y curl"
+      "label": "Install prerequisites",
+      "copy" : "apt update &&\\napt install -y curl nginx apache2 letsencrypt && cd /var/www"
     },
     "download_installer": {
         "type": "process",
@@ -33,7 +34,7 @@
     },
     "cleanup": {
         "type": "process",
-        "label": "Remove previous installation",
+        "label": "OPTIONAL : Remove previous installation",
         "copy": "rm -rf /var/www/NicerAppWebOS-*"
     },
     "extract": {

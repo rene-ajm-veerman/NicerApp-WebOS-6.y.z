@@ -2,7 +2,11 @@
 /**
  * phpFlowcharts.class.php
  * Core class that turns a structured JSON flowchart definition into Mermaid / HTML / DOT
- * Now supports "copy" on nodes → clickable clipboard copy in the HTML version
+ *
+ * Features:
+ *  - Mermaid, HTML and Graphviz DOT output
+ *  - "copy" key on nodes → clickable clipboard copy in the HTML version
+ *  - Proper handling of multi-line labels and special characters
  */
 
 declare(strict_types=1);
@@ -42,23 +46,59 @@ class phpFlowcharts
     }
 
     /**
-     * Generate Mermaid source (includes click handlers for copyable nodes)
+     * Generate Mermaid source (includes click handlers + colored node types)
      */
     public function toMermaid(): string
     {
         $lines = ["flowchart {$this->direction}"];
+
+        // ----- class definitions (semi-transparent fills, opacity ≈ 0.555) -----
+        $lines[] = "    classDef startEnd fill:rgba(34,197,94,0.555),stroke:#4ade80,stroke-width:2px,color:#f0fdf4";
+        $lines[] = "    classDef process fill:rgba(59,130,246,0.555),stroke:#60a5fa,stroke-width:1px,color:#eff6ff";
+        $lines[] = "    classDef decision fill:rgba(245,158,11,0.555),stroke:#fbbf24,stroke-width:2px,color:#fffbeb";
+        $lines[] = "    classDef error fill:rgba(239,68,68,0.555),stroke:#f87171,stroke-width:2px,color:#fef2f2";
+        $lines[] = "    classDef io fill:rgba(168,85,247,0.555),stroke:#c084fc,stroke-width:1px,color:#faf5ff";
+        $lines[] = "    classDef subroutine fill:rgba(20,184,166,0.555),stroke:#2dd4bf,stroke-width:1px,color:#f0fdfa";
+        $lines[] = "    classDef normal fill:rgba(148,163,184,0.555),stroke:#94a3b8,stroke-width:1px,color:#f8fafc";
+
+        // Collect nodes per class so we can emit clean "class id1,id2 classname" lines
+        $classMap = [
+            'startEnd'   => [],
+            'process'    => [],
+            'decision'   => [],
+            'error'      => [],
+            'io'         => [],
+            'subroutine' => [],
+            'normal'     => [],
+        ];
 
         // Nodes
         foreach ($this->nodes as $id => $node) {
             $type  = $node['type']  ?? 'process';
             $label = $node['label'] ?? $id;
 
-            // Visual hint that the node is copyable
+            // Normalize newlines
+            $label = str_replace(["\\n", "\r\n", "\r", "\n"], "\n", $label);
+
+            // Visual hint for copyable nodes
             if (!empty($node['copy'])) {
                 $label .= " 📋";
             }
 
             $lines[] = "    " . $this->mermaidShape($type, $id, $label);
+
+            // Map type → class name
+            $className = match ($type) {
+                'start', 'end'  => 'startEnd',
+                'decision'      => 'decision',
+                'error'         => 'error',
+                'io'            => 'io',
+                'subroutine'    => 'subroutine',
+                'process'       => 'process',
+                default         => 'normal',
+            };
+
+            $classMap[$className][] = $id;
         }
 
         // Edges
@@ -69,10 +109,16 @@ class phpFlowcharts
             $lines[] = "    {$from} -->{$label} {$to}";
         }
 
+        // Apply classes (this is the most reliable syntax)
+        foreach ($classMap as $className => $ids) {
+            if (!empty($ids)) {
+                $lines[] = "    class " . implode(',', $ids) . " {$className}";
+            }
+        }
+
         // Click handlers for copyable nodes
         foreach ($this->nodes as $id => $node) {
             if (!empty($node['copy'])) {
-                // We only pass the node id – the actual text lives in a JS map
                 $lines[] = "    click {$id} call phpFlowchartsCopy(\"{$id}\") \"Click to copy command\"";
             }
         }
@@ -93,7 +139,7 @@ class phpFlowcharts
         ];
 
         foreach ($this->nodes as $id => $node) {
-            $label = str_replace("\n", "\\n", $node['label'] ?? $id);
+            $label = str_replace(["\\n", "\r\n", "\r", "\n"], "\\n", $node['label'] ?? $id);
             if (!empty($node['copy'])) {
                 $label .= " 📋";
             }
@@ -129,10 +175,15 @@ class phpFlowcharts
                 $copyMap[$id] = $node['copy'];
             }
         }
-        $copyMapJson = json_encode($copyMap, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        $copyMapJson = json_encode(
+            $copyMap,
+            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
+        );
 
-        // Escape for embedding inside HTML
-        $mermaidEscaped = htmlspecialchars($mermaidSource, ENT_NOQUOTES);
+        // Escape only title & description for HTML safety.
+        // Do NOT escape the Mermaid source – Mermaid needs the raw text.
+        $title       = htmlspecialchars($this->title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $description = htmlspecialchars($this->description, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
         return <<<HTML
         <!DOCTYPE html>
@@ -140,25 +191,24 @@ class phpFlowcharts
         <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{$this->title}</title>
+        <title>{$title}</title>
         <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
         <style>
         body {
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             margin: 2rem;
-            background: #0f172a;
+            background: none;
             color: #e2e8f0;
         }
         h1 { margin-bottom: 0.25rem; }
         .desc { color: #94a3b8; margin-bottom: 1.5rem; max-width: 70ch; }
         .hint { color: #64748b; font-size: 0.9rem; margin-bottom: 2rem; }
         .mermaid {
-            background: #1e293b;
+            background: rgba(100,20,200,0.555);
             padding: 2rem;
             border-radius: 12px;
             overflow: auto;
         }
-        /* Toast notification */
         #toast {
         visibility: hidden;
         min-width: 220px;
@@ -184,18 +234,17 @@ class phpFlowcharts
         </style>
         </head>
         <body>
-        <h1>{$this->title}</h1>
-        <p class="desc">{$this->description}</p>
+        <h1>{$title}</h1>
+        <p class="desc">{$description}</p>
         <p class="hint">Nodes marked with 📋 are clickable — click them to copy the command to your clipboard.</p>
 
         <div class="mermaid">
-        {$mermaidEscaped}
+        {$mermaidSource}
         </div>
 
         <div id="toast">Copied to clipboard!</div>
 
         <script>
-        // Map of nodeId → text that should be copied
         window.phpFlowchartsCopyMap = {$copyMapJson};
 
         window.phpFlowchartsCopy = function(nodeId) {
@@ -205,7 +254,6 @@ class phpFlowcharts
                 return;
             }
 
-            // Modern clipboard API
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text).then(showToast).catch(fallbackCopy);
             } else {
@@ -213,7 +261,6 @@ class phpFlowcharts
             }
 
             function fallbackCopy() {
-                // Fallback for older browsers / non-HTTPS
                 const ta = document.createElement('textarea');
                 ta.value = text;
                 ta.style.position = 'fixed';
@@ -239,7 +286,7 @@ class phpFlowcharts
         mermaid.initialize({
             startOnLoad: true,
             theme: 'dark',
-            securityLevel: 'loose',   // required for click callbacks
+            securityLevel: 'loose',
             flowchart: {
                 curve: 'basis',
                 htmlLabels: true
@@ -293,7 +340,7 @@ class phpFlowcharts
 
     private function mermaidShape(string $type, string $id, string $label): string
     {
-        // Support multi-line labels + escape double quotes
+        // Convert real newlines to Mermaid's <br/> and escape double quotes
         $label = str_replace(["\n", '"'], ["<br/>", "'"], $label);
 
         return match ($type) {
