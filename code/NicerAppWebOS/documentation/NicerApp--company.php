@@ -63,7 +63,6 @@ i will keep NicerApp WebOS (https://nicer.app) as open source  (C)+(R) by myself
 <h2>Executives</h2>
 
 <div class="backdropped naComments_onTheSide">
-    <img src="/NicerAppWebOS/documentation/IMG_20260120_133439_1_800.jpg" style="width:400px;"/>
     <div class="backdropped naComments_onTheSide">
         Owner, Founder, CTO, Senior Coder, CFO :<br/>
         <a href="https://www.youtube.com/watch?v=nO5KNu-Qwcs" target="naReneMemoires" class="nomod noPushState">Rene A.J.M. Veerman</a><br/>[ rene.veerman.netherlands@gmail.com ]<br/>

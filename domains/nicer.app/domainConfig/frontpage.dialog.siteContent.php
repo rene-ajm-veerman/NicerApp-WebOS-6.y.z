@@ -43,7 +43,7 @@
         E.T.A. until next alpha/beta release : no longer than 1 week from now.
         </p>
 
-        <iframe src="https://nicer.app/NicerAppWebOS/scripts.install/flowchart.html" style="border:none;width:700px;height:1500px;"></iframe>
+        <iframe src="https://nicer.app/NicerAppWebOS/scripts.install/flowchart.html" style="border:none;width:700px;height:1500px;overflow:hidden;"></iframe>
 
 <!--        <p><a href="https://said.by/view/eyJcL05pY2VyQXBwV2ViT1NcL2FwcHNcL05pY2VyQXBwV2ViT1NcL2NvbnRlbnQtbWFuYWdlbWVudC1zeXN0ZW1zXC9OaWNlckFwcFdlYk9TIjp7ImNtc1ZpZXdNZWRpYSI6eyJjb2RlUGF0aCI6IlwvdmFyXC93d3dcL25pY2VyLmFwcC01LjEwLnpcL2RvbWFpbnNcL3NhaWQuYnlcL3NpdGVEYXRhXC9zYWlkLmJ5XC9Vc2Vyc1wvUmVuZSBBSk0gVmVlcm1hblwvTWVkaWEgQWxidW1zXC9OZXciLCJmaWxlbmFtZSI6IlNjcmVlbnNob3RfMjAyNjA2MTJfMjAxMjQwLnBuZyJ9fX0" class="nomod noPushState" target="naScreenshots-20260623-1016CET-AMS">Screenshot</a> <a href="https://said.by/Rene-AJM-Veerman/about/NicerApp" class="nomod noPushState" target="naScreenshots-collection">collection</a> of <a class="nomod noPushState" target="naDiary-20260623-1008CET-AMS" href="https://nicer.app/view/eyJhaWQiOjAsImZkcyI6NTcxMjAwLCJycCI6IlwvMjAyNiBCZXN0XC8ifQ?idxStart=0&pw=alwaysXMASzzz">this</a>.</p>-->
         <p style="padding:8px;border-radius:5px;margin-block-start:0;margin-block-end:0;margin-inline-start:0;margin-inline-end:0;">
@@ -53,10 +53,17 @@
 
     <div class="naFrontpage_headerText naFrontpage_headerText_intro" style="float:left">
     <p>
+    2026-09-16 12:00CET; Change of plans : I will morph my software via it's photo album and file explorer features into a banking and webshops platform. I want to expand significantly on my own CFO skills rather than rely on -in-my-opinion- shady accountancy firms, small or large. I will try Grok as my teacher in these matters.
+    </p>
+    </div>
+    <div style="height:250px"></div>
+
+    <div class="naFrontpage_headerText naFrontpage_headerText_intro" style="float:left">
+    <p>
     I've been thinking on how to prevent over-usage of my system, and the answer is a side-module, another human+AI-written statistical algorithm, to compute graphdata of daily usage hours (measured in seconds) per user/IP-address, per app, per NicerApp domain, results also stored in database for quick retrieval upon display or decision-time.
     </p>
     </div>
-<div style="height:450px"></div>
+    <div style="height:300px"></div>
 
     <div class="naFrontpage_headerText naFrontpage_headerText_recentAchievement" style="float:left">
         <p class="backdropped" style="color:lime">

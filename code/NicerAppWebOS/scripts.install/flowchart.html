@@ -43,35 +43,36 @@ transition: opacity 0.3s, visibility 0.3s;
 visibility: visible;
 opacity: 1;
 }
+/* Make copyable nodes stand out */
+.mermaid .node.clickable rect,
+.mermaid .node.clickable .label-container {
+    stroke-dasharray: 6 3 !important;
+    stroke-width: 2px !important;
+}
 </style>
 </head>
-<body>
+<body style="overflow:hidden">
 <h1>NicerApp WebOS 6.y.z Installation</h1>
-<p class="desc">High-level installation flowchart for recreating the official install scripts</p>
-<p class="hint">Nodes marked with 📋 are clickable — click them to copy the command to your clipboard.</p>
+<p class="desc">High-level installation flowchart for recreating the official install scripts.<br/>To be augmented later.</p>
+<p class="hint">
+<strong>Tip:</strong> Nodes with a dashed border are clickable — click them to copy the command to your clipboard.
+</p>
 
 <div class="mermaid">
 flowchart TD
-    classDef startEnd fill:rgba(34,197,94,0.555),stroke:#4ade80,stroke-width:2px,color:#f0fdf4
-    classDef process fill:rgba(59,130,246,0.555),stroke:#60a5fa,stroke-width:1px,color:#eff6ff
-    classDef decision fill:rgba(245,158,11,0.555),stroke:#fbbf24,stroke-width:2px,color:#fffbeb
-    classDef error fill:rgba(239,68,68,0.555),stroke:#f87171,stroke-width:2px,color:#fef2f2
-    classDef io fill:rgba(168,85,247,0.555),stroke:#c084fc,stroke-width:1px,color:#faf5ff
-    classDef subroutine fill:rgba(20,184,166,0.555),stroke:#2dd4bf,stroke-width:1px,color:#f0fdfa
-    classDef normal fill:rgba(148,163,184,0.555),stroke:#94a3b8,stroke-width:1px,color:#f8fafc
     start(["Start Installation"])
     detect_os["Detect OS<br/>(Linux / Windows / macOS)"]
     is_linux{{"Is Linux?"}}
-    apt_update["Install prerequisites 📋"]
-    download_installer["Download & run official installer 📋"]
+    apt_update["Install prerequisites"]
+    download_installer["Download & run official installer"]
     check_previous{{"Previous install<br/>exists?"}}
-    cleanup["OPTIONAL : Remove previous installation 📋"]
+    cleanup["OPTIONAL : Remove previous installation"]
     extract["Extract package<br/>+ set permissions"]
     apache_vhost["Configure Apache<br/>VirtualHost + a2ensite"]
     couchdb["Install / configure<br/>CouchDB + credentials"]
     set_perms["Run setPermissions.sh"]
     done(["Installation Complete<br/>→ http://localhost"])
-    error_os[/"Unsupported OS<br/>(manual install required)"\]
+    error_os["Unsupported OS<br/>(manual install required)"]
     start --> detect_os
     detect_os --> is_linux
     is_linux -->|Yes| apt_update
@@ -85,6 +86,13 @@ flowchart TD
     apache_vhost --> couchdb
     couchdb --> set_perms
     set_perms --> done
+    classDef startEnd fill:#16a34a,stroke:#4ade80,stroke-width:2px,color:#f0fdf4
+    classDef process fill:#2563eb,stroke:#93c5fd,stroke-width:1px,color:#eff6ff
+    classDef decision fill:#d97706,stroke:#fcd34d,stroke-width:2px,color:#fffbeb
+    classDef error fill:#dc2626,stroke:#fca5a5,stroke-width:2px,color:#fef2f2
+    classDef io fill:#9333ea,stroke:#d8b4fe,stroke-width:1px,color:#faf5ff
+    classDef subroutine fill:#0d9488,stroke:#5eead4,stroke-width:1px,color:#f0fdfa
+    classDef normal fill:#64748b,stroke:#cbd5e1,stroke-width:1px,color:#f8fafc
     class start,done startEnd
     class detect_os,apt_update,download_installer,cleanup,extract,apache_vhost,couchdb,set_perms process
     class is_linux,check_previous decision

@@ -45,23 +45,39 @@ class phpFlowcharts
         $this->edges       = $data['edges'];
     }
 
-    /**
-     * Generate Mermaid source (includes click handlers + colored node types)
-     */
     public function toMermaid(): string
     {
         $lines = ["flowchart {$this->direction}"];
 
-        // ----- class definitions (semi-transparent fills, opacity ≈ 0.555) -----
-        $lines[] = "    classDef startEnd fill:rgba(34,197,94,0.555),stroke:#4ade80,stroke-width:2px,color:#f0fdf4";
-        $lines[] = "    classDef process fill:rgba(59,130,246,0.555),stroke:#60a5fa,stroke-width:1px,color:#eff6ff";
-        $lines[] = "    classDef decision fill:rgba(245,158,11,0.555),stroke:#fbbf24,stroke-width:2px,color:#fffbeb";
-        $lines[] = "    classDef error fill:rgba(239,68,68,0.555),stroke:#f87171,stroke-width:2px,color:#fef2f2";
-        $lines[] = "    classDef io fill:rgba(168,85,247,0.555),stroke:#c084fc,stroke-width:1px,color:#faf5ff";
-        $lines[] = "    classDef subroutine fill:rgba(20,184,166,0.555),stroke:#2dd4bf,stroke-width:1px,color:#f0fdfa";
-        $lines[] = "    classDef normal fill:rgba(148,163,184,0.555),stroke:#94a3b8,stroke-width:1px,color:#f8fafc";
+        // 1. Nodes first (no emoji inside labels for maximum compatibility)
+        foreach ($this->nodes as $id => $node) {
+            $type  = $node['type']  ?? 'process';
+            $label = $node['label'] ?? $id;
 
-        // Collect nodes per class so we can emit clean "class id1,id2 classname" lines
+            // Normalize newlines
+            $label = str_replace(["\\n", "\r\n", "\r", "\n"], "\n", $label);
+
+            $lines[] = "    " . $this->mermaidShape($type, $id, $label);
+        }
+
+        // 2. Edges
+        foreach ($this->edges as $edge) {
+            $from  = $edge['from'];
+            $to    = $edge['to'];
+            $label = isset($edge['label']) ? "|{$edge['label']}|" : '';
+            $lines[] = "    {$from} -->{$label} {$to}";
+        }
+
+        // 3. classDef – solid colors (very reliable) + good contrast
+        $lines[] = "    classDef startEnd fill:#16a34a,stroke:#4ade80,stroke-width:2px,color:#f0fdf4";
+        $lines[] = "    classDef process fill:#2563eb,stroke:#93c5fd,stroke-width:1px,color:#eff6ff";
+        $lines[] = "    classDef decision fill:#d97706,stroke:#fcd34d,stroke-width:2px,color:#fffbeb";
+        $lines[] = "    classDef error fill:#dc2626,stroke:#fca5a5,stroke-width:2px,color:#fef2f2";
+        $lines[] = "    classDef io fill:#9333ea,stroke:#d8b4fe,stroke-width:1px,color:#faf5ff";
+        $lines[] = "    classDef subroutine fill:#0d9488,stroke:#5eead4,stroke-width:1px,color:#f0fdfa";
+        $lines[] = "    classDef normal fill:#64748b,stroke:#cbd5e1,stroke-width:1px,color:#f8fafc";
+
+        // 4. Apply classes
         $classMap = [
             'startEnd'   => [],
             'process'    => [],
@@ -72,22 +88,8 @@ class phpFlowcharts
             'normal'     => [],
         ];
 
-        // Nodes
         foreach ($this->nodes as $id => $node) {
-            $type  = $node['type']  ?? 'process';
-            $label = $node['label'] ?? $id;
-
-            // Normalize newlines
-            $label = str_replace(["\\n", "\r\n", "\r", "\n"], "\n", $label);
-
-            // Visual hint for copyable nodes
-            if (!empty($node['copy'])) {
-                $label .= " 📋";
-            }
-
-            $lines[] = "    " . $this->mermaidShape($type, $id, $label);
-
-            // Map type → class name
+            $type = $node['type'] ?? 'process';
             $className = match ($type) {
                 'start', 'end'  => 'startEnd',
                 'decision'      => 'decision',
@@ -97,26 +99,16 @@ class phpFlowcharts
                 'process'       => 'process',
                 default         => 'normal',
             };
-
             $classMap[$className][] = $id;
         }
 
-        // Edges
-        foreach ($this->edges as $edge) {
-            $from  = $edge['from'];
-            $to    = $edge['to'];
-            $label = isset($edge['label']) ? "|{$edge['label']}|" : '';
-            $lines[] = "    {$from} -->{$label} {$to}";
-        }
-
-        // Apply classes (this is the most reliable syntax)
         foreach ($classMap as $className => $ids) {
             if (!empty($ids)) {
                 $lines[] = "    class " . implode(',', $ids) . " {$className}";
             }
         }
 
-        // Click handlers for copyable nodes
+        // 5. Click handlers
         foreach ($this->nodes as $id => $node) {
             if (!empty($node['copy'])) {
                 $lines[] = "    click {$id} call phpFlowchartsCopy(\"{$id}\") \"Click to copy command\"";
@@ -183,7 +175,7 @@ class phpFlowcharts
         // Escape only title & description for HTML safety.
         // Do NOT escape the Mermaid source – Mermaid needs the raw text.
         $title       = htmlspecialchars($this->title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-        $description = htmlspecialchars($this->description, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $description = $this->description;
 
         return <<<HTML
         <!DOCTYPE html>
@@ -231,12 +223,20 @@ class phpFlowcharts
         visibility: visible;
         opacity: 1;
         }
+        /* Make copyable nodes stand out */
+        .mermaid .node.clickable rect,
+        .mermaid .node.clickable .label-container {
+            stroke-dasharray: 6 3 !important;
+            stroke-width: 2px !important;
+        }
         </style>
         </head>
         <body>
         <h1>{$title}</h1>
         <p class="desc">{$description}</p>
-        <p class="hint">Nodes marked with 📋 are clickable — click them to copy the command to your clipboard.</p>
+        <p class="hint">
+        <strong>Tip:</strong> Nodes with a dashed border are clickable — click them to copy the command to your clipboard.
+        </p>
 
         <div class="mermaid">
         {$mermaidSource}
@@ -340,16 +340,15 @@ class phpFlowcharts
 
     private function mermaidShape(string $type, string $id, string $label): string
     {
-        // Convert real newlines to Mermaid's <br/> and escape double quotes
         $label = str_replace(["\n", '"'], ["<br/>", "'"], $label);
 
         return match ($type) {
             'start', 'end'   => "{$id}([\"{$label}\"])",
             'decision'       => "{$id}{{\"{$label}\"}}",
-            'error'          => "{$id}[/\"{$label}\"\\]",
+            'error'          => "{$id}[\"{$label}\"]",
             'io'             => "{$id}[/\"{$label}\"/]",
             'subroutine'     => "{$id}[[\"{$label}\"]]",
-            default          => "{$id}[\"{$label}\"]",   // process
+            default          => "{$id}[\"{$label}\"]",
         };
     }
 
