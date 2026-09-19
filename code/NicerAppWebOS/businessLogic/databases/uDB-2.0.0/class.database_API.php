@@ -231,9 +231,10 @@ class class_NicerAppWebOS_database_API {
 
         $html = '<link type="text/css" rel="StyleSheet" href="/NicerAppWebOS/db_init.css?c='.date('Ymd_His').'">'.PHP_EOL;
         foreach ($allDBs as $cIdx => $dbsRec) {
+            //echo '<pre>'; var_dump($dbsRec); echo '</pre>'; exit;
             $html .= '<div id="listDatabases_cIdx__'.$cIdx.'" class="listDatabases_forConnection">'.PHP_EOL;
                 $html .= "\t".'<div id="listDatabases_cIdxConnectionDetails__'.$cIdx.'" class="listDatabases_connectionSettings">'.PHP_EOL;
-                    $html .= "\t\t".'server connection <span class="dbConnectionType">'.$dbsRec['c']['ct'].'</span> : <span class="dbConnectionAddress">'.$dbsRec['c']['cRec']['username'].':*****@'.$dbsRec['c']['cRec']['host'].':'.$dbsRec['c']['cRec']['port'].'</span>'.PHP_EOL;
+                    $html .= "\t\t".'server connection <span class="dbConnectionType">'.$dbsRec['c']['ct'].'</span> : <span class="dbConnectionAddress">'.$dbsRec['c']['cRec']['databases']['couchdb']['username'].':*****@'.$dbsRec['c']['cRec']['databases']['couchdb']['host'].':'.$dbsRec['c']['cRec']['databases']['couchdb']['port'].'</span>'.PHP_EOL;
                 $html .= "\t".'</div>'.PHP_EOL;
 
 

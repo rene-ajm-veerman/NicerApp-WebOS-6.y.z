@@ -147,6 +147,43 @@ function addPrefixes ($dbs) {
 }
 
 
+$db = $naWebOS->dbsAdmin->findConnection('couchdb');
+$cdb = $db->cdb;
+
+/*
+ * Fetch users into array
+ */
+$prefix = $naWebOS->domainFolderForDB . '___';
+$findCommand = [
+    'selector' => [
+        'name' => [
+            '$regex' => '^' . preg_quote($prefix, '/')
+        ]
+    ],
+    //'fields' => ['_id', '_rev', 'name', 'roles', 'type']
+    'fields' => ['_id', '_rev', 'name']
+];
+try {
+    $call = $cdb->find ($findCommand);
+} catch (Exception $e) {
+    $msg = $fncn.' FAILED while trying to find in \''.$dataSetName.'\' : '.$e->getMessage();
+    trigger_error ($msg, E_USER_NOTICE);
+    echo $msg;
+    return false;
+}
+$users = [];
+if (
+    is_object($call)
+    && is_object($call->body)
+    && is_array($call->body->docs)
+) {
+    foreach ($call->body->docs as $idx => $doc) {
+        $users[] = $db->translate_couchdbUsername_to_plainUsername($doc->name);
+    };
+}
+echo '<pre style="color:yellow;background:purple;margin:10px;padding:10px;border-radius:10px;">'; var_dump ($users); echo '</pre>'; //exit;
+
+
 
 if (mustDo('analytics')) {
     $dbs = goDo ($dbs, [ 'analytics' ]);
@@ -205,6 +242,13 @@ if (mustDo('app_fileManager')) {
 
 $dbs2 = addPrefixes($dbs);
 //echo '<pre style="color:lime;background:navy;border-radius:10px;margin:10px;">t118:'; echo json_encode ($naWebOS->dbsAdmin->findConnection('couchdb'), JSON_PRETTY_PRINT); echo '</pre>';
+
+
+/*
+ * Prepare databases
+ */
+
+
 try {
     $allDBs = $naWebOS->dbsAdmin->getAllDatabases ();
 } catch (Exception $e) {
@@ -245,12 +289,17 @@ if (!is_null($clientGroups))
 else $groupsFinal = $groups;
 
 $naWebOS->dbsAdmin->clearOutDatabases ($dbs2);
-$naWebOS->dbsAdmin->createUsers($users, $groupsFinal);
 
+/*
+ * Main()
+ */
+$naWebOS->dbsAdmin->createUsers($users, $groupsFinal);
 $naWebOS->dbsAdmin->createDatabases ($dbs);
 $naWebOS->dbsAdmin->resetDatabases ($dbsReset);
 
-
+/*
+ * Post-init db config-ing
+ */
 $fn = dirname(__FILE__).'/scripts.maintenance/htaccess.build.php';
 /*
 $xec = 'php "'.$fn.'"';

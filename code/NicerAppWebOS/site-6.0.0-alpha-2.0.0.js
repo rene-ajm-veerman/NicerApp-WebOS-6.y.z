@@ -2960,7 +2960,7 @@ na.site = {
                 $('#nb_url1_dropdown_selector > div, #url1_dropdown_selector > div').removeClass('selected');
                 $(this).add($('#'+$(this).parent()[0].id.replace('nb_',''))).addClass('selected');
                 $('#nb_url2_value').css({width:120});
-                na.blog.onchange_documentHeaders(evt,na.blog.onresize);
+                na.cms.onchange_documentHeaders(evt,na.cms.onresize);
             });
 
 

@@ -9,8 +9,8 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
     public $connectionType = 'couchdb';
     public $debug = false;
     public $ip;
-    public $security_admin = '{ "admins": { "names": [], "roles": ["administrators","guests"] }, "members": { "names": [], "roles": ["administrators","guests"] } }';
-    public $security_guest = '{ "admins": { "names": [], "roles": ["guests"] }, "members": { "names": [], "roles": ["guests"] } }';
+    public $security_admin = '{ "admins": { "names": [], "roles": [""] }, "members": { "names": [], "roles": [""] } }';
+    public $security_guest = '{ "admins": { "names": [], "roles": [""] }, "members": { "names": [], "roles": [""] } }';
     public $naWebOS;
     public $cdb;
     public $cdb_slr;
@@ -29,6 +29,13 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
         if (is_null($naWebOS)) $this->throwError('__construct($naWebOS) : invalid $naWebOS', E_USER_ERROR);
         $this->cms = $naWebOS;
         //$db = $naWebOS->dbs->findConnection('couchdb');
+
+        $an = $this->translate_plainGroupName_to_couchdbGroupName('Administrators');
+        $gn = $this->translate_plainGroupName_to_couchdbGroupName('Guests');
+
+        $this->security_admin = '{ "admins": { "names": [], "roles": ["'.$an.'"] }, "members": { "names": [], "roles": ["'.$gn.'"] } }';
+        $this->security_guest = '{ "admins": { "names": [], "roles": ["'.$gn.'"] }, "members": { "names": [], "roles": [""] } }';
+
         
         $this->connectionSettings = $cRec;
         //echo '<pre>t32:'; var_dump ($cRec); echo '</pre>';
@@ -413,10 +420,11 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
         foreach ($users as $userName => $userDoc) {
 
             $un = $this->translate_plainUserName_to_couchdbUserName ($userName);
+            $gn = $this->translate_plainGroupName_to_couchdbGroupName ('Guests');
             $username1 = preg_replace('/.*___/', '', $un);
 
-            $security_role = '{ "admins": { "names": [], "roles": ["guests"] }, "members": { "names": [], "roles": [] } }';
-            $security_user = '{ "admins": { "names": ["'.$un.'"], "roles": ["'.$cdbDomain.'___Guests", "'.$cdbDomain.'___Users"] }, "members": { "names": ["'.$un.'"], "roles": ["'.$cdbDomain.'___Guests", "'.$cdbDomain.'___Users"] } }';
+            $security_role = '{ "admins": { "names": [], "roles": ["'.$gn.'"] }, "members": { "names": [], "roles": [] } }';
+            $security_user = '{ "admins": { "names": ["'.$un.'"], "roles": [] }, "members": { "names": [], "roles": [] } }';
 
 
             $dn = $this->dataSetName_domainName($naWebOS->domainFolder);
@@ -574,67 +582,105 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
             $call = $this->cdb->post ($groupRec);
             //echo '<pre style="background:purple;color:white;border-radius:10px;">'; var_dump ($call); echo '</pre>';
             if ($call->body->ok) echo (!$got?'Created ':'Updated ').'\''.$gn.'\' group document in database '.$dataSetName.'.<br/>'; else echo '<span style="color:red">Could not '.(!$got?'create ':'update ').'\''.$gn.'\' group document in database '.$dataSetName.'.</span><br/>';
-
         }
-
-
-
 
         return true;
     }
 
     public function clearOutDatabases($dbs) {
-        $dbsArr=[];
-        foreach ($dbs as $dataSetName=>$mustDo) {
+        $dbsArr = [];
+        foreach ($dbs as $dataSetName => $mustDo) {
             $dbsArr[] = strtolower($dataSetName);
         }
-        //echo '<pre style="color:red">'; var_dump ($dbs); echo '</pre>'; die();
 
-        //$this->debug = true;
         $allDBs = $this->cdb->getAllDatabases();
-        if ($this->debug) { echo '<pre style="color:green">'; var_dump($dbs); echo '</pre>'; }
+        if ($this->debug) {
+            echo '<pre style="color:green">';
+            var_dump($dbs);
+            echo '</pre>';
+        }
+
+        // Cache of existing usernames from _users (so we only query once)
+        $existingUsers = $this->getExistingUsernamesFromUsersDb();
+
         foreach ($allDBs->body as $idx => $dataSetName) {
             $domainName = $this->dataSetName_domainName($this->cms->domain);
             $dataSetName = strtolower($dataSetName);
-            $dbDomainName = preg_replace('/___.*$/','',$dataSetName);
-            $strippeddataSetName = preg_replace('/.*___/','',$dataSetName);
-            $dbg = array(
-                '$dataSetName' => $dataSetName,
-                '$domainName' => $domainName,
-                'strpos' => strpos($dataSetName,$domainName)
-            );
-            //echo '<pre>'; var_dump($dbg); echo '</pre>';
 
-            $sp = strpos($dataSetName,$domainName);
-            $dbg = [
-                0 => $dataSetName,
-                1 => in_array($dataSetName, $dbsArr),
-                2 => array_key_exists($dataSetName,$dbs),
-                3 => array_key_exists($dataSetName,$dbs)?$dbs[$dataSetName]:null,
-                4 => $sp
-            ];
-            //echo '<pre>'; var_dump($dbg); echo '</pre>';
+            $sp = strpos($dataSetName, $domainName);
 
             $toBeDeleted = (
-                ( array_key_exists($dataSetName,$dbs) && $dbs[$dataSetName] )
+                (array_key_exists($dataSetName, $dbs) && $dbs[$dataSetName])
                 || $sp === 0
             );
-            //var_dump ($toBeDeleted);
 
-            if (
-                $toBeDeleted
-            ) {
-                $do = true;
-                try { 
-                    $db = $this->cdb->deleteDatabase($dataSetName); echo '<span style="color:lime;background:blue">Deleted database '.$dataSetName.'</span><br/>'.PHP_EOL;
-                } catch (Exception $e) { 
-                    if ($this->debug) { echo $e->getMessage(); echo '<br/>'; $do = false; exit(); }
+            if ($toBeDeleted) {
+                // ---- NEW PROTECTION ----
+                // Extract the part after the last "___" → candidate username
+                $parts = explode('___', $dataSetName);
+                $candidateUsername = end($parts);
+
+                // Only protect databases that look like: …___cms…___username
+                $isCmsUserDb = (count($parts) >= 3 && strpos($dataSetName, '___cms') !== false);
+
+                if ($isCmsUserDb && isset($existingUsers[$candidateUsername])) {
+                    echo '<span style="color:orange;background:navy">'
+                    . 'PROTECTED (user still exists in _users): '
+                    . htmlspecialchars($dataSetName)
+                    . '</span><br/>' . PHP_EOL;
+                    continue;   // skip deletion
+                }
+                // ---- END PROTECTION ----
+
+                try {
+                    $this->cdb->deleteDatabase($dataSetName);
+                    echo '<span style="color:lime;background:blue">Deleted database '
+                    . htmlspecialchars($dataSetName)
+                    . '</span><br/>' . PHP_EOL;
+                } catch (Exception $e) {
+                    if ($this->debug) {
+                        echo $e->getMessage() . '<br/>';
+                    }
                 }
             } else {
-                echo '<span style="color:yellow;background:navy">NOT deleted database '.$dataSetName.'</span><br/>'.PHP_EOL;
+                echo '<span style="color:yellow;background:navy">NOT deleted database '
+                . htmlspecialchars($dataSetName)
+                . '</span><br/>' . PHP_EOL;
             }
         }
         return true;
+    }
+
+    /**
+     * Helper: returns an associative array of usernames that still exist in _users.
+     * Key = username, value = true
+     */
+    protected function getExistingUsernamesFromUsersDb() {
+        $existing = [];
+
+        try {
+            // CouchDB _users documents are normally named:
+            // org.couchdb.user:username
+            $usersDb = $this->cdb->getDatabase('_users');
+            $allDocs = $usersDb->getAllDocuments(['include_docs' => false]);
+
+            foreach ($allDocs->body->rows as $row) {
+                $id = $row->id;
+                if (strpos($id, 'org.couchdb.user:') === 0) {
+                    $username = substr($id, strlen('org.couchdb.user:'));
+                    $existing[strtolower($username)] = true;
+                }
+            }
+        } catch (Exception $e) {
+            if ($this->debug) {
+                echo 'Warning: could not read _users database – '
+                . $e->getMessage() . '<br/>';
+            }
+            // In case of error we return an empty list → no extra protection
+            // (safer than accidentally protecting everything)
+        }
+
+        return $existing;
     }
     
     public function createDataSet_analytics() {
@@ -1027,7 +1073,7 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
         // TODO : error handling
         $debug = $this->debug;
         $dataSetName = $this->dataSetName('cms_comments');
-        try { $this->cdb->deleteDatabase ($dataSetName); } catch (Exception $e) { };
+        //try { $this->cdb->deleteDatabase ($dataSetName); } catch (Exception $e) { }; // NEVER DELETE YOUR COMMENTS DB!
         $this->cdb->setDatabase($dataSetName, true);
         try {
             $call = $this->cdb->setSecurity ($this->security_guest);
@@ -1589,7 +1635,7 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
         try { $this->cdb->deleteDatabase ($dataSetName); } catch (Exception $e) { };
         $this->cdb->setDatabase($dataSetName, true);
         try {
-            $call = $this->cdb->setSecurity ($this->security_admin);
+            $call = $this->cdb->setSecurity ($this->security_guest);
         } catch (Exception $e) {
             if ($this->debug) { echo '<pre style="color:red">'; var_dump ($e); echo '</pre>'; exit(); }
         }
@@ -1613,7 +1659,7 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
         try { $this->cdb->deleteDatabase ($dataSetName); } catch (Exception $e) { };
         $this->cdb->setDatabase($dataSetName, true);
         try {
-            $call = $this->cdb->setSecurity ($this->security_admin);
+            $call = $this->cdb->setSecurity ($this->security_guest);
         } catch (Exception $e) {
             if ($this->debug) { echo '<pre style="color:red">'; var_dump ($e); echo '</pre>'; exit(); }
         }

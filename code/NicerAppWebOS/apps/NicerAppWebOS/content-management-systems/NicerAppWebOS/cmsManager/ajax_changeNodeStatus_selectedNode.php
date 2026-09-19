@@ -1,6 +1,6 @@
 <?php
 require_once (realpath(dirname(__FILE__).'/../../../../..').'/boot.php');
-$debug = true;
+$debug = false;
 
 global $naWebOS;
 $cdb = $naWebOS->dbs->findConnection('couchdb')->cdb;
@@ -18,7 +18,7 @@ if (strpos($_POST['databases'], '_tree_')===false)
 
 $dbs = json_decode($_POST['databases'],true);
 foreach ($dbs as $idx => $dbName) {
-    $cdb->setDatabase($dbName, false);
+    $cdb->setDatabase($dbName, true);
     $call = $cdb->getAllDocs();
     //echo '<pre>'; var_dump ($call); echo '</pre>';
     foreach ($call->body->rows as $idx => $row) {
@@ -36,7 +36,7 @@ foreach ($dbs as $idx => $dbName) {
 //die();
 
 
-$cdb->setDatabase(str_replace('_documents_','_tree_',$_POST['database']),false);
+$cdb->setDatabase(str_replace('_documents_','_tree_',$_POST['database']),true);
 $call = $cdb->get ($_POST['id']);
 if (!property_exists($call->body,'state') || !is_object($call->body->state))
     $call->body->state = json_decode(json_encode([

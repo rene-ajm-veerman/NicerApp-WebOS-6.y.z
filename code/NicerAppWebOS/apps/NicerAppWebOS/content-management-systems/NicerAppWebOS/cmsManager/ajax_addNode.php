@@ -191,7 +191,7 @@ $dbg = array (
     'rootPath' => $rootPath,
     'folder' => $folder,
     'recordAdded' => $recordToAdd,
-    'record2added' => $dbg
+    'record2added' => isset($dbg)?$dbg:''
 );
 echo json_encode($dbg);
 ?>

@@ -13,17 +13,23 @@ if (strpos($_POST['database'], '_tree')===false)
 
 
 
-$debug = true;
+$debug = false;
 global $naWebOS;
-$db = $naWebOS->dbs->findConnection('couchdb');
+$db = $naWebOS->dbsAdmin->findConnection('couchdb');
 
 $cdb = $db->cdb;
 
 
-
-
 $dataSetName = str_replace('_tree_','_documents_',$_POST['database']);
-$cdb->setDatabase($dataSetName,false);
+
+$an = $db->translate_plainGroupName_to_couchdbGroupName('Administrators');
+$gn = $db->translate_plainGroupName_to_couchdbGroupName('Guests');
+
+$security_admin = '{ "admins": { "names": [], "roles": ["'.$an.'"] }, "members": { "names": [], "roles": ["'.$gn.'"] } }';
+$security_guest = '{ "admins": { "names": [], "roles": ["'.$gn.'"] }, "members": { "names": [], "roles": [""] } }';
+
+$cdb->setDatabase($dataSetName,true);
+$cdb->setSecurity($security_admin);
 $findCommand = [
     'selector' => [
         'url1' => $_POST['url1'],
@@ -37,12 +43,22 @@ try {
 } catch (Exception $e) {
     $go = true;
 };
+if (isset($e)) {
+    echo 'FATAL ERROR : '.$e->getMessage();
+    global $naLAN;
+    if ($naLAN) {
+        echo '<pre>';
+        //echo $e->backtraceAsString();
+        echo '</pre>';
+    }
+    exit;
+}
 if ($debug) {
     var_dump ($dataSetName);
     var_dump ($findCommand);
     var_dump ($call0);
 }
-$go = (
+if (isset($call0) && is_object($call0) && isset($call0->body)) $go = (
     count($call0->body->docs) === 0
     || (
         count($call0->body->docs) === 1
@@ -53,8 +69,6 @@ if (!$go) {
     echo 'There are '.count($call0->body->docs).' documents with URL /'.$_POST['user'].'/'.$_POST['url1'].'/'.$_POST['seoValue'].': '.json_encode($call0->body->docs);
     exit();
 }
-
-
 
 $cdb->setDatabase($_POST['database'],false);
 try {
