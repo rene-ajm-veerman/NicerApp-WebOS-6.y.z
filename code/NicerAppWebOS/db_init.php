@@ -13,13 +13,10 @@ require_once (realpath(dirname(__FILE__)).'/boot.php');
 $debug = true; 
 global $naLAN;
 
+
 $ip = (array_key_exists('X-Forwarded-For',apache_request_headers())?apache_request_headers()['X-Forwarded-For'] : $_SERVER['REMOTE_ADDR']);
 //echo '<h1>'.$ip.'</h1>'; exit();
-if (
-    $ip !== '::1'
-    && $ip !== '127.0.0.1'
-    && !$naLAN
-) {
+if (!$naLAN) {
     header('HTTP/1.0 403 Forbidden');
     echo '403 - Access forbidden.';
     exit();
@@ -146,7 +143,8 @@ function addPrefixes ($dbs) {
     return $dbs2;
 }
 
-
+global $naWebOS;
+echo '<pre>'; var_dump($naWebOS);die();
 $db = $naWebOS->dbsAdmin->findConnection('couchdb');
 $cdb = $db->cdb;
 
@@ -195,7 +193,7 @@ if (mustDo('urlRedirection')) {
     $dbs = goDo ($dbs, [ 'data_by_users', 'views' ]);
 }
 
-//echo '<pre style="color:red">'; var_dump (mustDo('cms')); echo '</pre>';
+//echo '<pre style="color:red">'; var_dump (mustDo('cms')); echo '</pre>'; exit;
 if (mustDo('cms')) {
     $un1 = strtolower(trim($naWebOS->ownerInfo['OWNER_NAME']));
     $un1 = str_replace(' ', '_', $un1);
@@ -266,10 +264,10 @@ echo $naWebOS->dbsAdmin->listDatabases ($allDBs, $dbs, $dbsReset);
 
 //echo require_return(dirname(__FILE__).'/domainConfigs/'.$naWebOS->domainFolder.'/database.users.json.php', true); die();
 
-$users = safeLoadJSONfile($naWebOS->path.'/../domains/'.$naWebOS->domainFolder.'/domainConfig/database.users.json.php', true);
+$users = safeLoadJSONfile($naWebOS->path.'/domains/'.$naWebOS->domainFolder.'/domainConfig/database.users.json.php', true);
 //echo '<pre style="color:black;background:skyblue;">'; var_dump ($users); die();
 //$users = json_decode($usersJSON, true);
-$groups = safeLoadJSONfile($naWebOS->path.'/../domains/'.$naWebOS->domainFolder.'/domainConfig/database.groups.json.php', true);
+$groups = safeLoadJSONfile($naWebOS->path.'/domains/'.$naWebOS->domainFolder.'/domainConfig/database.groups.json.php', true);
 //echo '<pre>'; var_dump ($groups); die();
 //$groups = json_decode($groupsJSON, true);
 
@@ -287,6 +285,8 @@ else $usersFinal = $users;
 if (!is_null($clientGroups))
     $groupsFinal = array_merge_recursive($groups, $clientGroups);
 else $groupsFinal = $groups;
+
+echo '<pre style="color:white;background:navy;margin:10px;padding:10px;border-radius:10px;">'; var_dump($dbs2); echo '</pre>'; ///exit;
 
 $naWebOS->dbsAdmin->clearOutDatabases ($dbs2);
 
@@ -311,7 +311,9 @@ $dbg = [
 ];
 echo '<pre>'; var_dump($dbg); echo '</pre>';
 */
+echo '<pre style="color:brown;margin:10px;padding:10px;border-radius:10px;border:1px solid grey;">';
 require_once ($fn);
+echo '</pre>';
 
 $fn = dirname(__FILE__).'/scripts.maintenance/htaccess.build-views.php';
 /*
@@ -324,5 +326,7 @@ $dbg = [
 ];
 echo '<pre>'; var_dump($dbg); echo '</pre>';
 */
+echo '<pre style="color:orange;margin:10px;padding:10px;border-radius:10px;border:1px solid grey;">';
 require_once ($fn);
+echo '</pre>';
 ?>

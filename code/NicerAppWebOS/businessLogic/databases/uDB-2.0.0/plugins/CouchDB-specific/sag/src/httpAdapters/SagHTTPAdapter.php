@@ -67,7 +67,7 @@ abstract class SagHTTPAdapter {
      */
     if($method == 'HEAD') {
       if($response->status >= 400) {
-        throw new SagCouchException('HTTP/CouchDB error without message body', $response->headers->_HTTP->status);
+        throw new SagCouchException('HTTP/CouchDB error without message body; HTTP ='.json_encode($response,JSON_PRETTY_PRINT));
       }
 
       return $response;

@@ -176,7 +176,7 @@ $fc .= PHP_EOL.PHP_EOL;
 $fn = $rootPath_2vuslwos.'/NicerAppWebOS/apps/NicerAppWebOS/applications/2D/news/mainmenu.reverseRewriteRulesCSVlines.csv';
 $counts[$fn] = 0;
 $f = fopen ($fn, 'r');
-while (($data = fgetcsv($f, 10*1000, ',')) !== false) {
+while (($data = fgetcsv($f, 10*1000, ',', "\"", "\\")) !== false) {
     $id1 = randomString(50);
     $id2 = randomString(50);
     $seoValue = substr($data[0], 1, strlen($data[0])-2);

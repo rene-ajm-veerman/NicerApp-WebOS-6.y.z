@@ -39,7 +39,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
 
     global $naWebOS;
 
-    $debugMe = false;
+    $debugMe = true;
     if ($debugMe) {
       echo '<pre style="color:red">'; debug_print_backtrace(); echo '</pre>';
       echo '<pre style="color:blue;">'; var_dump($_SESSION); echo '</pre>';
@@ -47,6 +47,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
 
     // the base cURL options
     $url = (
+      /*
       isset($_SESSION)
       && array_key_exists('cdb_loginName', $_SESSION)
       && is_string($_SESSION['cdb_loginName'])
@@ -57,9 +58,9 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
       ? "{$this->proto}://".$naWebOS->domainFolderForDB.'___'.preg_replace('/.*___/','',
             str_replace(' ','_',
               str_replace('.','__', rawurlencode($_SESSION['cdb_loginName'])))).":".rawurlencode($_SESSION['cdb_pw'])."@{$this->host}:{$this->port}{$url}"
-      : "{$this->proto}://{$this->host}:{$this->port}{$url}"
+      : */"{$this->proto}://".rawurlencode('nicer_app___Guest').":".rawurlencode('Guest')."@{$this->host}:{$this->port}{$url}"
     );
-    //var_dump ('t3322'); var_dump ($url); die();
+    echo ('t3322:'); var_dump ($url); echo '<br/>'; // die();
 
     $opts = array(
       CURLOPT_URL => $url,
@@ -126,6 +127,8 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
     curl_reset($this->ch);
     curl_setopt_array($this->ch, $opts);
     $chResponse = curl_exec($this->ch);
+
+    echo '<pre style="color:purple;background:yellow;">t444:'; var_dump($chResponse); echo '</pre>';
 
     if (false && strpos($opts[CURLOPT_URL], 'logentries')===false) {
     //if (true) {
@@ -290,64 +293,64 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
         //echo '<pre>t33321:';var_dump (debug_backtrace());
         //echo '<pre>t120A:'.json_encode($_SESSION,JSON_PRETTY_PRINT).'</pre>';
 
-      if (
-          array_key_exists('na_error_log_filepath_txt', $_SESSION)
-          && is_string($na_error_log_filepath_txt)
-          && $na_error_log_filepath_txt !== ''
-        ) file_put_contents ($na_error_log_filepath_txt, $dbgTxt, FILE_APPEND);
-      }
-
-      if (false) {
-        global $phpScript_startupTime;
-        global $naIP;
-        global $naIsBot; global $naIsDesktop; global $naIsMobile; global $naBrowserMarketSharePercentage;
-        global $naLAN;
-        global $naVersionNumber;
-        $time = microtime(true) - $phpScript_startupTime;
-        //var_dump (dirname(__FILE__).'/errors.css');
-        //date_default_timezone_set('UTC');
-        $dtz = new DateTime('now');//new DateTimeZone(date_default_timezone_get());
-        $dtz_offset = $dtz->getOffset();
-        $unixTimeStamp = time();//date(DATE_ATOM);//date(DATE_RFC2822);//date('Y-m-d H:i:sa');
-        $timestamp = date(DATE_RFC2822);
-
-        $headers_list = [];
-        foreach (getallheaders() as $name => $value) {
-            array_push($headers_list, array("name" => $name, "value" => $value));
+        if (
+            array_key_exists('na_error_log_filepath_txt', $_SESSION)
+            && is_string($na_error_log_filepath_txt)
+            && $na_error_log_filepath_txt !== ''
+          ) file_put_contents ($na_error_log_filepath_txt, $dbgTxt, FILE_APPEND);
         }
 
-        $now = DateTime::createFromFormat('U.u', microtime(true));
-        $s3 = (int)$now->format("u"); // milliseconds after 's2' listed below here.
-        $err = [
-            'type' => 'CouchDB query',
-            's1' => $_SESSION['started'],
-            's2' => time(),///microtime(true),
-            's3' => $s3,
-            'to' => $dtz_offset,
-            'year' => date('Y'),
-            'month' => date('m'),
-            'day' => date('d'),
-            'i' => $_SESSION['startedID'],
-            'isIndex' => false,//DONT! $_SERVER['SCRIPT_NAME']==='/NicerAppWebOS/index.php',
-            'ip' => $naIP,
-            'sid' => session_id(),
-            'nav' => $naVersionNumber,
-            'isBot' => $naIsBot,
-            'isLAN' => $naLAN,
-            'isDesktop' => $naIsDesktop,
-            'isMobile' => $naIsMobile,
-            'headers' => $headers_list,
-            'browserMarketSharePercentage' => $naBrowserMarketSharePercentage,
-            'ts' => $timestamp,
-            'httpOpts' => $dbgOpts,
-            'httpResponse' => json_decode($response->body,true),
-            'txt' => $dbgTxt
-        ];
+        if (false) {
+          global $phpScript_startupTime;
+          global $naIP;
+          global $naIsBot; global $naIsDesktop; global $naIsMobile; global $naBrowserMarketSharePercentage;
+          global $naLAN;
+          global $naVersionNumber;
+          $time = microtime(true) - $phpScript_startupTime;
+          //var_dump (dirname(__FILE__).'/errors.css');
+          //date_default_timezone_set('UTC');
+          $dtz = new DateTime('now');//new DateTimeZone(date_default_timezone_get());
+          $dtz_offset = $dtz->getOffset();
+          $unixTimeStamp = time();//date(DATE_ATOM);//date(DATE_RFC2822);//date('Y-m-d H:i:sa');
+          $timestamp = date(DATE_RFC2822);
 
-        global $naLog;
-        $naLog->add ( [ $err ] );
+          $headers_list = [];
+          foreach (getallheaders() as $name => $value) {
+              array_push($headers_list, array("name" => $name, "value" => $value));
+          }
 
-      }
+          $now = DateTime::createFromFormat('U.u', microtime(true));
+          $s3 = (int)$now->format("u"); // milliseconds after 's2' listed below here.
+          $err = [
+              'type' => 'CouchDB query',
+              's1' => $_SESSION['started'],
+              's2' => time(),///microtime(true),
+              's3' => $s3,
+              'to' => $dtz_offset,
+              'year' => date('Y'),
+              'month' => date('m'),
+              'day' => date('d'),
+              'i' => $_SESSION['startedID'],
+              'isIndex' => false,//DONT! $_SERVER['SCRIPT_NAME']==='/NicerAppWebOS/index.php',
+              'ip' => $naIP,
+              'sid' => session_id(),
+              'nav' => $naVersionNumber,
+              'isBot' => $naIsBot,
+              'isLAN' => $naLAN,
+              'isDesktop' => $naIsDesktop,
+              'isMobile' => $naIsMobile,
+              'headers' => $headers_list,
+              'browserMarketSharePercentage' => $naBrowserMarketSharePercentage,
+              'ts' => $timestamp,
+              'httpOpts' => $dbgOpts,
+              'httpResponse' => json_decode($response->body,true),
+              'txt' => $dbgTxt
+          ];
+
+          global $naLog;
+          $naLog->add ( [ $err ] );
+
+        }
     }
 
     // in the event cURL can't follow and we got a Location header w/ a 3xx

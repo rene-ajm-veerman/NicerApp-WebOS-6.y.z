@@ -38,7 +38,7 @@ class class_naDB_2_0_0
         $this->config = $cRec ?? [];
         $this->username = $username;
 
-        $this->admin = ($username === 'admin' ||
+        $this->admin = ($username === $naWebOS->domainFolderForDB.'___Administrator') ||
         $username === $this->translate_plainUserName_to_couchdbUserName($naWebOS->ownerInfo['OWNER_NAME'] ?? ''));
 
         $this->initSagConnection();

@@ -268,10 +268,10 @@ class NicerAppWebOS {
             $this->dbsAdmin = 'initializing';
             // logged in as $cdbConfig['adminUsername']!
             // $this->dbAdmin = new class_NicerAppWebOS_database_API_couchdb_3_2 (clone $this, true);
-            $this->dbsAdmin = new class_NicerAppWebOS_database_API ('admin');
+            $this->dbsAdmin = new class_NicerAppWebOS_database_API ($this->domainFolderForDB.'___Administrator');
             //echo 't842:'; var_dump ($this->dbsAdmin->connections);
             try {
-                // $this->dbsAdmin = new class_NicerAppWebOS_database_API ('admin');
+                // $this->dbsAdmin = new class_NicerAppWebOS_database_API ($this->domainFolderForDB.'___Administrator');
 
                 if (php_sapi_name() !== 'cli') {
                     //WILL NEVER WORK; HANDLED BY logic.AJAX/ajax_testDBconnection.php! setcookie('cdb_admin_loginName' ,$this->dbsAdmin->findConnection('couchdb')->username, time() + 604800, '/');
@@ -1648,7 +1648,7 @@ class NicerAppWebOS {
             //{ echo '<pre>667 : $idx='.$idx; echo '$selector='; var_dump($selector); var_dump($css); var_dump($hasData); echo '</pre>'; };
             if ($debug) {
                 echo '<h1>'.$specificityName.'</h1>'; echo PHP_EOL;
-                echo '<pre style="color:yellow;background:navy;">'; var_dump ($selector); echo '</pre>';
+                //echo '<pre style="color:yellow;background:navy;">'; var_dump ($selector); echo '</pre>';
                 /*
                 if (
                     is_array($css)

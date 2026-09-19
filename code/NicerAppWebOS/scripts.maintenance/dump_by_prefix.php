@@ -354,10 +354,11 @@ if (php_sapi_name() === 'cli') {
         exit(1);
     }
 
+    global $naWebOS;
     dumpByPrefix(
         $opts['prefix'],
         $opts['type']         ?? 'both',
-        $opts['username']     ?? 'admin',
+        $opts['username']     ?? $naWebOS->domainFolderForDB.'___Administrator',
         $opts['out']          ?? './dumps',
         (int)($opts['page-size']   ?? 1000),
         ($opts['compress']    ?? '1') !== '0',

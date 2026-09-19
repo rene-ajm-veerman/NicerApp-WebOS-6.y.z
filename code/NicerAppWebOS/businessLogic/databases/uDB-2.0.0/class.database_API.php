@@ -22,7 +22,7 @@ class class_NicerAppWebOS_database_API {
         $ret = [];
 
 
-        if ($username!=='admin' && $username!=='Guest') {
+        if ($username!==$this->dbsAdmin = new class_NicerAppWebOS_database_API ($naWebOS->domainFolderForDB.'___Administrator') && $username!=='Guest') {
             $cRec = json_decode('{"host" : "127.0.0.1","port" : "5984","useSSL" : false,"httpAdapter" : "HTTP_CURL","dbName" : "analytics","username" : "'.$naWebOS->domainFolderForDB.'___'.str_replace(' ','__',$username).'"}', true);
 
             $ret[] = [
@@ -35,10 +35,10 @@ class class_NicerAppWebOS_database_API {
         } else {
             $fn = $naWebOS->path.'/domains/'.$naWebOS->domainFolder.'/domainConfig/databases.username-'.$username.'.json';
             $cRec = json_decode(file_get_contents($fn),true);
-            //echo 't783:'; var_dump ($fn); var_dump ($cRec); var_dump (error_get_last());
+            //echo 't783:<pre>'; var_dump ($fn); var_dump ($cRec); var_dump (error_get_last()); echo '</pre>';
             $ret[] = [
                 'ct' => 'couchdb',
-                'cRec' => $cRec,
+                'cRec' => $cRec['databases']['couchdb'],
                 'conn' => $this->connectToDatabase ( $username, 'couchdb', $cRec['databases']['couchdb'] ) // !! is_null($cRec) inside this call. meaning we use $_COOKIE['cdb_authSession_cookie]
             ];
         }
@@ -57,7 +57,7 @@ class class_NicerAppWebOS_database_API {
         $db = null;
         //echo 't932:<pre style="color:navy">'; var_dump ($ct); var_dump($cRec); echo '</pre>';
         if (strpos('couchdb', $ct)!==false) {
-            //echo '<span style="color:purple">Now logging in as '.$username.'</span><br/>'.PHP_EOL;
+            echo '<span style="color:purple">Now logging in as '.$username.'</span><br/>'.PHP_EOL;
             $db = new class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 ( clone $naWebOS, $username, $cRec );
         }
         if (strpos('fsdb', $ct)!==false) {

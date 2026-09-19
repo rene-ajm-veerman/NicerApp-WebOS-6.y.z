@@ -24,6 +24,7 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
     public $roles=null;
 
     public function __construct ($naWebOS, $username = 'Guest', $cRec = null) {
+        global $naWebOS;
         global $dbConfigFile_couchdb;
 
         if (is_null($naWebOS)) $this->throwError('__construct($naWebOS) : invalid $naWebOS', E_USER_ERROR);
@@ -42,7 +43,7 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
 
         $admin = (
             $username==$this->translate_plainUserName_to_couchdbUserName($naWebOS->ownerInfo['OWNER_NAME'])
-            || $username=='admin'
+            || $username==$naWebOS->domainFolderForDB.'___Administrator'
         );
         $this->admin = $admin;
 
@@ -59,12 +60,29 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
     //if (php_sapi_name() === 'cli') return 'php_sapi_name()='.php_sapi_name(); // BAD!
         //echo 't77;<pre style="color:navy">'; var_dump ($cRec);  var_dump ($username); echo '</pre>';
         try {
-            if (!is_null($cRec)) $naLoginResult = cdb_login ($this, $this->cdb, $cRec, $cRec['username']); else $naLoginResult = cdb_login ($this, $this->cdb, null, null);
+            if (!is_null($cRec)) $naLoginResult = cdb_login ($this, $this->cdb, $cRec, $this->translate_plainUserName_to_couchdbUserName($cRec['username'])); else $naLoginResult = cdb_login ($this, $this->cdb, null, null);
         } catch (Exception $e) {
-            $naLoginResult = cdb_login ($this, $this->cdb, null, 'Guest');
+            $cdba = $naWebOS->dbsAdmin->findConnection('couchdb');
+            $cdba->cdb->setDatabase('_users',true);
+            $cdba->cdb->put ('org.couchdb.user:'.$db->translate_plainUserName_to_couchdbUserName('Guest'),[
+                'name' => $db->translate_plainUserName_to_couchdbUserName('Guest'),
+                        'type' => 'user',
+                        'roles' => [],
+                        'password' => 'Guest'
+            ]);
+            try {
+                $cdb->login ($db->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest', Sag::$AUTH_COOKIE);
+                $call = $cdba->find($findCommand);
+            } catch (Throwable $e) {
+                echo '<pre>.../NicerAppWebOS/functions.php::cdb_login() : Could not create account "Guest"</pre>';
+                return false;
+            }
+
+
+            $naLoginResult = cdb_login ($this, $this->cdb, $this->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest');
             echo '<pre>'.$this->cn.'::__construct() : cdb_login() FATAL ERROR : '; var_dump ($naLoginResult); echo '</pre>'; exit();
         }
-	$_SESSION['loginResult'] = $naLoginResult;
+        $_SESSION['loginResult'] = $naLoginResult;
 
         if (!$naLoginResult) return $naLoginResult; //die ('500 - could not login using username "'.$cRec['username'].' to NicerApp WebOS.');
 
@@ -414,9 +432,14 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
         global $naWebOS;
         $cdbDomain = $naWebOS->domainFolderForDB;
         $debug = true;
+        $fncn = $this->cn.'::createUsers()';
 
         $g2 = [];
-        //echo '<pre>633:'; var_dump ($users); die();
+        if (!is_array($users)) {
+            trigger_error ($fncn.' : $users='.json_encode($users),E_USER_WARNING);
+            return false;
+        };
+
         foreach ($users as $userName => $userDoc) {
 
             $un = $this->translate_plainUserName_to_couchdbUserName ($userName);
@@ -594,7 +617,7 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
         }
 
         $allDBs = $this->cdb->getAllDatabases();
-        if ($this->debug) {
+        if (true) {
             echo '<pre style="color:green">';
             var_dump($dbs);
             echo '</pre>';
@@ -611,8 +634,9 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
 
             $toBeDeleted = (
                 (array_key_exists($dataSetName, $dbs) && $dbs[$dataSetName])
-                || $sp === 0
+                || $sp === false
             );
+            echo '<pre style="color:yellow;background:darkred;margin:10px;padding:10px;border-radius:10px;">'; var_dump ([$dataSetName, $sp, array_key_exists($dataSetName, $dbs)]); echo '</pre>';
 
             if ($toBeDeleted) {
                 // ---- NEW PROTECTION ----
@@ -624,28 +648,28 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
                 $isCmsUserDb = (count($parts) >= 3 && strpos($dataSetName, '___cms') !== false);
 
                 if ($isCmsUserDb && isset($existingUsers[$candidateUsername])) {
-                    echo '<span style="color:orange;background:navy">'
+                    echo '<div style="color:orange;background:navy;margin:10px;padding:10px;border-radius:10px;">'
                     . 'PROTECTED (user still exists in _users): '
                     . htmlspecialchars($dataSetName)
-                    . '</span><br/>' . PHP_EOL;
+                    . '</div>' . PHP_EOL;
                     continue;   // skip deletion
                 }
                 // ---- END PROTECTION ----
 
                 try {
                     $this->cdb->deleteDatabase($dataSetName);
-                    echo '<span style="color:lime;background:blue">Deleted database '
+                    echo '<div style="color:lime;background:blue;margin:10px;padding:10px;border-radius:10px;">Deleted database '
                     . htmlspecialchars($dataSetName)
-                    . '</span><br/>' . PHP_EOL;
+                    . '</div>' . PHP_EOL;
                 } catch (Exception $e) {
                     if ($this->debug) {
                         echo $e->getMessage() . '<br/>';
                     }
                 }
             } else {
-                echo '<span style="color:yellow;background:navy">NOT deleted database '
+                echo '<div style="color:yellow;background:navy;margin:10px;padding:10px;border-radius:10px;">NOT touching database '
                 . htmlspecialchars($dataSetName)
-                . '</span><br/>' . PHP_EOL;
+                . '</div>' . PHP_EOL;
             }
         }
         return true;
@@ -661,8 +685,8 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
         try {
             // CouchDB _users documents are normally named:
             // org.couchdb.user:username
-            $usersDb = $this->cdb->getDatabase('_users');
-            $allDocs = $usersDb->getAllDocuments(['include_docs' => false]);
+            $usersDb = $this->cdb->setDatabase('_users');
+            $allDocs = $this->cdb->getAllDocs(['include_docs' => false]);
 
             foreach ($allDocs->body->rows as $row) {
                 $id = $row->id;
@@ -1307,7 +1331,7 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
         echo 'Created and populated database '.$dataSetName.'<br/>'.PHP_EOL;
     }
     
-    public function resetDataSet_data_themes() {
+    public function resetDataSet_themes() {
         // TODO : error handling
 
         $dataSetName = $this->dataSetName('data_themes');
@@ -1333,7 +1357,7 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
         ];
 
         try {
-            $call = $cdb->find ($findCommand);
+            $call = $this->cdb->find ($findCommand);
         } catch (Exception $e) {
             $msg = $fncn.' FAILED while trying to find in \''.$dataSetName.'\' : '.$e->getMessage();
             trigger_error ($msg, E_USER_NOTICE);
@@ -1347,15 +1371,15 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
             && is_array($call->body->docs)
         ) {
             foreach ($call->body->docs as $idx => $doc) {
-                $call = $cdb->delete ($doc['_id'], $doc['_rev']);
+                $call = $this->cdb->delete ($doc['_id'], $doc['_rev']);
             };
-            $call = $cdb->get ($call->body->docs[0]['_id']);
+            //$call = $this->cdb->get ($call->body->docs[0]['_id']);
         }
 
 
         $rec = array(
             '_id' => cdb_randomString(20),
-            'role' => 'guests',
+            'role' => $this->translate_plainGroupName_to_couchdbGroupName('Guests'),
             'theme' => 'default',
             'specificityName' => 'site',
             'menusFadingSpeed' => 400,
@@ -1389,7 +1413,7 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
             '_id' => cdb_randomString(20),
             'lastUsed' => time(),
             'view' => 'applications/2D/musicPlayer',
-            'role' => 'guests',
+            'role' => $this->translate_plainGroupName_to_couchdbGroupName('Guests'),
             'theme' => 'app \'musicPlayer\' default',
             'menusFadingSpeed' => 400,
             'menusUseRainbowPanels' => true,

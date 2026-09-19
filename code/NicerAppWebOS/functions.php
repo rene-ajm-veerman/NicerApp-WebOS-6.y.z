@@ -709,6 +709,7 @@ function translate_couchdbGroupName_to_plainGroupName ($gn) {
 function cdb_login($db, $cdb, $cRec, $username) {
     //echo '$_COOKIE=<pre>';var_dump($_COOKIE);echo '</PRE>';
     $fncn = '.../NicerAppWebOS/functions.php::cdb_login()';
+    global $naWebOS;
 
     $done = false;
     /* ANTIQUATED CODE :
@@ -730,7 +731,7 @@ function cdb_login($db, $cdb, $cRec, $username) {
     } else {
     */
 
-    //echo '<pre style="color:white;background:navy;">'; var_dump ($username); var_dump($cRec); echo '</pre>';
+    echo '<pre style="font-weight:bold;color:yellow;background:navy;">'; var_dump ($username); var_dump($cRec); debug_print_backtrace(); echo '</pre>';
 
     if (
         is_array($cRec)
@@ -740,8 +741,8 @@ function cdb_login($db, $cdb, $cRec, $username) {
         try {
             global $naLAN;
 
-            if ($cRec['username']=='admin') {
-                $cdb->login ($cRec['username'], 'texass.t33');
+            if ($cRec['username']==$naWebOS->domainFolderForDB.'___Administrator') {
+                $cdb->login ($cRec['username'], $cRec['password']);
             } else {
                 //if ($naLAN) {echo '<pre>';debug_print_backtrace(); var_dump($cRec);echo '</pre>';}//exit;}
                 $cdb->login ($db->translate_plainUserName_to_couchdbUserName($cRec['username']), $cRec['password']);
@@ -752,7 +753,7 @@ function cdb_login($db, $cdb, $cRec, $username) {
                 && $cdb_session->body->ok
                 && !is_null($cdb_session->body->userCtx->name)
             ) {
-                if ($username!=='admin') $_SESSION['cdb_loginName'] = $cdb_session->body->userCtx->name;
+                if ($username!==$naWebOS->domainFolderForDB.'___Administrator') $_SESSION['cdb_loginName'] = $cdb_session->body->userCtx->name;
                 //echo '<pre style="color:green;">'; var_dump($_SESSION); echo '</pre>';
                 $done = true;
             }
@@ -786,7 +787,7 @@ function cdb_login($db, $cdb, $cRec, $username) {
                     && $cdb_session->body->ok
                     && !is_null($cdb_session->body->userCtx->name)
                 ) {
-                    if ($username!=='admin') $_SESSION['cdb_loginName'] = $cdb_session->body->userCtx->name;
+                    if ($username!==$naWebOS->domainFolderForDB.'___Administrator') $_SESSION['cdb_loginName'] = $cdb_session->body->userCtx->name;
                     //echo '<pre style="color:green;">'; var_dump($_SESSION); echo '</pre>';
                     $done = true;
                 }
@@ -861,17 +862,17 @@ function cdb_login($db, $cdb, $cRec, $username) {
         //echo '<pre>'; var_dump($cdb_session->body->userCtx->name); echo '</pre>';// exit;
 
         global $naLAN;
-	$dn = null;
-        if ($cdb_session->body->userCtx->name!=='admin') {
+        $dn = null;
+        if ($cdb_session->body->userCtx->name!==$naWebOS->domainFolderForDB.'___Administrator') {
         //if ($naLAN) {
             $dbName = '_users';
-	    global $naWebOS;
-	    $cdba = $naWebOS->dbsAdmin->findConnection('couchdb')->cdb;
+            global $naWebOS;
+            $cdba = $naWebOS->dbsAdmin->findConnection('couchdb')->cdb;
             try {
                 $cdba->setDatabase($dbName, false);
             } catch (Exception $e) {
                 echo 'cdb_login() ERROR 1 : '.$e->getMessage();
-		exit;
+                exit;
             }
 
             $findCommand = [
@@ -884,18 +885,40 @@ function cdb_login($db, $cdb, $cRec, $username) {
             try {
                 $call = $cdba->find($findCommand);
             } catch (Exception $e) {
-                echo '<pre>'; var_dump ($findCommand); echo PHP_EOL.'<br/>'.PHP_EOL.$e->getMessage(); echo '</pre>'; exit;
+                //echo '<pre>.../NicerAppWebOS/functions.php::cdb_login() : '; var_dump ($findCommand); echo PHP_EOL.'<br/>'.PHP_EOL.$e->getMessage(); echo '</pre>'; exit;
+                try {
+                    $cdb->login ($db->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest', Sag::$AUTH_COOKIE);
+                    $call = $cdba->find($findCommand);
+                } catch (Throwable $e) {
+                    return false;
+                    /*
+                    $cdba->setDatabase('_users',true);
+                    $cdba->put ('org.couchdb.user:'.$db->translate_plainUserName_to_couchdbUserName('Guest'),[
+                        'name' => $db->translate_plainUserName_to_couchdbUserName('Guest'),
+                        'type' => 'user',
+                        'roles' => [],
+                        'password' => 'Guest'
+                    ]);
+                    try {
+                        $cdb->login ($db->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest', Sag::$AUTH_COOKIE);
+                        $call = $cdba->find($findCommand);
+                    } catch (Throwable $e) {
+                        echo '<pre>.../NicerAppWebOS/functions.php::cdb_login() : Could not create account "Guest"</pre>';
+                        return false;
+                    }
+                    */
+                }
             }
             //echo '<pre>'; var_dump ($findCommand); echo PHP_EOL.'<br/>'.PHP_EOL.json_encode ($call, JSON_PRETTY_PRINT); echo '</pre>'; exit;
-	    if (
-		    array_key_exists(0,$call->body->docs)
-		    && property_exists($call->body->docs[0],'displayName')
-	    ) $dn = $call->body->docs[0]->displayName;
+            if (
+                array_key_exists(0,$call->body->docs)
+                && property_exists($call->body->docs[0],'displayName')
+            ) $dn = $call->body->docs[0]->displayName;
         }
 
         return [
             'username' => $cdb_session->body->userCtx->name,
-	    'displayName' => $dn,
+            'displayName' => $dn,
             'roles' => $cdb_session->body->userCtx->roles
         ];
     } else return false;

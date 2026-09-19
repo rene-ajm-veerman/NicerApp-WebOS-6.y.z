@@ -25,6 +25,8 @@ NicerApp WebOS from Nicer Enterprises
     global $na_full_init;
     if (!isset($na_full_init)) $na_full_init = true;
 
+    ini_set('memory_limit','2G'); // hacker deterrence by keeping it at 5G (of 64G).
+    set_time_limit(70); // 70 seconds; also for hacker deterrence. can be overridden by individual ajax scripts though!
 
     global $naSettings;
     global $rootPath_na;
@@ -290,7 +292,7 @@ NicerApp WebOS from Nicer Enterprises
     $lanConfigRaw = file_get_contents($lanConfigFilepath);
     $lanConfig = json_decode($lanConfigRaw, true);
     checkForJSONerrors($lanConfigRaw, $lanConfigFilepath, $lanConfigExampleFilepath);
-    //echo '<pre>'; var_dump ($lanConfigFilepath); var_dump ($lanConfigRaw); var_dump ($lanConfig); var_dump (json_last_error_msg()); exit();
+    //echo '<pre>'; var_dump ($lanConfigFilepath); var_dump ($lanConfigRaw); var_dump ($lanConfig); var_dump (json_last_error_msg()); echo '</pre>'; //exit();
     global $naLAN;
     $naLAN = (
         $naIP === '::1'
@@ -298,6 +300,7 @@ NicerApp WebOS from Nicer Enterprises
         || in_array($naIP, $lanConfig)
     );
     //$naLAN = false;
+    //echo '<pre>'; var_dump ($naLAN);exit();
 
     $_SESSION['started'] = time();//microtime(true);
     global $date;
@@ -320,6 +323,7 @@ NicerApp WebOS from Nicer Enterprises
     // Get the name of the bot (very useful)
     $name = $detect->getMatches(); // Returns the matching bot name/pattern
     $naIsDesktop = false;
+    /*
 
     if (
         $_SERVER['SCRIPT_NAME']=='/NicerAppWebOS/index.php'
@@ -338,7 +342,7 @@ NicerApp WebOS from Nicer Enterprises
             global $naLogLocation;
             $naLogLocation = '<!-- saving logs to : '.$na_error_log_filepath_html.' -->'.PHP_EOL;
 
-            $absoluteDir = /* $folderName = */ dirname($na_error_log_filepath_txt);
+            $absoluteDir = /* $folderName = * / dirname($na_error_log_filepath_txt);
             //echo '<pre>t120B:'.json_encode($folderName,JSON_PRETTY_PRINT).'</pre>'; exit();
             if (!is_dir($absoluteDir)) {
                 set_error_handler(function ($severity, $message, $file, $line) {
@@ -484,7 +488,7 @@ NicerApp WebOS from Nicer Enterprises
         }
     }
     //  echo '<p style="color:purple">'; var_dump($naIsBot); echo '</p>';
-    */
+    * /
 
     global $naURL;
     $naURL = 'https://'.$_SERVER['HTTP_HOST'].(array_key_exists('REDIRECT_URL',$_SERVER)?$_SERVER['REDIRECT_URL']:'/');
@@ -523,7 +527,7 @@ NicerApp WebOS from Nicer Enterprises
             //'<html><head>'
             //.PHP_EOL.$naWebOS->getLinks($naWebOS->cssFiles)
             //.PHP_EOL.$naWebOS->getLinks($naWebOS->javascriptFiles).PHP_EOL
-            //.'</head><body style="overflow:visible"><div id="siteBackground"></div>';*/
+            //.'</head><body style="overflow:visible"><div id="siteBackground"></div>';* /
         //$html = '<script type="text/javascript" src="/NicerAppWebOS/logic.business-5.8.z/debug-1.0.0.source.js?c='.date('Ymd_His',filemtime(dirname(__FILE__).'/logic.business-5.8.z/debug-1.0.0.source.js')).'"></script>';
         //file_put_contents ($na_error_log_filepath_html, $html, FILE_APPEND);
 
@@ -661,7 +665,7 @@ NicerApp WebOS from Nicer Enterprises
             }
         }
     };
-    */
+    * /
 
     if ($naThisServer['log']['dbActivity']) {
         $now = DateTime::createFromFormat('U.u', microtime(true));
@@ -714,9 +718,7 @@ NicerApp WebOS from Nicer Enterprises
     }
     // at the *bottom* of this file (that's for good reasons),
     // you will find : require_once(dirname(__FILE__).'/apps/nicer.app/api.paymentSystems/boot.php');
-    
-    ini_set('memory_limit','5000M'); // hacker deterrence by keeping it at 5G (of 64G).
-    set_time_limit(70); // 70 seconds; also for hacker deterrence. can be overridden by individual ajax scripts though!
+*/
 
     //echo '<pre>'; var_dump ($_SERVER); exit();
     
