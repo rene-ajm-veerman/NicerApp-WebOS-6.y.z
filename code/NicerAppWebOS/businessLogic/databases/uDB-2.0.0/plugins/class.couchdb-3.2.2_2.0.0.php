@@ -58,9 +58,12 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
         }
 
     //if (php_sapi_name() === 'cli') return 'php_sapi_name()='.php_sapi_name(); // BAD!
-        //echo 't77;<pre style="color:navy">'; var_dump ($cRec);  var_dump ($username); echo '</pre>';
+        echo 't77;<pre style="color:navy">'; var_dump ($cRec);  var_dump ($username); echo '</pre>';
         try {
-            if (!is_null($cRec)) $naLoginResult = cdb_login ($this, $this->cdb, $cRec, $this->translate_plainUserName_to_couchdbUserName($cRec['username'])); else $naLoginResult = cdb_login ($this, $this->cdb, null, null);
+            if (!is_null($cRec))
+                $naLoginResult = cdb_login ($this, $this->cdb, $cRec, $this->translate_plainUserName_to_couchdbUserName($cRec['username']));
+            else
+                $naLoginResult = cdb_login ($this, $this->cdb, null, null);
         } catch (Exception $e) {
             $cdba = $naWebOS->dbsAdmin->findConnection('couchdb');
             $cdba->cdb->setDatabase('_users',true);

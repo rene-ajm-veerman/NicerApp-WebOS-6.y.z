@@ -39,8 +39,9 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
 
     global $naWebOS;
 
-    $debugMe = true;
+    $debugMe = false;
     if ($debugMe) {
+      echo 'procPacket():';
       echo '<pre style="color:red">'; debug_print_backtrace(); echo '</pre>';
       echo '<pre style="color:blue;">'; var_dump($_SESSION); echo '</pre>';
     };

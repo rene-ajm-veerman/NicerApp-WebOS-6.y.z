@@ -21,27 +21,16 @@ class class_NicerAppWebOS_database_API {
         global $naWebOS;
         $ret = [];
 
+        //var_dump ($username); exit;
 
-        if ($username!==$this->dbsAdmin = new class_NicerAppWebOS_database_API ($naWebOS->domainFolderForDB.'___Administrator') && $username!=='Guest') {
-            $cRec = json_decode('{"host" : "127.0.0.1","port" : "5984","useSSL" : false,"httpAdapter" : "HTTP_CURL","dbName" : "analytics","username" : "'.$naWebOS->domainFolderForDB.'___'.str_replace(' ','__',$username).'"}', true);
-
-            $ret[] = [
-                'ct' => 'couchdb',
-                'cRec' => $cRec,
-                'conn' => $this->connectToDatabase ( $username, 'couchdb', $cRec ) // !! is_null($cRec) inside this call. meaning we use $_COOKIE['cdb_authSession_cookie]
-            ];
-            $this->connections = $ret;
-            //echo '<pre>t21;'; var_dump ($cRec); var_dump ($this->findConnection('couchdb')->username); echo '</pre>'; //exit();
-        } else {
-            $fn = $naWebOS->path.'/domains/'.$naWebOS->domainFolder.'/domainConfig/databases.username-'.$username.'.json';
-            $cRec = json_decode(file_get_contents($fn),true);
-            //echo 't783:<pre>'; var_dump ($fn); var_dump ($cRec); var_dump (error_get_last()); echo '</pre>';
-            $ret[] = [
-                'ct' => 'couchdb',
-                'cRec' => $cRec['databases']['couchdb'],
-                'conn' => $this->connectToDatabase ( $username, 'couchdb', $cRec['databases']['couchdb'] ) // !! is_null($cRec) inside this call. meaning we use $_COOKIE['cdb_authSession_cookie]
-            ];
-        }
+        $fn = $naWebOS->path.'/domains/'.$naWebOS->domainFolder.'/domainConfig/databases.username-'.$username.'.json';
+        $cRec = json_decode(file_get_contents($fn),true);
+        //echo 't783:<pre>'; var_dump ($fn); var_dump ($cRec); var_dump (error_get_last()); echo '</pre>';
+        $ret[] = [
+            'ct' => 'couchdb',
+            'cRec' => $cRec['databases']['couchdb'],
+            'conn' => $this->connectToDatabase ( $username, 'couchdb', $cRec['databases']['couchdb'] ) // !! is_null($cRec) inside this call. meaning we use $_COOKIE['cdb_authSession_cookie]
+        ];
 
         $this->connections = $ret;
         //echo '<pre>t80;'; var_dump ($ret[0]['conn']->username); debug_print_backtrace(); echo '</pre>'; //exit();
