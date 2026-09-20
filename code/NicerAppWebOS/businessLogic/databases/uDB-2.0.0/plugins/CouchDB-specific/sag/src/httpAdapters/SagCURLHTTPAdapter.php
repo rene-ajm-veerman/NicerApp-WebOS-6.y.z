@@ -12,13 +12,17 @@ require_once(dirname(__FILE__).'/../../../../../../../../apps/NicerAppWebOS/appl
 
 class SagCURLHTTPAdapter extends SagHTTPAdapter {
   private $ch;
-
   private $followLocation; //whether cURL is allowed to follow redirects
+  private $user = 'nobody';
+  private $pass = 'nopass';
 
-  public function __construct($host, $port) {
+  public function __construct($host, $port, $user, $pass) {
     if(!extension_loaded('curl')) {
       throw new SagException('Sag cannot use cURL on this system: the PHP cURL extension is not installed.');
     }
+
+    $this->user = $user;
+    $this->pass = $pass;
 
     parent::__construct($host, $port);
 
@@ -59,9 +63,9 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
       ? "{$this->proto}://".$naWebOS->domainFolderForDB.'___'.preg_replace('/.*___/','',
             str_replace(' ','_',
               str_replace('.','__', rawurlencode($_SESSION['cdb_loginName'])))).":".rawurlencode($_SESSION['cdb_pw'])."@{$this->host}:{$this->port}{$url}"
-      : */"{$this->proto}://".rawurlencode('nicer_app___Guest').":".rawurlencode('Guest')."@{$this->host}:{$this->port}{$url}"
+      : */"{$this->proto}://".rawurlencode($this->user).":".rawurlencode($this->pass)."@{$this->host}:{$this->port}{$url}"
     );
-    echo ('t3322:'); var_dump ($url); echo '<br/>'; // die();
+    if ($debugMe) { echo ('<pre style="color:white;background:purple;margin:10px;padding:10px;border-radius:10px;">t3322:'); var_dump ($this); var_dump ($url); echo '</pre>'; } // die();
 
     $opts = array(
       CURLOPT_URL => $url,
@@ -129,7 +133,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
     curl_setopt_array($this->ch, $opts);
     $chResponse = curl_exec($this->ch);
 
-    echo '<pre style="color:purple;background:yellow;">t444:'; var_dump($chResponse); echo '</pre>';
+    if ($debugMe) { echo '<pre style="color:purple;background:yellow;">t444:'; var_dump($chResponse); echo '</pre>'; }
 
     if (false && strpos($opts[CURLOPT_URL], 'logentries')===false) {
     //if (true) {

@@ -144,7 +144,7 @@ function addPrefixes ($dbs) {
 }
 
 global $naWebOS;
-echo '<pre>'; var_dump($naWebOS);die();
+//echo '<pre>t669:'; var_dump($naWebOS);die();
 $db = $naWebOS->dbsAdmin->findConnection('couchdb');
 $cdb = $db->cdb;
 
@@ -164,7 +164,8 @@ $findCommand = [
 try {
     $call = $cdb->find ($findCommand);
 } catch (Exception $e) {
-    $msg = $fncn.' FAILED while trying to find in \''.$dataSetName.'\' : '.$e->getMessage();
+    $fncn = 'db_init.php';
+    $msg = $fncn.' FAILED while trying to find in \''.$prefix.'\' : '.$e->getMessage();
     trigger_error ($msg, E_USER_NOTICE);
     echo $msg;
     return false;
@@ -286,7 +287,7 @@ if (!is_null($clientGroups))
     $groupsFinal = array_merge_recursive($groups, $clientGroups);
 else $groupsFinal = $groups;
 
-echo '<pre style="color:white;background:navy;margin:10px;padding:10px;border-radius:10px;">'; var_dump($dbs2); echo '</pre>'; ///exit;
+//echo '<pre style="color:white;background:navy;margin:10px;padding:10px;border-radius:10px;">'; var_dump($dbs2); echo '</pre>'; ///exit;
 
 $naWebOS->dbsAdmin->clearOutDatabases ($dbs2);
 

@@ -87,13 +87,13 @@ class Sag {
    * @param string $port (OPTIONAL) The host's port that Couch is listening on.
    * Defaults to '5984'.
    */
-  public function __construct($host = "127.0.0.1", $port = "5984")
+  public function __construct($host = "127.0.0.1", $port = "5984", $un, $p)
   {
     $this->host = $host;
     $this->port = $port;
 
     //sets to the default by ... default
-    $this->setHTTPAdapter();
+    $this->setHTTPAdapter(null, $un, $p);
   }
 
   
@@ -114,7 +114,7 @@ class Sag {
    * @see Sag::$HTTP_NATIVE_SOCKETS
    * @see Sag::$HTTP_CURL
    */
-  public function setHTTPAdapter($type = null) {
+  public function setHTTPAdapter($type = null, $un, $p) {
     if(!$type) {
       $type = extension_loaded("curl") ? self::$HTTP_CURL : self::$HTTP_NATIVE_SOCKETS;
     }
@@ -139,7 +139,7 @@ class Sag {
         break;
 
       case self::$HTTP_CURL:
-        $this->httpAdapter = new SagCURLHTTPAdapter($this->host, $this->port);
+        $this->httpAdapter = new SagCURLHTTPAdapter($this->host, $this->port, $un, $p);
         break;
 
       default:
@@ -616,6 +616,7 @@ class Sag {
    * @return Sag Returns $this. Throws on failure.
    */
   public function setDatabase($db, $createIfNotFound = false) {
+    $debugMe = false;
     if($this->db != $db || $createIfNotFound) {
       if(!is_string($db)) {
         throw new SagException('setDatabase() expected a string.');
@@ -624,14 +625,17 @@ class Sag {
       $db = urlencode($db);
 
       if($createIfNotFound) {
+        if ($debugMe) echo '<h1>Creating db '.$db.'</h1>';
         try {
           self::procPacket('HEAD', "/{$db}");
         }
         catch(SagCouchException $e) {
-          if($e->getCode() != 404) {
+          if ($debugMe) echo '<pre>t666a: could not access through HEAD method the database "'.$db.'". $e->getCode()='.$e->getCode().'</pre>';
+          if($e->getCode() != 404 && $e->getCode() !== 0) {
             throw $e; //these are not the errors that we are looking for
           }
 
+          if ($debugMe) echo '<pre>t666b: could not access through HEAD method the database "'.$db.'". $e->getMessage()='.$e->getMessage().'</pre>';
           self::createDatabase($db);
         }
       }

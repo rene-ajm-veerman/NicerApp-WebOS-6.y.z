@@ -1,6 +1,6 @@
 <?php
 
-$siteCurrentlyDown = true;
+$siteCurrentlyDown = false;
 $debugMe = false;
 
 if ($siteCurrentlyDown) {

@@ -325,8 +325,13 @@ class NicerAppWebOS {
                     );
                 } else {
                     $un = 'Guest';
-              }
-                $this->dbs = new class_NicerAppWebOS_database_API ($un);
+                }
+                try {
+                    $this->dbs = new class_NicerAppWebOS_database_API ($un);
+                } catch (Throwable $e) {
+                    $this->dbs = new class_NicerAppWebOS_database_API ('Guest');
+                }
+
                 //echo '<pre style="color:blue;">'; var_dump ($this->dbs->findConnection('couchdb')->username);echo '</pre>';exit();
 
 /*

@@ -36,7 +36,6 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
 
         $this->security_admin = '{ "admins": { "names": [], "roles": ["'.$an.'"] }, "members": { "names": [], "roles": ["'.$gn.'"] } }';
         $this->security_guest = '{ "admins": { "names": [], "roles": ["'.$gn.'"] }, "members": { "names": [], "roles": [""] } }';
-
         
         $this->connectionSettings = $cRec;
         //echo '<pre>t32:'; var_dump ($cRec); echo '</pre>';
@@ -48,17 +47,17 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
         $this->admin = $admin;
 
         if (!is_null($cRec)) {
-            $this->cdb = new Sag($cRec['host'], $cRec['port']);
-            $this->cdb->setHTTPAdapter($cRec['httpAdapter']);
+            $this->cdb = new Sag($cRec['host'], $cRec['port'], $this->translate_plainUserName_to_couchdbUserName($cRec['username']), $cRec['password']);
+            $this->cdb->setHTTPAdapter($cRec['httpAdapter'], $this->translate_plainUserName_to_couchdbUserName($cRec['username']), $cRec['password']);
             $this->cdb->useSSL($cRec['useSSL']);
         } else {
-            $this->cdb = new Sag('127.0.0.1', 5984);
-            $this->cdb->setHTTPAdapter('HTTP_CURL');
+            $this->cdb = new Sag('127.0.0.1', 5984, $this->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest');
+            $this->cdb->setHTTPAdapter('HTTP_CURL', $this->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest');
             $this->cdb->useSSL(false);
         }
 
     //if (php_sapi_name() === 'cli') return 'php_sapi_name()='.php_sapi_name(); // BAD!
-        echo 't77;<pre style="color:navy">'; var_dump ($cRec);  var_dump ($username); echo '</pre>';
+        //echo 't77;<pre style="color:navy">'; var_dump ($cRec);  var_dump ($username); echo '</pre>';
         try {
             if (!is_null($cRec))
                 $naLoginResult = cdb_login ($this, $this->cdb, $cRec, $this->translate_plainUserName_to_couchdbUserName($cRec['username']));
@@ -561,7 +560,7 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
             echo 'Created database '.$dbName.'<br/>'.PHP_EOL;
 
             //$dbName = $cdbDomain.'___themeData__user___'.strtolower($username);
-            $dbName = $cdbDomain.'___data_themes';
+            $dbName = $cdbDomain.'___themes';
             //try { $cdb->deleteDatabase ($dbName); } catch (Exception $e) { };
             $cdb->setDatabase($dbName, true);
             try {
@@ -614,14 +613,15 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
     }
 
     public function clearOutDatabases($dbs) {
+        $debugMe = false;
         $dbsArr = [];
         foreach ($dbs as $dataSetName => $mustDo) {
             $dbsArr[] = strtolower($dataSetName);
         }
 
         $allDBs = $this->cdb->getAllDatabases();
-        if (true) {
-            echo '<pre style="color:green">';
+        if ($debugMe) {
+            echo '<pre style="color:green">t932a:';
             var_dump($dbs);
             echo '</pre>';
         }
@@ -637,9 +637,9 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
 
             $toBeDeleted = (
                 (array_key_exists($dataSetName, $dbs) && $dbs[$dataSetName])
-                || $sp === false
+                || $sp === 0
             );
-            echo '<pre style="color:yellow;background:darkred;margin:10px;padding:10px;border-radius:10px;">'; var_dump ([$dataSetName, $sp, array_key_exists($dataSetName, $dbs)]); echo '</pre>';
+            if ($debugMe) { echo '<pre style="color:yellow;background:darkred;margin:10px;padding:10px;border-radius:10px;">t932b:'; var_dump ([$dataSetName, $sp, array_key_exists($dataSetName, $dbs)]); echo '</pre>'; };
 
             if ($toBeDeleted) {
                 // ---- NEW PROTECTION ----
@@ -713,6 +713,7 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
     public function createDataSet_analytics() {
         $dataSetName = $this->dataSetName('analytics');
         //try { $this->cdb->deleteDatabase ($dataSetName); } catch (Exception $e) { };
+        //echo '<pre>t234:'; var_dump($this->cdb); echo '</pre>';
         $this->cdb->setDatabase($dataSetName,true);
         //echo '<pre>'; var_dump ($this->security_guest); echo '</pre>'; die();
         if (is_null($this->security_guest)) { trigger_error ('FATAL ERROR : $this->security_guest is null. see $this->setGlobals()', E_USER_ERROR); die(); }

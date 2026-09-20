@@ -15,7 +15,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$dbName = $cdbDomain.'___data_themes';
+$dbName = $cdbDomain.'__themes';
 $cdb->setDatabase($dbName, false);    
 $call = $cdb->getAllDocs();
 

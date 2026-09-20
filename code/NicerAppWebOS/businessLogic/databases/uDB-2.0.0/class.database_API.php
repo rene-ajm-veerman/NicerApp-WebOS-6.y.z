@@ -23,14 +23,55 @@ class class_NicerAppWebOS_database_API {
 
         //var_dump ($username); exit;
 
-        $fn = $naWebOS->path.'/domains/'.$naWebOS->domainFolder.'/domainConfig/databases.username-'.$username.'.json';
-        $cRec = json_decode(file_get_contents($fn),true);
-        //echo 't783:<pre>'; var_dump ($fn); var_dump ($cRec); var_dump (error_get_last()); echo '</pre>';
-        $ret[] = [
-            'ct' => 'couchdb',
-            'cRec' => $cRec['databases']['couchdb'],
-            'conn' => $this->connectToDatabase ( $username, 'couchdb', $cRec['databases']['couchdb'] ) // !! is_null($cRec) inside this call. meaning we use $_COOKIE['cdb_authSession_cookie]
-        ];
+        try {
+            $fn = $naWebOS->path.'/domains/'.$naWebOS->domainFolder.'/domainConfig/databases.username-'.$username.'.json';
+            $cRec = json_decode(file_get_contents($fn),true);
+            echo '<pre style="color:lime;background:navy;margin:10px;padding:10px;border-radius:10px;">t783:'; var_dump ($fn); var_dump ($cRec); var_dump (error_get_last()); echo '</pre>';
+            $ret[] = [
+                'ct' => 'couchdb',
+                'cRec' => $cRec['databases']['couchdb'],
+                'conn' => $this->connectToDatabase ( $username, 'couchdb', $cRec['databases']['couchdb'] ) // !! is_null($cRec) inside this call. meaning we use $_COOKIE['cdb_authSession_cookie]
+            ];
+        } catch (Throwable $e) {
+            $username = 'admin';
+            $fn = $naWebOS->path.'/domains/'.$naWebOS->domainFolder.'/domainConfig/databases.username-'.$username.'.json';
+            $cRec = json_decode(file_get_contents($fn),true);
+            echo '<pre style="color:lime;background:navy;margin:10px;padding:10px;border-radius:10px;">t783:'; var_dump ($fn); var_dump ($cRec); var_dump (error_get_last()); echo '</pre>';
+
+
+
+
+            $ret[] = [
+                'ct' => 'couchdb',
+                'cRec' => $cRec['databases']['couchdb'],
+                'conn' => $this->connectToDatabase ( $username, 'couchdb', $cRec['databases']['couchdb'] ) // !! is_null($cRec) inside this call. meaning we use $_COOKIE['cdb_authSession_cookie]
+            ];
+
+            $username = $db->translate_plainUserName_to_couchdbUserName('Administrator');
+            $fn = $naWebOS->path.'/domains/'.$naWebOS->domainFolder.'/domainConfig/databases.username-'.$username.'.json';
+            $cRec = json_decode(file_get_contents($fn),true);
+            echo '<pre style="color:orange;background:navy;margin:10px;padding:10px;border-radius:10px;">t783:'; var_dump ($fn); var_dump ($cRec); var_dump (error_get_last()); echo '</pre>';
+
+            $cdba = $ret[count($ret)-1]['conn'];
+            try {
+                $r = $cdba->setDatabase('_users', true);
+            } catch (Throwable $e) {
+                echo '<pre>t762e: ERROR CREATING _users DATABASE : '.$e->getMessage().'</pre>';
+                return false;
+            }
+            echo '<pre>t761:'; var_dump($r); echo '</pre>';
+            $r = $cdba->put ('org.couchdb.user:'.$db->translate_plainUserName_to_couchdbUserName('Administrator'),[
+                'name' => $db->translate_plainUserName_to_couchdbUserName('Administrator'),
+                'type' => 'user',
+                'roles' => [
+                    $db->translate_plainGroupName_to_couchdbGroupName('Guests')
+                ],
+                'password' => $cRec2['password']
+            ]);
+            echo '<pre>t762:'; var_dump($r); echo '</pre>';
+
+
+        }
 
         $this->connections = $ret;
         //echo '<pre>t80;'; var_dump ($ret[0]['conn']->username); debug_print_backtrace(); echo '</pre>'; //exit();
@@ -46,7 +87,7 @@ class class_NicerAppWebOS_database_API {
         $db = null;
         //echo 't932:<pre style="color:navy">'; var_dump ($ct); var_dump($cRec); echo '</pre>';
         if (strpos('couchdb', $ct)!==false) {
-            echo '<span style="color:purple">Now logging in as '.$username.'</span><br/>'.PHP_EOL;
+            //echo '<span style="color:purple">Now logging in as '.$username.'</span><br/>'.PHP_EOL;
             $db = new class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 ( clone $naWebOS, $username, $cRec );
         }
         if (strpos('fsdb', $ct)!==false) {
@@ -208,6 +249,7 @@ class class_NicerAppWebOS_database_API {
 
     public function listDatabases ($allDBs, $dbs, $dbsReset) {
         global $naWebOS;
+        $debugMe = false;
 
         $dbsLowerCased = [];
         foreach ($dbs as $dbName => $mustDo) {
@@ -220,7 +262,7 @@ class class_NicerAppWebOS_database_API {
 
         $html = '<link type="text/css" rel="StyleSheet" href="/NicerAppWebOS/db_init.css?c='.date('Ymd_His').'">'.PHP_EOL;
         foreach ($allDBs as $cIdx => $dbsRec) {
-            //echo '<pre>'; var_dump($dbsRec); echo '</pre>'; exit;
+            if ($debugMe) { echo '<pre>t22:'; var_dump($dbsRec); echo '</pre>'; };// exit;
             $html .= '<div id="listDatabases_cIdx__'.$cIdx.'" class="listDatabases_forConnection">'.PHP_EOL;
                 $html .= "\t".'<div id="listDatabases_cIdxConnectionDetails__'.$cIdx.'" class="listDatabases_connectionSettings">'.PHP_EOL;
                     $html .= "\t\t".'server connection <span class="dbConnectionType">'.$dbsRec['c']['ct'].'</span> : <span class="dbConnectionAddress">'.$dbsRec['c']['cRec']['databases']['couchdb']['username'].':*****@'.$dbsRec['c']['cRec']['databases']['couchdb']['host'].':'.$dbsRec['c']['cRec']['databases']['couchdb']['port'].'</span>'.PHP_EOL;

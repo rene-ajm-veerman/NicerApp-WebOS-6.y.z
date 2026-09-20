@@ -25,12 +25,13 @@ NicerApp WebOS from Nicer Enterprises
     global $na_full_init;
     if (!isset($na_full_init)) $na_full_init = true;
 
-    ini_set('memory_limit','2G'); // hacker deterrence by keeping it at 5G (of 64G).
+    ini_set('memory_limit','2G'); // hacker deterrence by keeping it at 2G.
     set_time_limit(70); // 70 seconds; also for hacker deterrence. can be overridden by individual ajax scripts though!
 
     global $naSettings;
     global $rootPath_na;
     try {
+        //var_dump($_SERVER);
         if (array_key_exists('DOCUMENT_ROOT',$_SERVER) && $_SERVER['DOCUMENT_ROOT']!=='') {
             $dcFolderName = basename($_SERVER['DOCUMENT_ROOT']);
             $settingsFilePath = $_SERVER['DOCUMENT_ROOT'].'/domainConfig/settings.json';
@@ -59,9 +60,9 @@ NicerApp WebOS from Nicer Enterprises
     			$bn = $m[1];
 		} else {
 			//var_dump ('---- boot.php (1)');
-			/*var_dump ($_SERVER);
+			//var_dump ($_SERVER);
     			// fallback to your existing explode + ugly hack
-			if (array_key_exists('PWD',$_SERVER)) {
+			/*if (array_key_exists('PWD',$_SERVER)) {
 				var_dump (explode('/',$_SERVER['PWD']));
 				$dcFolderName = explode('/',$_SERVER['PWD'])[5];
 				var_dump ($dcFolderName);
@@ -81,7 +82,7 @@ NicerApp WebOS from Nicer Enterprises
 		    $settingsFilePath = dirname($scriptDir, 2) . '/domains/' . $bn . '/domainConfig/settings.json';
 		    // or hard-code the known root if you prefer:
 			if (!file_exists($settingsFilePath)) {
-				$settingsFilePath = dirname($scriptDir, 2) . '/' . $bn . '/domainConfig/settings.json';
+				$settingsFilePath =  dirname($scriptDir, 2) . '/' . $bn . '/domainConfig/settings.json';
 			}
 		    // $settingsFilePath = '/var/www/NicerAppWebOS-v6.0.z/domains/' . $bn . '/domainConfig/settings.json';
 		}
@@ -107,6 +108,7 @@ NicerApp WebOS from Nicer Enterprises
             ob_end_flush();
             ob_clean();
             ob_start();
+            exit;
         }
 
         $naSettings = json_decode(file_get_contents($settingsFilePath), true);
@@ -159,8 +161,6 @@ NicerApp WebOS from Nicer Enterprises
     }
     if (!isset($naBypassMainErrorHandler) || $naBypassMainErrorHandler)
       $old_error_handler = set_error_handler ('mainErrorHandler');
-
-
 
 
     //ini_set ('log_errors', true);
@@ -219,10 +219,7 @@ NicerApp WebOS from Nicer Enterprises
     }
     $naIPforDB = str_replace('.','_',$naIP);
     $naIPforDB = str_replace(':','-',$naIPforDB);
-
     //var_dump($naIP); echo PHP_EOL; die();
-
-
 
     if (php_sapi_name() !== 'cli') {
         if (session_status() === PHP_SESSION_NONE) {
@@ -323,7 +320,6 @@ NicerApp WebOS from Nicer Enterprises
     // Get the name of the bot (very useful)
     $name = $detect->getMatches(); // Returns the matching bot name/pattern
     $naIsDesktop = false;
-    /*
 
     if (
         $_SERVER['SCRIPT_NAME']=='/NicerAppWebOS/index.php'
@@ -342,7 +338,7 @@ NicerApp WebOS from Nicer Enterprises
             global $naLogLocation;
             $naLogLocation = '<!-- saving logs to : '.$na_error_log_filepath_html.' -->'.PHP_EOL;
 
-            $absoluteDir = /* $folderName = * / dirname($na_error_log_filepath_txt);
+            $absoluteDir = /* $folderName = */ dirname($na_error_log_filepath_txt);
             //echo '<pre>t120B:'.json_encode($folderName,JSON_PRETTY_PRINT).'</pre>'; exit();
             if (!is_dir($absoluteDir)) {
                 set_error_handler(function ($severity, $message, $file, $line) {
@@ -488,7 +484,7 @@ NicerApp WebOS from Nicer Enterprises
         }
     }
     //  echo '<p style="color:purple">'; var_dump($naIsBot); echo '</p>';
-    * /
+    */
 
     global $naURL;
     $naURL = 'https://'.$_SERVER['HTTP_HOST'].(array_key_exists('REDIRECT_URL',$_SERVER)?$_SERVER['REDIRECT_URL']:'/');
@@ -521,6 +517,7 @@ NicerApp WebOS from Nicer Enterprises
         exit();
     };
 
+    /*
     if ($naLAN && array_key_exists('logsInitialized', $_SESSION) && !$_SESSION['logsInitialized']) {
         /*
         $html = $naWebOS->getSite();
@@ -533,7 +530,7 @@ NicerApp WebOS from Nicer Enterprises
 
         $_SESSION['logsInitialized'] = true;
     }
-
+    */
 
     global $naSettings;
     $fnSettingsMusicPlayer2D = realpath(dirname(__FILE__)).'/apps/NicerAppWebOS/applications/2D/musicPlayer.beatPulse/settings.json';
@@ -566,7 +563,6 @@ NicerApp WebOS from Nicer Enterprises
         foreach (getallheaders() as $name => $value) {
             array_push($headers_list, array("name" => $name, "value" => $value));
         }
-    /*
     //if (!$naIsBot) {
     if (false) { // TODO : Get this done via /view/logs on an as-needed basis instead!
 
@@ -665,7 +661,6 @@ NicerApp WebOS from Nicer Enterprises
             }
         }
     };
-    * /
 
     if ($naThisServer['log']['dbActivity']) {
         $now = DateTime::createFromFormat('U.u', microtime(true));
@@ -718,7 +713,7 @@ NicerApp WebOS from Nicer Enterprises
     }
     // at the *bottom* of this file (that's for good reasons),
     // you will find : require_once(dirname(__FILE__).'/apps/nicer.app/api.paymentSystems/boot.php');
-*/
+
 
     //echo '<pre>'; var_dump ($_SERVER); exit();
     
