@@ -66,7 +66,7 @@ class Sag {
   private $port;                        //Port to connect to.
   private $pathPrefix = '';             //Prepended to URLs.
 
-  private $user;                        //Username to auth with.
+  public $user;                        //Username to auth with.
   private $pass;                        //Password to auth with.
   private $authType;                    //One of the Sag::$AUTH_* variables
   private $authSession;                 //AuthSession cookie value from/for CouchDB
@@ -260,8 +260,8 @@ class Sag {
    *
    * @return stdClass
    */
-  public function getSession() {
-    return $this->procPacket('GET', '/_session');
+  public function getSession($backupAccountName, $backupAccountPassword) {
+    return $this->procPacket('GET', '/_session', null, [], $backupAccountName, $backupAccountPassword);
   }
 
   /**
@@ -625,7 +625,10 @@ class Sag {
       $db = urlencode($db);
 
       if($createIfNotFound) {
-        if ($debugMe) echo '<h1>Creating db '.$db.'</h1>';
+        global $naDebugStartup;
+        if ($naDebugStartup) {
+          if ($debugMe) echo '<h1>Creating db '.$db.'</h1>';
+        }
         try {
           self::procPacket('HEAD', "/{$db}");
         }
@@ -1267,7 +1270,7 @@ class Sag {
   }
   
   // The main driver - does all the socket and protocol work.
-  private function procPacket($method, $url, $data = null, $headers = array()) {
+  private function procPacket($method, $url, $data = null, $headers = array(), $backupAccountName = null, $backupAccountPassword = null) {
     /*
      * For now we only data data as strings. Streams and other formats will be
      * permitted later.
@@ -1357,7 +1360,7 @@ class Sag {
       $headers['Content-Length'] = strlen($data);
     }
 
-    return $this->httpAdapter->procPacket($method, $url, $data, $headers);
+    return $this->httpAdapter->procPacket($method, $url, $data, $headers, $backupAccountName, $backupAccountPassword);
   }
 
   /**

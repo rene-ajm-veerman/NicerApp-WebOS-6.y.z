@@ -32,7 +32,7 @@ class class_NicerAppWebOS_database_API {
             //echo '<pre>t21;'; var_dump ($cRec); var_dump ($this->findConnection('couchdb')->username); echo '</pre>'; //exit();
         }
 
-        if (true || ($username=='admin' || (is_object($this->findConnection('couchdb')) && is_null($this->findConnection('couchdb')->username)))) {
+        if (($username=='admin' || (is_object($this->findConnection('couchdb')) && is_null($this->findConnection('couchdb')->username)))) {
             //var_dump($ret[0]['conn']); exit();
 
             $domainConfigsPath = realpath($myPath_BLdbs.'/../..').'/domains/'.$naWebOS->domainFolder.'/domainConfig/';

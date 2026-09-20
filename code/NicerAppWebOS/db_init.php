@@ -147,6 +147,7 @@ global $naWebOS;
 //echo '<pre>t669:'; var_dump($naWebOS);die();
 $db = $naWebOS->dbsAdmin->findConnection('couchdb');
 $cdb = $db->cdb;
+$cdb->setDatabase('_users', true);
 
 /*
  * Fetch users into array
@@ -162,6 +163,7 @@ $findCommand = [
     'fields' => ['_id', '_rev', 'name']
 ];
 try {
+    //echo '<pre>t953:'; var_dump ($cdb); echo '</pre>';
     $call = $cdb->find ($findCommand);
 } catch (Exception $e) {
     $fncn = 'db_init.php';

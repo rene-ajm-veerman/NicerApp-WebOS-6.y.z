@@ -275,7 +275,11 @@ class NicerAppWebOS {
 
                 if (php_sapi_name() !== 'cli') {
                     //WILL NEVER WORK; HANDLED BY logic.AJAX/ajax_testDBconnection.php! setcookie('cdb_admin_loginName' ,$this->dbsAdmin->findConnection('couchdb')->username, time() + 604800, '/');
-                    $_SESSION['cdb_admin_loginName'] = $this->dbsAdmin->findConnection('couchdb')->username;
+                    $_SESSION['cdb_admin_loginName'] =
+                        is_object($this->dbsAdmin)
+                        && is_object($this->dbsAdmin->findConnection('couchdb'))
+                        ? $this->dbsAdmin->findConnection('couchdb')->username
+                        : null;
                 }
 
                 $this->hasDB = true;
@@ -332,23 +336,9 @@ class NicerAppWebOS {
                     $this->dbs = new class_NicerAppWebOS_database_API ('Guest');
                 }
 
-                //echo '<pre style="color:blue;">'; var_dump ($this->dbs->findConnection('couchdb')->username);echo '</pre>';exit();
-
-/*
-                if (strpos('ajax_login.php',$_SERVER['SCRIPT_NAME'])!==false)
-                    setcookie('cdb_loginName', $this->dbs->findConnection('couchdb')->username, time() + 604800, '/');
-*/
-
-                $naUsername =
-                    $this->dbsAdmin->findConnection('couchdb')->translate_couchdbUserName_to_plainUserName(
-                        $this->dbs->findConnection('couchdb')->username
-                    );
-
-            //echo '<pre>'; var_dump ($this->dbs); exit();
-
                 if (php_sapi_name() !== 'cli') {
                     //WILL NEVER WORK; HANDLED BY logic.AJAX/ajax_testDBconnection.php! setcookie('cdb_loginName' ,$this->dbs->findConnection('couchdb')->username, time() + 604800, '/');
-                    $_SESSION['cdb_loginName'] = $this->dbs->findConnection('couchdb')->username;
+                    //$_SESSION['cdb_loginName'] = $this->dbs->findConnection('couchdb')->username;
                 }
 
                 $this->hasDB = true;
@@ -367,9 +357,15 @@ class NicerAppWebOS {
             }
         };
 
-        $this->dbs->setGlobals($this->dbs->findConnection('couchdb')->username);
+        if (
+            is_object($this->dbs)
+            && is_object($this->dbs->findConnection('couchdb'))
+        ) $this->dbs->setGlobals($this->dbs->findConnection('couchdb')->username);
 
-        $this->dbsAdmin->setGlobals($this->dbsAdmin->findConnection('couchdb')->username);
+        if (
+            is_object($this->dbsAdmin)
+            && is_object($this->dbsAdmin->findConnection('couchdb'))
+        ) $this->dbsAdmin->setGlobals($this->dbsAdmin->findConnection('couchdb')->username);
 
         $this->initialized = true;
     }

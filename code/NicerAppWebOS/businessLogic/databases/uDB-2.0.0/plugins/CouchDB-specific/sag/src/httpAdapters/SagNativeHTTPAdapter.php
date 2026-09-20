@@ -37,7 +37,7 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
     throw new SagException('Sag::$HTTP_NATIVE_SOCKETS does not yet implement SSL checking.');
   }
 
-  public function procPacket($method, $url, $data = null, $reqHeaders = array(), $specialHost = null, $specialPort = null) {
+  public function procPacket($method, $url, $data = null, $reqHeaders = array(), $specialHost = null, $specialPort = null, $backupAccountName = null, $backupAccountPassword = null) {
     if(is_string($specialHost) || is_string($specialPort)) {
       $host = ($specialHost) ? $specialHost : $this->host;
       $port = ($specialPort) ? $specialPort : $this->port;
@@ -232,7 +232,9 @@ class SagNativeHTTPAdapter extends SagHTTPAdapter {
                     $data,
                     $reqHeaders,
                     $line[1]['host'],
-                    $line[1]['port']
+                    $line[1]['port'],
+                    $backupAccountName,
+                    $backupAccountPassword
                   );
                 }
 

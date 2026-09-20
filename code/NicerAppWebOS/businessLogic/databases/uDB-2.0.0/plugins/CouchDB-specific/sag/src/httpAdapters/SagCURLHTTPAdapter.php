@@ -37,7 +37,7 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
 
   }
 
-  public function procPacket($method, $url, $data = null, $reqHeaders = array(), $specialHost = null, $specialPort = null) {
+  public function procPacket($method, $url, $data = null, $reqHeaders = array(), $specialHost = null, $specialPort = null, $backupAccountName = null, $backupAccountPassword = null) {
     global $na_error_log_filepath_html;
     global $na_error_log_filepath_txt;
 
@@ -65,7 +65,9 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
               str_replace('.','__', rawurlencode($_SESSION['cdb_loginName'])))).":".rawurlencode($_SESSION['cdb_pw'])."@{$this->host}:{$this->port}{$url}"
       : */"{$this->proto}://".rawurlencode($this->user).":".rawurlencode($this->pass)."@{$this->host}:{$this->port}{$url}"
     );
-    if ($debugMe) { echo ('<pre style="color:white;background:purple;margin:10px;padding:10px;border-radius:10px;">t3322:'); var_dump ($this); var_dump ($url); echo '</pre>'; } // die();
+    global $naDebugStartup;
+
+    if ($naDebugStartup) { echo ('<pre style="color:white;background:purple;margin:10px;padding:10px;border-radius:10px;">t3322:'); var_dump ($this); var_dump ($url); echo json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS),JSON_PRETTY_PRINT);echo '</pre>'; } // die();
 
     $opts = array(
       CURLOPT_URL => $url,
@@ -133,7 +135,103 @@ class SagCURLHTTPAdapter extends SagHTTPAdapter {
     curl_setopt_array($this->ch, $opts);
     $chResponse = curl_exec($this->ch);
 
-    if ($debugMe) { echo '<pre style="color:purple;background:yellow;">t444:'; var_dump($chResponse); echo '</pre>'; }
+
+    global $naDebugStartup;
+
+    if ($naDebugStartup) { echo '<pre style="color:purple;background:yellow;">t444:'; var_dump($chResponse); echo '</pre>'; }
+
+
+    if (strpos('401 Unauthorized',$chResponse)!==false) {
+      // the base cURL options
+      $url = (
+        /*
+         *      isset($_SESSION)
+         *      && array_key_exists('cdb_loginName', $_SESSION)
+         *      && is_string($_SESSION['cdb_loginName'])
+         *      && $_SESSION['cdb_loginName']!=''
+         *      && array_key_exists('cdb_pw', $_SESSION)
+         *      && is_string($_SESSION['cdb_pw'])
+         *      && $_SESSION['cdb_pw']!=''
+         *      ? "{$this->proto}://".$naWebOS->domainFolderForDB.'___'.preg_replace('/.*___/','',
+         *            str_replace(' ','_',
+         *              str_replace('.','__', rawurlencode($_SESSION['cdb_loginName'])))).":".rawurlencode($_SESSION['cdb_pw'])."@{$this->host}:{$this->port}{$url}"
+         *      : */"{$this->proto}://".rawurlencode($backupAccountName).":".rawurlencode($backupAccountPassword)."@{$this->host}:{$this->port}{$url}"
+      );
+      if ($naDebugStartup) { echo ('<pre style="color:white;background:purple;margin:10px;padding:10px;border-radius:10px;">t3322:'); var_dump ($this); var_dump ($url); echo json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS),JSON_PRETTY_PRINT); echo '</pre>'; } // die();
+
+      $opts = array(
+        CURLOPT_URL => $url,
+        CURLOPT_PORT => $this->port,
+        CURLOPT_FOLLOWLOCATION => $this->followLocation,
+        CURLOPT_HEADER => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_NOBODY => false,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => $method
+      );
+
+      // cURL wants the headers as an array of strings, not an assoc array
+      if(is_array($reqHeaders) && sizeof($reqHeaders) > 0) {
+        $opts[CURLOPT_HTTPHEADER] = array();
+
+        foreach($reqHeaders as $k => $v) {
+          $opts[CURLOPT_HTTPHEADER][] = "$k: $v";
+        }
+      }
+
+      // send data through cURL's poorly named opt
+      //echo '<pre style="color:green">'; var_dump ($data); echo '</pre>'.PHP_EOL;
+      if($data) {
+        $opts[CURLOPT_POSTFIELDS] = $data;
+      }
+
+      if($method == 'GET') {
+        $opts[CURLOPT_ENCODING] = "";
+      }
+
+      // special considerations for HEAD requests
+      if($method == 'HEAD') {
+        $opts[CURLOPT_NOBODY] = true;
+      }
+
+      // connect timeout
+      if(is_int($this->socketOpenTimeout)) {
+        $opts[CURLOPT_CONNECTTIMEOUT] = $this->socketOpenTimeout;
+      }
+
+      // exec timeout (seconds)
+      if(is_int($this->socketRWTimeoutSeconds)) {
+        $opts[CURLOPT_TIMEOUT] = $this->socketRWTimeoutSeconds;
+      }
+
+      // exec timeout (ms)
+      if(is_int($this->socketRWTimeoutMicroseconds)) {
+        $opts[CURLOPT_TIMEOUT_MS] = $this->socketRWTimeoutMicroseconds;
+      }
+
+      // SSL support: don't verify unless we have a cert set
+      if($this->proto === 'https') {
+        if(!$this->sslCertPath) {
+          $opts[CURLOPT_SSL_VERIFYPEER] = false;
+        }
+        else {
+          $opts[CURLOPT_SSL_VERIFYPEER] = true;
+          $opts[CURLOPT_SSL_VERIFYHOST] = 2;
+          $opts[CURLOPT_CAINFO] = $this->sslCertPath;
+        }
+      }
+
+      curl_reset($this->ch);
+      curl_setopt_array($this->ch, $opts);
+      $chResponse = curl_exec($this->ch);
+    }
+
+
+
+
+
+
+
 
     if (false && strpos($opts[CURLOPT_URL], 'logentries')===false) {
     //if (true) {

@@ -38,15 +38,21 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
         $this->security_guest = '{ "admins": { "names": [], "roles": ["'.$gn.'"] }, "members": { "names": [], "roles": [""] } }';
         
         $this->connectionSettings = $cRec;
-        //echo '<pre>t32:'; var_dump ($cRec); echo '</pre>';
+        //echo '<pre style="color:green;background:yellow;margin:10px;padding:10px;border-radius:10px;">t3112:'; var_dump ($username); var_dump ($cRec); echo '</pre>';
 
         $admin = (
             $username==$this->translate_plainUserName_to_couchdbUserName($naWebOS->ownerInfo['OWNER_NAME'])
-            || $username==$naWebOS->domainFolderForDB.'___Administrator'
+            || $username==$this->translate_plainUserName_to_couchdbUserName('Administrator')
+            || $username=='admin'
         );
         $this->admin = $admin;
 
-        if (!is_null($cRec)) {
+        //echo 't3321:'.$username.'<br/>';
+        if ($username=='admin') {
+            $this->cdb = new Sag($cRec['host'], $cRec['port'], 'admin', $cRec['password']);
+            $this->cdb->setHTTPAdapter($cRec['httpAdapter'], 'admin', $cRec['password']);
+            $this->cdb->useSSL($cRec['useSSL']);
+        } elseif (!is_null($cRec)) {
             $this->cdb = new Sag($cRec['host'], $cRec['port'], $this->translate_plainUserName_to_couchdbUserName($cRec['username']), $cRec['password']);
             $this->cdb->setHTTPAdapter($cRec['httpAdapter'], $this->translate_plainUserName_to_couchdbUserName($cRec['username']), $cRec['password']);
             $this->cdb->useSSL($cRec['useSSL']);
@@ -57,32 +63,78 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
         }
 
     //if (php_sapi_name() === 'cli') return 'php_sapi_name()='.php_sapi_name(); // BAD!
-        //echo 't77;<pre style="color:navy">'; var_dump ($cRec);  var_dump ($username); echo '</pre>';
+        global $naDebugStartup;
+        if ($naDebugStartup) {
+            echo '<pre style="color:navy;background:white;margin:10px;padding:10px;border-radius:10px;">t1977:'; var_dump ($cRec);  var_dump ($username); /*var_dump (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS));*/ echo '</pre>';
+        }
         try {
-            if (!is_null($cRec))
-                $naLoginResult = cdb_login ($this, $this->cdb, $cRec, $this->translate_plainUserName_to_couchdbUserName($cRec['username']));
-            else
+            //echo '<pre style="color:brown;">'; var_dump ($cRec['username']); echo '</pre>';
+            if (is_array($cRec) && is_string($cRec['username']) && $cRec['username']!=='') {
+                if ($cRec['username']=='admin') {
+                    //echo '<h2 style="color:green;">Logging in as "admin"</h2>'; //exit;
+                    $naLoginResult = cdb_login ($this, $this->cdb, $cRec, $cRec['username'], $cRec['password']);
+                    return $this;
+                } else
+                    $naLoginResult = cdb_login ($this, $this->cdb, $cRec, $this->translate_plainUserName_to_couchdbUserName($cRec['username']), $cRec['password']);
+            } else
                 $naLoginResult = cdb_login ($this, $this->cdb, null, null);
+
+            if ($naLoginResult === false) {
+                //echo '<h1>ERROR LOGGING IN AS '.(is_array($cRec)?$cRec['username']:'Guest').'</h1>'; var_dump(is_object($naWebOS->dbsAdmin));
+                if (!is_object($naWebOS->dbsAdmin) && is_array($cRec) && $cRec['username']=='Administrator') { //CHECKED!
+                    $naLoginResult = cdb_login ($this, $this->cdb, $this->translate_plainUserName_to_couchdbUserName('Administrator'), $cRec['password']);
+                } elseif (is_object($naWebOS->dbsAdmin)) {
+                    $cdba = $naWebOS->dbsAdmin->findConnection('couchdb');
+                    //echo '<pre style="color:navy;background:white;margin:10px;padding:10px;border-radius:10px;">t1978:'; var_dump($cdba); echo '</pre>';
+                    $cdba->cdb->setDatabase('_users',true);
+                    $cdba->cdb->put ('org.couchdb.user:'.$db->translate_plainUserName_to_couchdbUserName('Guest'),[
+                        'name' => $db->translate_plainUserName_to_couchdbUserName('Guest'),
+                        'type' => 'user',
+                        'roles' => [
+                            $db->translate_plainGroupName_to_couchdbGroupName('Guests')
+                        ],
+                        'password' => 'Guest'
+                    ]);
+                    try {
+                        $naLoginResult = $cdb->login ($db->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest', Sag::$AUTH_COOKIE);
+                        $call = $cdba->cdb->find($findCommand);
+                    } catch (Throwable $e) {
+                        //echo '<pre>.../NicerAppWebOS/functions.php::cdb_login() : Could not create account "Guest"</pre>';
+                        return false;
+                    }
+                } else {
+                    $naLoginResult = cdb_login ($this, $this->cdb, $this->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest');
+                }
+            }
         } catch (Exception $e) {
+
+            global $naDebugStartup;
+            if ($naDebugStartup) {
+                echo '<h1>ERROR: '.$e->getMessage().'</h1>';
+            }
+
+
             $cdba = $naWebOS->dbsAdmin->findConnection('couchdb');
             $cdba->cdb->setDatabase('_users',true);
             $cdba->cdb->put ('org.couchdb.user:'.$db->translate_plainUserName_to_couchdbUserName('Guest'),[
                 'name' => $db->translate_plainUserName_to_couchdbUserName('Guest'),
-                        'type' => 'user',
-                        'roles' => [],
-                        'password' => 'Guest'
+                'type' => 'user',
+                'roles' => [
+                    $db->translate_plainGroupName_to_couchdbGroupName('Guests')
+                ],
+                'password' => 'Guest'
             ]);
             try {
                 $cdb->login ($db->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest', Sag::$AUTH_COOKIE);
-                $call = $cdba->find($findCommand);
+                $call = $cdba->cdb->find($findCommand);
             } catch (Throwable $e) {
-                echo '<pre>.../NicerAppWebOS/functions.php::cdb_login() : Could not create account "Guest"</pre>';
+                //echo '<pre>.../NicerAppWebOS/functions.php::cdb_login() : Could not create account "Guest"</pre>';
                 return false;
             }
 
 
             $naLoginResult = cdb_login ($this, $this->cdb, $this->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest');
-            echo '<pre>'.$this->cn.'::__construct() : cdb_login() FATAL ERROR : '; var_dump ($naLoginResult); echo '</pre>'; exit();
+            //echo '<pre>'.$this->cn.'::__construct() : cdb_login() FATAL ERROR : '; var_dump ($naLoginResult); echo '</pre>'; exit();
         }
         $_SESSION['loginResult'] = $naLoginResult;
 
@@ -94,11 +146,12 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
 
 
         // test db connection quality
-        if (is_null($this->cdb->getSession()->body->userCtx->name)) {
+        global $naBackupAccountName; global $naBackupAccountPassword;
+        if (is_null($this->cdb->getSession($naBackupAccountName,$naBackupAccountPassword)->body->userCtx->name)) {
             trigger_error ('Could not log into couchdb database. Reason : Database cookie expired. Please login again.', E_USER_WARNING);
         }
 
-        $u = $this->cdb->getSession()->body->userCtx;
+        $u = $this->cdb->getSession($naBackupAccountName,$naBackupAccountPassword)->body->userCtx;
         //echo '<pre style="color:red">t79;'; var_dump ($u); echo '</pre>'; //exit();
         $this->username = $u->name;
         $this->roles = $u->roles;
@@ -110,7 +163,7 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
         } elseif (false) {
             /*---
              * REMEMBERME_BIRKE IS NOT LONGER USED.
-             * ONLY $cdb->loginByCookie is used from now on (2021-12), from
+             * O797NLY $cdb->loginByCookie is used from now on (2021-12), from
              *  #btnLoginLogout
              *      onclick = -->.../domainConfig/nicer.app/index.template.php::id="siteLogin"
              *          onclick = -->.../NicerAppWebOS/businessLogic/ajax/ajax_login.php::#btnLogin
