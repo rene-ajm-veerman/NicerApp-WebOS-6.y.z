@@ -63,7 +63,7 @@ if (!na.apps.loaded['/NicerAppWebOS/apps/NicerAppWebOS/applications/2D/news'])
                                 $('#siteContent__header').css({display:'flex'});
                             });
 
-                            na1.themeAppsChanged();
+                            //      na1.themeAppsChanged();
 
 
                             na.m.waitForCondition('news app : siteContent dialog reappearance', function () {
@@ -2017,7 +2017,7 @@ if (!na.apps.loaded['/NicerAppWebOS/apps/NicerAppWebOS/applications/2D/news'])
                     });
                 }, 200);
 
-                na1.themeAppsChanged();
+                //na1.themeAppsChanged();
 
                 /*
                  *            if (na.m.userDevice.isPhone) $('#btnOptions, #btnLoginLogout, #btnChangeBackground').css({opacity:1})

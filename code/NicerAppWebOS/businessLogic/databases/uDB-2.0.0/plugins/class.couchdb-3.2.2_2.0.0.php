@@ -87,11 +87,11 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
                     $cdba = $naWebOS->dbsAdmin->findConnection('couchdb');
                     //echo '<pre style="color:navy;background:white;margin:10px;padding:10px;border-radius:10px;">t1978:'; var_dump($cdba); echo '</pre>';
                     $cdba->cdb->setDatabase('_users',true);
-                    $cdba->cdb->put ('org.couchdb.user:'.$db->translate_plainUserName_to_couchdbUserName('Guest'),[
-                        'name' => $db->translate_plainUserName_to_couchdbUserName('Guest'),
+                    $cdba->cdb->put ('org.couchdb.user:'.$cdba->translate_plainUserName_to_couchdbUserName('Guest'),[
+                        'name' => $cdba->translate_plainUserName_to_couchdbUserName('Guest'),
                         'type' => 'user',
                         'roles' => [
-                            $db->translate_plainGroupName_to_couchdbGroupName('Guests')
+                            $cdba->translate_plainGroupName_to_couchdbGroupName('Guests')
                         ],
                         'password' => 'Guest'
                     ]);
@@ -116,16 +116,16 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
 
             $cdba = $naWebOS->dbsAdmin->findConnection('couchdb');
             $cdba->cdb->setDatabase('_users',true);
-            $cdba->cdb->put ('org.couchdb.user:'.$db->translate_plainUserName_to_couchdbUserName('Guest'),[
-                'name' => $db->translate_plainUserName_to_couchdbUserName('Guest'),
+            $cdba->cdb->put ('org.couchdb.user:'.$cdba->translate_plainUserName_to_couchdbUserName('Guest'),[
+                'name' => $cdba->translate_plainUserName_to_couchdbUserName('Guest'),
                 'type' => 'user',
                 'roles' => [
-                    $db->translate_plainGroupName_to_couchdbGroupName('Guests')
+                    $cdba->translate_plainGroupName_to_couchdbGroupName('Guests')
                 ],
                 'password' => 'Guest'
             ]);
             try {
-                $cdb->login ($db->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest', Sag::$AUTH_COOKIE);
+                $cdb->login ($cdba->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest', Sag::$AUTH_COOKIE);
                 $call = $cdba->cdb->find($findCommand);
             } catch (Throwable $e) {
                 //echo '<pre>.../NicerAppWebOS/functions.php::cdb_login() : Could not create account "Guest"</pre>';
@@ -244,6 +244,10 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
 
     public function setGlobals ($username) {
         global $naWebOS;
+
+
+
+        /*
         $users = safeLoadJSONfile(
             realpath(dirname(__FILE__).'/../../../../../..')
             .'/domains/'.$naWebOS->domainFolder.'/domainConfig/database.users.json.php'
@@ -288,7 +292,7 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
             echo json_encode(debug_backtrace(), JSON_PRETTY_PRINT);
             echo '</pre>';
         }
-        */
+        * /
         //echo '<pre style="color:green;">'.$username.'</pre>';
         if (!is_null($usersFinal))
         foreach ($usersFinal as $username1 => $userDoc) {
@@ -339,7 +343,7 @@ class class_NicerAppWebOS_database_API_couchdb_3_2__2_0_0 {
                 ]);
             }
         }
-
+        */
         return true;
     }
 

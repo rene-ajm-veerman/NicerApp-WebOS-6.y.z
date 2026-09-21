@@ -723,8 +723,102 @@ function cdb_login($db, $cdb, $cRec, $username) {
         echo '<pre style="font-weight:bold;color:yellow;background:navy;">'; var_dump ($username); var_dump($cRec); debug_print_backtrace(); echo '</pre>';
     }
 
+    //echo '<pre>';var_dump($_COOKIE);echo '</pre>'; exit;
     if (
-        is_array($cRec)
+        !$done
+        && is_array($_COOKIE)
+        && array_key_exists('cdb_authSession_cookie',$_COOKIE)
+        && is_string($_COOKIE['cdb_authSession_cookie'])
+        && $_COOKIE['cdb_authSession_cookie']!==''
+    ) {
+        try {
+            $r = $cdb->loginByCookie ($_COOKIE['cdb_authSession_cookie']);
+            $done = true;
+        } catch (Throwable $e) {
+            try {
+                echo '<h1>Could not login by cookie; '.$e->getMessage().'</h1>';
+                //echo '<pre>';var_dump($cRec);die();
+                $cdb->login ($db->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest');
+                $cdb_session = $cdb->getSession();
+                //echo '<pre>';var_dump($cdb_session);die();
+                if (
+                    is_object($cdb_session)
+                    && $cdb_session->body->ok
+                    && !is_null($cdb_session->body->userCtx->name)
+                ) {
+                    if ($username!==$naWebOS->domainFolderForDB.'___Administrator') $_SESSION['cdb_loginName'] = $cdb_session->body->userCtx->name;
+                    //echo '<pre style="color:green;">'; var_dump($_SESSION); echo '</pre>';
+                    $done = true;
+                }
+            } catch (Exception $e) {
+                trigger_error ($fncn.' : could not login using credentials '.json_encode($cRec).', $e->getMessage()='.$e->getMessage(), E_USER_WARNING);
+            }
+
+        }
+
+        /*
+        try {
+            $cdb_session = $cdb->getSession();
+            //var_dump($cdb_session);
+        } catch (Throwable $e) {
+            if (
+                is_array($cRec)
+                && array_key_exists('password', $cRec)
+                && is_string ($cRec['password'])
+            ) {
+                $_SESSION['cdb_loginName'] = $cRec['username'];
+                $cdb->login ($cRec['username'], $cRec['password'], Sag::$AUTH_COOKIE);
+                $cdb_session = $cdb->getSession();
+                if (
+                    is_object($cdb_session)
+                    && $cdb_session->body->ok
+                    && !is_null($cdb_session->body->userCtx->name)
+                ) {
+                    $done = true;
+                }
+            }
+        }
+        if (
+            isset($cdb_session)
+            && is_object($cdb_session)
+            && $cdb_session->body->ok
+            && !is_null($cdb_session->body->userCtx->name)
+        ) {
+            $done = true;
+        } else {
+            if (
+                is_array($cRec)
+                && array_key_exists('password', $cRec)
+                && is_string ($cRec['password'])
+            )
+                $cdb->login ($cRec['username'], $cRec['password'], Sag::$AUTH_COOKIE);
+                else
+                    $cdb->login ($db->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest', Sag::$AUTH_COOKIE);
+            if ($cRec['username']!=='Guest') trigger_error ('Session cookie expired. You have been logged in as \''.$cRec['username'].'\'', E_USER_WARNING);
+            //echo '<pre>'; var_dump ($cdb->getSession()); exit();
+            if (
+                is_object($cdb_session)
+                && $cdb_session->body->ok
+                && !is_null($cdb_session->body->userCtx->name)
+            ) {
+                $done = true;
+            }
+        }*/
+    } elseif (
+        !$done
+        && is_array($_COOKIE)
+        && array_key_exists('AuthSession',$_COOKIE)
+        && is_string($_COOKIE['AuthSession'])
+        && $_COOKIE['AuthSession']!==''
+    ) {
+        $r = $cdb->loginByCookie ($_COOKIE['AuthSession']);
+        $done = true;
+    }
+
+
+    if (
+        !$done
+        && is_array($cRec)
         && array_key_exists('password', $cRec)
         && is_string ($cRec['password'])
     ) {
@@ -781,93 +875,6 @@ function cdb_login($db, $cdb, $cRec, $username) {
     //if (!$done) die();
     //echo '<pre>t333:'; var_dump ($done); var_dump ($_COOKIE); echo '</pre>';
 
-    if (
-        !$done
-        && is_array($_COOKIE)
-        && array_key_exists('cdb_authSession_cookie',$_COOKIE)
-        && is_string($_COOKIE['cdb_authSession_cookie'])
-        && $_COOKIE['cdb_authSession_cookie']!==''
-    ) {
-        try {
-            $r = $cdb->loginByCookie ($_COOKIE['cdb_authSession_cookie']);
-        } catch (Throwable $e) {
-              try {
-                //echo '<pre>';var_dump($cRec);die();
-                $cdb->login ($db->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest');
-                $cdb_session = $cdb->getSession();
-                //echo '<pre>';var_dump($cdb_session);die();
-                if (
-                    is_object($cdb_session)
-                    && $cdb_session->body->ok
-                    && !is_null($cdb_session->body->userCtx->name)
-                ) {
-                    if ($username!==$naWebOS->domainFolderForDB.'___Administrator') $_SESSION['cdb_loginName'] = $cdb_session->body->userCtx->name;
-                    //echo '<pre style="color:green;">'; var_dump($_SESSION); echo '</pre>';
-                    $done = true;
-                }
-            } catch (Exception $e) {
-                trigger_error ($fncn.' : could not login using credentials '.json_encode($cRec).', $e->getMessage()='.$e->getMessage(), E_USER_WARNING);
-            }
-
-        }
-
-        try {
-            $cdb_session = $cdb->getSession();
-            //var_dump($cdb_session);
-        } catch (Throwable $e) {
-            if (
-                is_array($cRec)
-                && array_key_exists('password', $cRec)
-                && is_string ($cRec['password'])
-            ) {
-                $_SESSION['cdb_loginName'] = $cRec['username'];
-                $cdb->login ($cRec['username'], $cRec['password'], Sag::$AUTH_COOKIE);
-                $cdb_session = $cdb->getSession();
-                if (
-                    is_object($cdb_session)
-                    && $cdb_session->body->ok
-                    && !is_null($cdb_session->body->userCtx->name)
-                ) {
-                    $done = true;
-                }
-            }
-        }
-        if (
-            isset($cdb_session)
-            && is_object($cdb_session)
-            && $cdb_session->body->ok
-            && !is_null($cdb_session->body->userCtx->name)
-        ) {
-            $done = true;
-        } else {
-            if (
-                is_array($cRec)
-                && array_key_exists('password', $cRec)
-                && is_string ($cRec['password'])
-            )
-                $cdb->login ($cRec['username'], $cRec['password'], Sag::$AUTH_COOKIE);
-            else
-                $cdb->login ($db->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest', Sag::$AUTH_COOKIE);
-            if ($cRec['username']!=='Guest') trigger_error ('Session cookie expired. You have been logged in as \''.$cRec['username'].'\'', E_USER_WARNING);
-            //echo '<pre>'; var_dump ($cdb->getSession()); exit();
-            if (
-                is_object($cdb_session)
-                && $cdb_session->body->ok
-                && !is_null($cdb_session->body->userCtx->name)
-            ) {
-                $done = true;
-            }
-        }
-    } elseif (
-        !$done
-        && is_array($_COOKIE)
-        && array_key_exists('AuthSession',$_COOKIE)
-        && is_string($_COOKIE['AuthSession'])
-        && $_COOKIE['AuthSession']!==''
-    ) {
-        $r = $cdb->loginByCookie ($_COOKIE['AuthSession']);
-        $done = true;
-    }
 
 
     //echo 't593:'; var_dump ($done);
@@ -951,13 +958,22 @@ function cdb_login($db, $cdb, $cRec, $username) {
 
             //exit;
         } else {
-            $cdba = $naWebOS->dbsAdmin->findConnection('couchdb')->cdb;
-            //echo '<pre style="color:orange;background:darkred">'; var_dump($cdba); echo '</pre>';
+            $dba = $naWebOS->dbsAdmin->findConnection('couchdb');
+            //echo '<pre style="color:orange;background:darkred">'; var_dump($dba); echo '</pre>';
+            $cdba = $dba->cdb;
             //echo '<pre style="color:yellow;background:darkred">'; var_dump ($cdba->getAllDatabases()); echo '</pre>';
             try {
                 $cdb->login ($db->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest', Sag::$AUTH_COOKIE);
+                $findCommand = [
+                    'selector' => [
+                        'name' => $db->translate_plainUserName_to_couchdbUserName('Guest')
+                    ],
+                    'fields' => ['_id', 'name', 'displayName']
+                ];
+
                 $call = $cdba->find($findCommand);
             } catch (Throwable $e) {
+                /*
                 global $naDebugStartup;
                 if ($naDebugStartup) {
                     echo '<h3>*Now* creating user "'.$db->translate_plainUserName_to_couchdbUserName('Guest').'" in _users database.</h3>';
@@ -976,23 +992,23 @@ function cdb_login($db, $cdb, $cRec, $username) {
                 if ($naDebugStartup) {
                     echo '<pre>t763:'; var_dump($r); echo '</pre>';
                 }
-                $r = $cdba->put ('org.couchdb.user:'.$db->translate_plainUserName_to_couchdbUserName('Guest'),[
-                    'name' => $db->translate_plainUserName_to_couchdbUserName('Guest'),
-                            'type' => 'user',
-                            'roles' => [
-                                $db->translate_plainGroupName_to_couchdbGroupName('Guests')
-                            ],
-                            'password' => 'Guest'
+                $r = $cdba->put ('org.couchdb.user:'.$dba->translate_plainUserName_to_couchdbUserName('Guest'),[
+                    'name' => $dba->translate_plainUserName_to_couchdbUserName('Guest'),
+                    'type' => 'user',
+                    'roles' => [
+                        $dba->translate_plainGroupName_to_couchdbGroupName('Guests')
+                    ],
+                    'password' => 'Guest'
                 ]);
                 global $naDebugStartup;
                 if ($naDebugStartup) {
                     echo '<pre>t764:'; var_dump($r); echo '</pre>';
                 }
                 try {
-                    $cdb->login ($db->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest', Sag::$AUTH_COOKIE);
+                    $cdb->login ($dba->translate_plainUserName_to_couchdbUserName('Guest'), 'Guest', Sag::$AUTH_COOKIE);
                     $findCommand = [
                         'selector' => [
-                            'name' => $db->translate_plainUserName_to_couchdbUserName('Guests')
+                            'name' => $dba->translate_plainUserName_to_couchdbUserName('Guests')
                         ],
                         'fields' => ['_id', 'name', 'displayName']
                     ];
@@ -1003,7 +1019,7 @@ function cdb_login($db, $cdb, $cRec, $username) {
                         echo '<pre>.../NicerAppWebOS/functions.php::cdb_login() : Could not create account "Guest"</pre>';
                     }
                     return false;
-                }
+                }*/
             }
         }
     }

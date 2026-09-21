@@ -278,7 +278,7 @@ class NicerAppWebOS {
                     $_SESSION['cdb_admin_loginName'] =
                         is_object($this->dbsAdmin)
                         && is_object($this->dbsAdmin->findConnection('couchdb'))
-                        ? $this->dbsAdmin->findConnection('couchdb')->username
+                        ? $this->domainFolderForDB.'___Administrator'
                         : null;
                 }
 
@@ -322,11 +322,12 @@ class NicerAppWebOS {
                 */
 
                 global $naUsername;
-
+                //echo '<pre style="color:blue;">';var_dump($_COOKIE);var_dump($this->dbsAdmin); echo '</pre>';
                 if (array_key_exists('cdb_loginName',$_COOKIE)) {
-                    $un = $this->dbsAdmin->findConnection('couchdb')->translate_couchdbUserName_to_plainUserName( // NEEDED!
-                        $_COOKIE['cdb_loginName']
-                    );
+                    $un = $_COOKIE['cdb_loginName'];
+                    $dn = $naWebOS->domainFolderForDB;
+                    $un = preg_replace('/.*___/','', $un);
+                    $un = $dn.'___'.str_replace('_','.',str_replace('__', ' ', $un));
                 } else {
                     $un = 'Guest';
                 }
@@ -357,15 +358,18 @@ class NicerAppWebOS {
             }
         };
 
+        /*
         if (
             is_object($this->dbs)
             && is_object($this->dbs->findConnection('couchdb'))
-        ) $this->dbs->setGlobals($this->dbs->findConnection('couchdb')->username);
+        ) $this->dbs->setGlobals($un);
 
+        //echo '<pre>'; var_dump($_COOKIE); echo '</pre>';
         if (
             is_object($this->dbsAdmin)
             && is_object($this->dbsAdmin->findConnection('couchdb'))
-        ) $this->dbsAdmin->setGlobals($this->dbsAdmin->findConnection('couchdb')->username);
+        ) $this->dbsAdmin->setGlobals($dn.'___Administrator');
+        */
 
         $this->initialized = true;
     }
@@ -1984,7 +1988,7 @@ class NicerAppWebOS {
         };
         if (!is_array($css) && !is_string($css)) {
             $ret .=
-            '<script>var naServerMsg = "Could not load theme settings.";</script>';
+            '<script>var m = "Could not load theme settings."; na.site.setStatusMsg(m, true); na.m.log (1,m);</script>';
         }
 
 
@@ -2038,7 +2042,8 @@ class NicerAppWebOS {
         global $naLAN;
         $debug = $this->debugThemeLoading;
         $db = $this->dbs->findConnection('couchdb');
-        $cdb = $db;
+        //echo '<pre style="color:purple">'; var_dump($db); echo '</pre>';
+        $cdb = $db->cdb;
 
         $viewFolder = '[UNKNOWN VIEW]';
 
